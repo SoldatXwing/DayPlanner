@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.Api", "DayPlanne
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.Authorization", "DayPlanner.Authorization\DayPlanner.Authorization.csproj", "{6AE2AD77-076F-435E-8E82-BC6C2B48D290}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.Abstractions", "DayPlanner.Abstractions\DayPlanner.Abstractions.csproj", "{1E9D51FF-02D1-4FAF-8CEA-D3E89B350740}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.FireStore", "DayPlanner.FireStore\DayPlanner.FireStore.csproj", "{62D17F37-F1E3-4BB5-8908-A23E3865D21A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +33,14 @@ Global
 		{6AE2AD77-076F-435E-8E82-BC6C2B48D290}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AE2AD77-076F-435E-8E82-BC6C2B48D290}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AE2AD77-076F-435E-8E82-BC6C2B48D290}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E9D51FF-02D1-4FAF-8CEA-D3E89B350740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E9D51FF-02D1-4FAF-8CEA-D3E89B350740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E9D51FF-02D1-4FAF-8CEA-D3E89B350740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E9D51FF-02D1-4FAF-8CEA-D3E89B350740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62D17F37-F1E3-4BB5-8908-A23E3865D21A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62D17F37-F1E3-4BB5-8908-A23E3865D21A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62D17F37-F1E3-4BB5-8908-A23E3865D21A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62D17F37-F1E3-4BB5-8908-A23E3865D21A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

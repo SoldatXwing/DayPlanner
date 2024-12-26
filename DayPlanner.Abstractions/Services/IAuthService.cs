@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DayPlanner.Authorization.Interfaces
+namespace DayPlanner.Abstractions.Services
 {
     public interface IAuthService
     {

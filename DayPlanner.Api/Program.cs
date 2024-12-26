@@ -1,34 +1,31 @@
 using Carter;
-using DayPlanner.Authorization.Interfaces;
+using DayPlanner.Api.Extensions;
 using DayPlanner.Authorization.Services;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using DayPlanner.FireStore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddInfrastructure();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCarter();
-builder.Services.AddScoped<IAuthService>(provider => new AuthService("serviceAccountKey.json"));
-builder.Services.AddHttpClient<IJwtProvider, JwtProvider>((sp,httpClient) =>
+FireStoreStore d = new(builder.Configuration["FireBase:project_id"]!);
+await d.CreateAppointmentAsync(new DayPlanner.Abstractions.Models.Backend.Appointment
 {
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    httpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]!);
+    Title = "Test",
+    Summary = "Test",
+    Start = DateTime.UtcNow,
+    End = DateTime.UtcNow.AddHours(1),
+    Location = null,
+    UserId = "1"
 });
 
-builder.Services.AddAuthentication()
-    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
-    {
-        jwtOptions.Audience = builder.Configuration["Authentication:Audience"];
-        jwtOptions.TokenValidationParameters.ValidIssuer = builder.Configuration["Authentication:ValidIssuer"];
-    }); 
-builder.Services.AddAuthorization();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

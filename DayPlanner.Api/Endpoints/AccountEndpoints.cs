@@ -1,9 +1,9 @@
 ﻿using Carter;
+using DayPlanner.Abstractions.Models.DTO;
+using DayPlanner.Abstractions.Services;
 using DayPlanner.Authorization.Exceptions;
-using DayPlanner.Authorization.Interfaces;
 using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Mvc;
-using static DayPlanner.Api.Models.AccountEndpoints;
 
 namespace DayPlanner.Api.Endpoints
 {
@@ -11,7 +11,7 @@ namespace DayPlanner.Api.Endpoints
     {
         public void AddRoutes(IEndpointRouteBuilder app)
         {
-            var noAuthGroup = app.MapGroup("none");
+            var noAuthGroup = app.MapGroup("Account");
             noAuthGroup.MapPost("/Validate", ValidateToken);
             noAuthGroup.MapPost("/Register", RegisterUser);
             noAuthGroup.MapPost("/Login", Login);

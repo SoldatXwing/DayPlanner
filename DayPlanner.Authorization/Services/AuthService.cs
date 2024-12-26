@@ -1,5 +1,4 @@
-﻿using DayPlanner.Authorization.Interfaces;
-using FirebaseAdmin.Auth;
+﻿using FirebaseAdmin.Auth;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using System;
@@ -7,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DayPlanner.Abstractions.Services;
 
 namespace DayPlanner.Authorization.Services
 {
@@ -16,6 +16,7 @@ namespace DayPlanner.Authorization.Services
 
         public AuthService(string serviceAccountPath)
         {
+            ArgumentNullException.ThrowIfNullOrEmpty(serviceAccountPath);
             var app = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
             {
                 Credential = GoogleCredential.FromFile(serviceAccountPath)

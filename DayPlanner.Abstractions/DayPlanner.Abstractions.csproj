@@ -10,8 +10,4 @@
     <PackageReference Include="FirebaseAdmin" Version="3.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
-  </ItemGroup>
-
 </Project>

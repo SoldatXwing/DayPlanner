@@ -1,6 +1,6 @@
-﻿using DayPlanner.Authorization.Exceptions;
-using DayPlanner.Authorization.Interfaces;
-using DayPlanner.Authorization.Models;
+﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Services;
+using DayPlanner.Authorization.Exceptions;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

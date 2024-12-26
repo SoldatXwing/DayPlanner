@@ -17,7 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
     <ProjectReference Include="..\DayPlanner.Authorization\DayPlanner.Authorization.csproj" />
-    <ProjectReference Include="..\DayPlanner.FireStore\DayPlanner.FireStore.csproj" />
   </ItemGroup>
 
 </Project>

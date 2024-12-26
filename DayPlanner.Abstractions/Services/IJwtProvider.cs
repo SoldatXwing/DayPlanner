@@ -1,4 +1,4 @@
-﻿namespace DayPlanner.Authorization.Interfaces
+﻿namespace DayPlanner.Abstractions.Services
 {
     public interface IJwtProvider
     {
