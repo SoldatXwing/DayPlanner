@@ -16,7 +16,7 @@ namespace DayPlanner.Authorization.Services
 
         public AuthService(string serviceAccountPath)
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(serviceAccountPath);
+            ArgumentException.ThrowIfNullOrEmpty(serviceAccountPath);
             var app = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
             {
                 Credential = GoogleCredential.FromFile(serviceAccountPath)

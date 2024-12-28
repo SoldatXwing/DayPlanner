@@ -10,7 +10,5 @@ namespace DayPlanner.Abstractions.Services
     public interface IAuthService
     {
         Task<FirebaseToken> VerifyTokenAsync(string idToken);
-        Task<UserRecord> GetUserByIdAsync(string uid);
-        Task<UserRecord> CreateUserAsync(UserRecordArgs args);
     }
 }

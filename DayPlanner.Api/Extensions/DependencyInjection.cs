@@ -1,6 +1,8 @@
 ﻿using Carter;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.Authorization.Services;
+using DayPlanner.FireStore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace DayPlanner.Api.Extensions
@@ -24,10 +26,12 @@ namespace DayPlanner.Api.Extensions
             });
 
             builder.Services.AddScoped<IAuthService>(provider => new AuthService("serviceAccountKey.json"));
-
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IUserStore>(provider => new FireStoreUserStore("serviceAccountKey.json"));
             builder.Services.AddAuthentication()
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
                 {
+                    jwtOptions.Authority = builder.Configuration["Authentication:ValidIssuer"];
                     jwtOptions.Audience = builder.Configuration["Authentication:Audience"];
                     jwtOptions.TokenValidationParameters.ValidIssuer = builder.Configuration["Authentication:ValidIssuer"];
                 });
