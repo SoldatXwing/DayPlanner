@@ -6,10 +6,11 @@ namespace DayPlanner.Abstractions.Stores
     public interface IAppointmentStore
     {
         Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end);
-        Task DeleteAppointment(string appointmentId);
-        Task<Appointment> GetAppointmentById(string appointmendId);
+        Task<List<Appointment>> GetUsersAppointments(string userId);
+        Task DeleteAppointment(string userId, string appointmentId);
+        Task<Appointment?> GetAppointmentById(string appointmentId);
         Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request);
-        Task<Appointment> CreateAppointment(AppointmentRequest request);
+        Task<Appointment> CreateAppointment(string userId, AppointmentRequest request);
     }
 
 }

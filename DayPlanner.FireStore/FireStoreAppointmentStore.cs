@@ -1,4 +1,5 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
+﻿using AutoMapper;
+using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.Backend.Extensions;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Stores;
@@ -8,54 +9,55 @@ namespace DayPlanner.FireStore
 {
     public class FireStoreAppointmentStore : IAppointmentStore
     {
-        //TODO: Implement the IAppointmentStore interface
         private readonly FirestoreDb _fireStoreDb;
-        public FireStoreAppointmentStore(string projectId)
+        private readonly IMapper _mapper;
+        public FireStoreAppointmentStore(string projectId, IMapper mapper)
         {
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "serviceAccountKey.json");
             _fireStoreDb = FirestoreDb.Create(projectId);
+            _mapper = mapper;
         }
 
-        public Task<Appointment> CreateAppointment(AppointmentRequest request)
+        public async Task<Appointment> CreateAppointment(string userId, AppointmentRequest request)
         {
-            throw new NotImplementedException();
-        }
+            var appointment = _mapper.Map<Appointment>(request);
 
-        public async Task<Appointment> CreateAppointmentAsync(Appointment appointment)
-        {
+            appointment.UserId = userId;
+
             DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document();
-
             await appointmentRef.SetAsync(appointment.ToDictionary());
 
             appointment.Id = appointmentRef.Id;
             return appointment;
         }
 
-        public Task DeleteAppointment(string appointmentId)
+        public async Task DeleteAppointment(string userId, string appointmentId)
         {
-            throw new NotImplementedException();
-        }
+            DocumentReference appointmentRef = _fireStoreDb.Collection("appointments")
+                .Document(appointmentId);
 
-        public async Task DeleteUsersAppointmentsAsync(string appointmentId)
-        {
-            DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);
+            DocumentSnapshot snapshot = await appointmentRef.GetSnapshotAsync();
+            if (!snapshot.Exists)
+            {
+                throw new InvalidOperationException($"Appointment with id {appointmentId} not found.");               
+            }
+            var appointment = snapshot.ConvertTo<Appointment>();
+
+            if (appointment.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("User is not authorized to delete this appointment.");
+            }
             await appointmentRef.DeleteAsync();
         }
 
-        public Task<Appointment> GetAppointmentById(string appointmendId)
+        public async Task<Appointment?> GetAppointmentById(string appointmentId)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<Appointment> GetSingleAppointmentAsync(string appointmentId)
-
-        {
-            DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);            // Retrieve the document
+            DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);   
 
             DocumentSnapshot snapshot = await appointmentRef.GetSnapshotAsync();
 
             if (snapshot.Exists)
-            {
+            { 
                 return snapshot.ConvertTo<Appointment>();
             }
             else
@@ -64,12 +66,7 @@ namespace DayPlanner.FireStore
             }
         }
 
-        public Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<Appointment>> GetUsersAppointmentsAsync(string userId, DateTime start, DateTime end)
+        public async Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end)
         {
             Query query = _fireStoreDb.Collection("appointments")
                 .WhereEqualTo("userId", userId)
@@ -80,28 +77,24 @@ namespace DayPlanner.FireStore
 
             return snapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
         }
-
-        public Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request)
+        public async Task<List<Appointment>> GetUsersAppointments(string userId)
         {
-            throw new NotImplementedException();
+            Query query = _fireStoreDb.Collection("appointments")
+                .WhereEqualTo("userId", userId);
+
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            return snapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
         }
 
-        public async Task<Appointment> UpdateAppointmentAsync(Appointment appointment)
-
+        public async Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request)
         {
-
-            // Get a reference to the appointment document
-
-            DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointment.Id);
-
-
-            // Update the appointment data
+            DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);
+            var appointment = _mapper.Map<Appointment>(request);
 
             await appointmentRef.SetAsync(appointment);
 
-
             return appointment;
-
         }
 
     }

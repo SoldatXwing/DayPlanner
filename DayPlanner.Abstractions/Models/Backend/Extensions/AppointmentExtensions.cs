@@ -5,6 +5,10 @@
         public static Dictionary<string, object> ToDictionary(this Appointment appointment) => new()
         {
 
+                { "id", appointment.Id },
+
+                { "userId", appointment.UserId },
+
                 { "title", appointment.Title },
 
                 { "summary", appointment.Summary },
@@ -12,7 +16,9 @@
                 { "startDate", appointment.Start },
 
                 { "endDate", appointment.End },
-                { "location", appointment.Location }
+                { "createdAt", appointment.CreatedAt },
+
+                { "location", appointment.Location is null ? "" : appointment.Location }
             };
     }
 }

@@ -87,16 +87,4 @@ namespace DayPlanner.Api.Endpoints
             }
         }
     }
-    public class AppointmentEndpoints : ICarterModule
-    {
-        public void AddRoutes(IEndpointRouteBuilder app)
-        {
-            var authGroup = app.MapGroup("Appointment").RequireAuthorization();
-
-        }
-        private async Task<IResult> GetAllAppointments(IAppointmentsService appointmentService)
-        {
-            return Results.Ok();
-        }
-    }
 }

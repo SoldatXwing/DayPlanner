@@ -1,9 +1,12 @@
-﻿using Carter;
+﻿using AutoMapper;
+using Carter;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Abstractions.Stores;
 using DayPlanner.Authorization.Services;
 using DayPlanner.FireStore;
+using Google.Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Newtonsoft.Json.Linq;
 
 namespace DayPlanner.Api.Extensions
 {
@@ -18,6 +21,9 @@ namespace DayPlanner.Api.Extensions
 
             //services.AddDbContext<DayPlannerDbContext>(options =>
             //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            string projectId = JObject.Parse(File.ReadAllText("serviceAccountKey.json"))["project_id"]!.ToString();
+            if (string.IsNullOrEmpty(projectId))
+                throw new NotImplementedException("Project id in service account key file not provided.");
 
             builder.Services.AddHttpClient<IJwtProvider, JwtProvider>((sp, httpClient) =>
             {
@@ -26,8 +32,16 @@ namespace DayPlanner.Api.Extensions
             });
 
             builder.Services.AddScoped<IAuthService>(provider => new AuthService("serviceAccountKey.json"));
+
+            builder.Services.AddScoped<IAppointmentsService, AppointmentsService>();
+            builder.Services.AddScoped<IAppointmentStore>(provider =>
+            {
+                var mapper = provider.GetRequiredService<IMapper>();
+                return new FireStoreAppointmentStore(projectId, mapper);
+            });
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IUserStore>(provider => new FireStoreUserStore("serviceAccountKey.json"));
+
             builder.Services.AddAuthentication()
                 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
                 {
@@ -38,6 +52,8 @@ namespace DayPlanner.Api.Extensions
             builder.Services.AddAuthorization();
 
             builder.Services.AddCarter();
+
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
         }
     }
 }
