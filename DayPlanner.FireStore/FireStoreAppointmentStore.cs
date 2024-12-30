@@ -66,6 +66,17 @@ namespace DayPlanner.FireStore
             }
         }
 
+        public async Task<long?> GetAppointmentsCount(string userId)
+        {
+            var query = _fireStoreDb.Collection("appointments")
+             .WhereEqualTo("userId", userId)
+             .Count();
+
+            var snapshot = await query.GetSnapshotAsync();
+
+            return snapshot.Count; 
+        }
+
         public async Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end)
         {
             Query query = _fireStoreDb.Collection("appointments")
@@ -77,15 +88,35 @@ namespace DayPlanner.FireStore
 
             return snapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
         }
-        public async Task<List<Appointment>> GetUsersAppointments(string userId)
+        public async Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize)
         {
+            if (page < 1) throw new ArgumentException("Page number must be greater than 0.");
+
             Query query = _fireStoreDb.Collection("appointments")
-                .WhereEqualTo("userId", userId);
+                .WhereEqualTo("userId", userId)
+                .Limit(pageSize);
 
-            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+            if (page > 1)
+            {
+                int skip = (page - 1) * pageSize;
+                QuerySnapshot snapshot = await query.Limit(skip).GetSnapshotAsync();
 
-            return snapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
+                if (snapshot.Documents.Count > 0)
+                {
+                    var lastDocument = snapshot.Documents.Last();
+                    query = query.StartAfter(lastDocument);
+                }
+                else
+                {
+                    return new();
+                }
+            }
+
+            QuerySnapshot pageSnapshot = await query.GetSnapshotAsync();
+
+            return pageSnapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
         }
+
 
         public async Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request)
         {

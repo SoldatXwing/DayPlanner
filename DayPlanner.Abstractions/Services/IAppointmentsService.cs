@@ -7,7 +7,8 @@ namespace DayPlanner.Abstractions.Services
     public interface IAppointmentsService
     {
         Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end);
-        Task<List<Appointment>> GetUsersAppointments(string userId);
+        Task<long?> GetAppointmentsCount(string userId);
+        Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize);
         Task DeleteUsersAppointment(string userId, string appointmentId);
         Task<Appointment?> GetAppointmentById(string appointmendId);
         Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request);
@@ -29,6 +30,9 @@ namespace DayPlanner.Abstractions.Services
 
         public async Task<Appointment?> GetAppointmentById(string appointmendId) => string.IsNullOrEmpty(appointmendId) ? throw new ArgumentNullException(nameof(appointmendId), "Appointment Id cant be null or empty.") : await _appointmentStore.GetAppointmentById(appointmendId);
 
+        public async Task<long?> GetAppointmentsCount(string userId) => string.IsNullOrEmpty(userId) ? throw new ArgumentNullException(nameof(userId), "User id cant be null or empty.") : await _appointmentStore.GetAppointmentsCount(userId);
+
+
         public async Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end)
         {
             if(start > end)
@@ -37,11 +41,11 @@ namespace DayPlanner.Abstractions.Services
                 throw new ArgumentNullException(nameof(userId), "User Id cant be null or empty.");
             return await _appointmentStore.GetUsersAppointments(userId, start, end);
         }
-        public async Task<List<Appointment>> GetUsersAppointments(string userId)
+        public async Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ArgumentNullException(nameof(userId), "User Id cant be null or empty.");
-            return await _appointmentStore.GetUsersAppointments(userId);
+            return await _appointmentStore.GetUsersAppointments(userId, page, pageSize);
         }
 
         public async Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request)

@@ -1,4 +1,5 @@
 ﻿using Carter;
+using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Authorization.Exceptions;
@@ -30,7 +31,7 @@ namespace DayPlanner.Api.Endpoints
 
             var user = await userService.GetUserByIdAsync(userId);
             if (user is null)
-                return Results.NotFound($"User with uid {userId} not found.");
+                return Results.NotFound(new ApiErrorModel { Error = $"User with uid {userId} not found.", Message = "User not found"});
 
             return Results.Ok(user.ProviderData);
         }
@@ -43,7 +44,7 @@ namespace DayPlanner.Api.Endpoints
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(new { Error = ex.Message });
+                return Results.BadRequest(new ApiErrorModel { Error = ex.Message, Message = "User not found" });
 
             }
 
@@ -83,7 +84,7 @@ namespace DayPlanner.Api.Endpoints
             }
             catch (Exception ex)
             {
-                return Results.BadRequest(new { Message = "Failed to register user.", Error = ex.Message });
+                return Results.BadRequest(new ApiErrorModel { Message = "Failed to register user.", Error = ex.Message });
             }
         }
     }
