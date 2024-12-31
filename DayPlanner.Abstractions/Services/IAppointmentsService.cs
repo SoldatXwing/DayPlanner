@@ -10,8 +10,8 @@ namespace DayPlanner.Abstractions.Services
         Task<long?> GetAppointmentsCount(string userId);
         Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize);
         Task DeleteUsersAppointment(string userId, string appointmentId);
-        Task<Appointment?> GetAppointmentById(string appointmendId);
-        Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request);
+        Task<Appointment?> GetAppointmentById(string userId,string appointmendId);
+        Task<Appointment> UpdateAppointment(string appointmentId, string userId, AppointmentRequest request);
         Task<Appointment> CreateAppointment(string userId, AppointmentRequest request);
     }
     public class AppointmentsService : IAppointmentsService
@@ -28,7 +28,7 @@ namespace DayPlanner.Abstractions.Services
             await _appointmentStore.DeleteAppointment(userId, appointmentId);
         }
 
-        public async Task<Appointment?> GetAppointmentById(string appointmendId) => string.IsNullOrEmpty(appointmendId) ? throw new ArgumentNullException(nameof(appointmendId), "Appointment Id cant be null or empty.") : await _appointmentStore.GetAppointmentById(appointmendId);
+        public async Task<Appointment?> GetAppointmentById(string userId,string appointmendId) => string.IsNullOrEmpty(appointmendId) ? throw new ArgumentNullException(nameof(appointmendId), "Appointment Id cant be null or empty.") : await _appointmentStore.GetAppointmentById(userId,appointmendId);
 
         public async Task<long?> GetAppointmentsCount(string userId) => string.IsNullOrEmpty(userId) ? throw new ArgumentNullException(nameof(userId), "User id cant be null or empty.") : await _appointmentStore.GetAppointmentsCount(userId);
 
@@ -48,13 +48,13 @@ namespace DayPlanner.Abstractions.Services
             return await _appointmentStore.GetUsersAppointments(userId, page, pageSize);
         }
 
-        public async Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request)
+        public async Task<Appointment> UpdateAppointment(string appointmentId,string userId, AppointmentRequest request)
         {
             if(string.IsNullOrEmpty(appointmentId))
                 throw new ArgumentNullException(nameof(appointmentId), "Appointment Id cant be null or empty.");
             if (request is null)
                 throw new ArgumentNullException(nameof(appointmentId), "Appointment cant be null.");
-            return await _appointmentStore.UpdateAppointment(appointmentId, request);
+            return await _appointmentStore.UpdateAppointment(appointmentId, userId, request);
 
         }
     }

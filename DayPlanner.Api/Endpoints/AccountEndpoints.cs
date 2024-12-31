@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DayPlanner.Api.Endpoints
 {
+    //TODO: Catch UnatuorizedException and return 401
     public class AccountEndpoints : ICarterModule
     {
         public void AddRoutes(IEndpointRouteBuilder app)

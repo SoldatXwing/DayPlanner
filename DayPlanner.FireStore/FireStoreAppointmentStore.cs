@@ -43,14 +43,11 @@ namespace DayPlanner.FireStore
             }
             var appointment = snapshot.ConvertTo<Appointment>();
 
-            if (appointment.UserId != userId)
-            {
-                throw new UnauthorizedAccessException("User is not authorized to delete this appointment.");
-            }
+            ThrowIfUnauthorized(userId, appointment);
             await appointmentRef.DeleteAsync();
         }
 
-        public async Task<Appointment?> GetAppointmentById(string appointmentId)
+        public async Task<Appointment?> GetAppointmentById(string userId,string appointmentId)
         {
             DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);   
 
@@ -58,7 +55,9 @@ namespace DayPlanner.FireStore
 
             if (snapshot.Exists)
             { 
-                return snapshot.ConvertTo<Appointment>();
+                var appointment = snapshot.ConvertTo<Appointment>(); 
+                ThrowIfUnauthorized(userId, appointment);
+                return appointment;
             }
             else
             {
@@ -73,7 +72,7 @@ namespace DayPlanner.FireStore
              .Count();
 
             var snapshot = await query.GetSnapshotAsync();
-
+            //TODO: Auth check
             return snapshot.Count; 
         }
 
@@ -85,8 +84,9 @@ namespace DayPlanner.FireStore
                 .WhereLessThanOrEqualTo("endTime", end);
 
             QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-            return snapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
+            var appointments = snapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList(); 
+            ThrowIfUnauthorized(userId, appointments);
+            return appointments;
         }
         public async Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize)
         {
@@ -94,38 +94,63 @@ namespace DayPlanner.FireStore
 
             Query query = _fireStoreDb.Collection("appointments")
                 .WhereEqualTo("userId", userId)
+                .OrderBy("startTime")
                 .Limit(pageSize);
 
+            DocumentSnapshot? lastDocument = null;
             if (page > 1)
             {
+                QuerySnapshot previousSnapshot = await query.GetSnapshotAsync();
                 int skip = (page - 1) * pageSize;
-                QuerySnapshot snapshot = await query.Limit(skip).GetSnapshotAsync();
 
-                if (snapshot.Documents.Count > 0)
+                if (skip >= previousSnapshot.Documents.Count)
                 {
-                    var lastDocument = snapshot.Documents.Last();
-                    query = query.StartAfter(lastDocument);
+                    return [];
                 }
-                else
-                {
-                    return new();
-                }
+
+                lastDocument = previousSnapshot.Documents.ElementAt(skip - 1);
+                query = query.StartAfter(lastDocument);
             }
 
-            QuerySnapshot pageSnapshot = await query.GetSnapshotAsync();
+            QuerySnapshot currentSnapshot = await query.GetSnapshotAsync();
 
-            return pageSnapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
+            var appointments = currentSnapshot.Documents.Select(doc => doc.ConvertTo<Appointment>()).ToList();
+            ThrowIfUnauthorized(userId, appointments);
+            return appointments;
+
         }
 
-
-        public async Task<Appointment> UpdateAppointment(string appointmentId, AppointmentRequest request)
+        public async Task<Appointment> UpdateAppointment(string appointmentId, string userId, AppointmentRequest request)
         {
             DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);
-            var appointment = _mapper.Map<Appointment>(request);
 
+            var appointment = _mapper.Map<Appointment>(request);
+            ThrowIfUnauthorized(userId, appointment);
             await appointmentRef.SetAsync(appointment);
 
-            return appointment;
+            var updatedSnapshot = await appointmentRef.GetSnapshotAsync();
+            if (!updatedSnapshot.Exists)
+            {
+                throw new Exception("Failed to retrieve the updated appointment.");
+            }
+
+            var updatedAppointment = updatedSnapshot.ConvertTo<Appointment>();
+            
+            return updatedAppointment;
+        }
+        private static void ThrowIfUnauthorized(string givenUserId, Appointment dbAppointment)
+        {
+            if(givenUserId != dbAppointment.UserId)
+            {
+                throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
+            }
+        }
+        private static void ThrowIfUnauthorized(string givenUserId, List<Appointment> dbAppointments)
+        {
+            if(dbAppointments.Any(c => c.UserId != givenUserId))
+            {
+                throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
+            }
         }
 
     }

@@ -14,8 +14,10 @@ namespace DayPlanner.Api.Endpoints
             var authGroup = app.MapGroup("Appointment").RequireAuthorization();
             authGroup.MapGet("", GetAllAppointments);
             authGroup.MapPost("", CreateAppointment);
-            authGroup.MapGet("/{appointmentId}", GetAppointment);
             authGroup.MapGet("/Range", GetAllAppointmentsByDate);
+            authGroup.MapGet("/{appointmentId}", GetAppointment);
+            authGroup.MapDelete("/{appointmentId}", DeleteAppointment);
+            authGroup.MapPut("/{appointmentId}", UpdateAppointment);
 
         }
         private async Task<IResult> GetAllAppointments(
@@ -65,7 +67,7 @@ namespace DayPlanner.Api.Endpoints
             if (string.IsNullOrEmpty(userId))
                 return Results.Unauthorized();
 
-            var appointment = await appointmentService.GetAppointmentById(appointmentId);
+            var appointment = await appointmentService.GetAppointmentById(userId,appointmentId);
             return appointment is null ? Results.NotFound(new ApiErrorModel { Message = "Appointment not found",Error = $"No appointment with id {appointmentId} found."}) : Results.Ok(appointment);
         }
         private static async Task<IResult> GetAllAppointmentsByDate(
@@ -107,6 +109,18 @@ namespace DayPlanner.Api.Endpoints
             {
                 return Results.NotFound(new ApiErrorModel { Message = "Appointment not found", Error = ex.Message });
             }
+        }
+        private static async Task<IResult> UpdateAppointment(
+            string appointmentId,
+            AppointmentRequest request,
+            IAppointmentsService appointmentService,
+            HttpContext httpContext)
+        {
+            var userId = httpContext.User.Claims.Single(c => c.Type == "user_id").Value;
+            if (string.IsNullOrEmpty(userId))   
+                return Results.Unauthorized();
+            var appointment = await appointmentService.UpdateAppointment(appointmentId, userId, request);
+            return Results.Ok(appointment);
         }
     }
 }
