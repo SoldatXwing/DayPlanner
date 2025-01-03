@@ -7,16 +7,10 @@ using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore
 {
-    public class FireStoreAppointmentStore : IAppointmentStore
+    public class FireStoreAppointmentStore(FirestoreDb db, IMapper mapper) : IAppointmentStore
     {
-        private readonly FirestoreDb _fireStoreDb;
-        private readonly IMapper _mapper;
-        public FireStoreAppointmentStore(string projectId, IMapper mapper)
-        {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "serviceAccountKey.json");
-            _fireStoreDb = FirestoreDb.Create(projectId);
-            _mapper = mapper;
-        }
+        private readonly FirestoreDb _fireStoreDb = db;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<Appointment> CreateAppointment(string userId, AppointmentRequest request)
         {

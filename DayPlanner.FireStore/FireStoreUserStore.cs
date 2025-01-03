@@ -8,14 +8,10 @@ namespace DayPlanner.FireStore
     public class FireStoreUserStore : IUserStore
     {
         private readonly FirebaseAuth _firebaseAuth;
-        public FireStoreUserStore(string serviceAccountPath)
+        public FireStoreUserStore(FirebaseApp app)
         {
-            ArgumentException.ThrowIfNullOrEmpty(serviceAccountPath);
-            var app = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
-            {
-                Credential = GoogleCredential.FromFile(serviceAccountPath)
-            });
-
+            if(app is null)
+                throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
             _firebaseAuth = FirebaseAuth.GetAuth(app);
         }
         public async Task<UserRecord> CreateAsync(UserRecordArgs args) => args is not null ? await _firebaseAuth.CreateUserAsync(args) : throw new ArgumentNullException(nameof(args), "The user record arguments cannot be null.");

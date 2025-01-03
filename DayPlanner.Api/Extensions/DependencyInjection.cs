@@ -4,7 +4,9 @@ using DayPlanner.Abstractions.Services;
 using DayPlanner.Abstractions.Stores;
 using DayPlanner.Authorization.Services;
 using DayPlanner.FireStore;
-using Google.Api;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Newtonsoft.Json.Linq;
 
@@ -14,46 +16,98 @@ namespace DayPlanner.Api.Extensions
     {
         public static void AddInfrastructure(this WebApplicationBuilder builder)
         {
-            ArgumentNullException.ThrowIfNull(builder.Configuration);
-            ArgumentNullException.ThrowIfNull(builder.Configuration["Authentication:TokenUri"]);
-            ArgumentNullException.ThrowIfNull(builder.Configuration["Authentication:Audience"]);
-            ArgumentNullException.ThrowIfNull(builder.Configuration["Authentication:ValidIssuer"]);
+            ValidateConfiguration(builder.Configuration,
+            [
+                "Authentication:TokenUri",
+                "Authentication:Audience",
+                "Authentication:ValidIssuer"
+            ]);
+            string basePath = AppContext.BaseDirectory; 
+            string filePath = Path.Combine(basePath, "FireBase/serviceAccountKey.json");
 
-            //services.AddDbContext<DayPlannerDbContext>(options =>
-            //    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            string projectId = JObject.Parse(File.ReadAllText("serviceAccountKey.json"))["project_id"]!.ToString();
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Service account key file not found: {filePath}");
+            
+
+            var serviceAccountKeyjson = File.ReadAllText(filePath);
+            var projectId = JObject.Parse(serviceAccountKeyjson)["project_id"]?.ToString();
             if (string.IsNullOrEmpty(projectId))
-                throw new NotImplementedException("Project id in service account key file not provided.");
+                throw new InvalidOperationException("Project ID is not provided in the service account key file.");
 
-            builder.Services.AddHttpClient<IJwtProvider, JwtProvider>((sp, httpClient) =>
+            var firebaseApp = InitializeFirebaseApp(serviceAccountKeyjson, projectId);
+            var firestoreDb = InitializeFirestoreDb(filePath, projectId);
+
+            AddAuthenticationServices(builder);
+            AddCustomServices(builder.Services, projectId, firebaseApp, firestoreDb);
+
+            builder.Services.AddCarter();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
+        }
+
+        private static void ValidateConfiguration(IConfiguration configuration, string[] requiredKeys)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            foreach (var key in requiredKeys)
             {
-                var configuration = sp.GetRequiredService<IConfiguration>();
-                httpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]!);
-            });
+                if (string.IsNullOrEmpty(configuration[key]))
+                {
+                    throw new ArgumentNullException(key, $"Configuration value for '{key}' is missing.");
+                }
+            }
+        }
 
-            builder.Services.AddScoped<IAuthService>(provider => new AuthService("serviceAccountKey.json"));
-
-            builder.Services.AddScoped<IAppointmentsService, AppointmentsService>();
-            builder.Services.AddScoped<IAppointmentStore>(provider =>
-            {
-                var mapper = provider.GetRequiredService<IMapper>();
-                return new FireStoreAppointmentStore(projectId, mapper);
-            });
-            builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IUserStore>(provider => new FireStoreUserStore("serviceAccountKey.json"));
-
-            builder.Services.AddAuthentication()
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
+        private static void AddAuthenticationServices(WebApplicationBuilder builder)
+        {
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(jwtOptions =>
                 {
                     jwtOptions.Authority = builder.Configuration["Authentication:ValidIssuer"];
                     jwtOptions.Audience = builder.Configuration["Authentication:Audience"];
                     jwtOptions.TokenValidationParameters.ValidIssuer = builder.Configuration["Authentication:ValidIssuer"];
                 });
+
             builder.Services.AddAuthorization();
-
-            builder.Services.AddCarter();
-
-            builder.Services.AddAutoMapper(typeof(MappingProfile));
         }
+
+        private static void AddCustomServices(IServiceCollection services, string projectId, FirebaseApp app, FirestoreDb db)
+        {
+            services.AddHttpClient<IJwtProvider, JwtProvider>((sp, httpClient) =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                httpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]!);
+            });
+
+            services.AddScoped<IAuthService>(provider => new AuthService(app));
+            services.AddScoped<IAppointmentsService, AppointmentsService>();
+            services.AddScoped<IAppointmentStore>(provider =>
+            {
+                var mapper = provider.GetRequiredService<IMapper>();
+                return new FireStoreAppointmentStore(db, mapper);
+            });
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserStore>(provider => new FireStoreUserStore(app));
+        }
+        private static FirebaseApp InitializeFirebaseApp(string serviceAccountKeyJson, string projectId)
+        {
+            if (string.IsNullOrEmpty(projectId))
+            {
+                throw new InvalidOperationException("Project ID in service account key file is missing.");
+            }
+
+            var app = FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromJson(serviceAccountKeyJson),
+                ProjectId = projectId
+            });
+
+            return app;
+        }
+        private static FirestoreDb InitializeFirestoreDb(string serviceAccountKeyPath, string projectId)
+        {
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", serviceAccountKeyPath);
+            return FirestoreDb.Create(projectId);
+        }
+
     }
 }

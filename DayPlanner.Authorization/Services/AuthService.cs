@@ -14,14 +14,11 @@ namespace DayPlanner.Authorization.Services
     {
         private readonly FirebaseAuth _firebaseAuth;
 
-        public AuthService(string serviceAccountPath)
+        public AuthService(FirebaseApp app)
         {
-            ArgumentException.ThrowIfNullOrEmpty(serviceAccountPath);
-            var app = FirebaseApp.DefaultInstance ?? FirebaseApp.Create(new AppOptions
-            {
-                Credential = GoogleCredential.FromFile(serviceAccountPath)
-            });
-
+            if(app is null)
+                throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
+            
             _firebaseAuth = FirebaseAuth.GetAuth(app);
         }
 
