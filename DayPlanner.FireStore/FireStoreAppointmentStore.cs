@@ -7,16 +7,10 @@ using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore
 {
-    public class FireStoreAppointmentStore : IAppointmentStore
+    public class FireStoreAppointmentStore(FirestoreDb firestoreDb, IMapper mapper) : IAppointmentStore
     {
-        private readonly FirestoreDb _fireStoreDb;
-        private readonly IMapper _mapper;
-        public FireStoreAppointmentStore(string projectId, IMapper mapper)
-        {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "serviceAccountKey.json");
-            _fireStoreDb = FirestoreDb.Create(projectId);
-            _mapper = mapper;
-        }
+        private readonly FirestoreDb _fireStoreDb = firestoreDb;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<Appointment> CreateAppointment(string userId, AppointmentRequest request)
         {
@@ -88,6 +82,7 @@ namespace DayPlanner.FireStore
             ThrowIfUnauthorized(userId, appointments);
             return appointments;
         }
+
         public async Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize)
         {
             if (page < 1) throw new ArgumentException("Page number must be greater than 0.");
@@ -138,6 +133,7 @@ namespace DayPlanner.FireStore
             
             return updatedAppointment;
         }
+
         private static void ThrowIfUnauthorized(string givenUserId, Appointment dbAppointment)
         {
             if(givenUserId != dbAppointment.UserId)
@@ -145,6 +141,7 @@ namespace DayPlanner.FireStore
                 throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
             }
         }
+
         private static void ThrowIfUnauthorized(string givenUserId, List<Appointment> dbAppointments)
         {
             if(dbAppointments.Any(c => c.UserId != givenUserId))
@@ -152,7 +149,5 @@ namespace DayPlanner.FireStore
                 throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
             }
         }
-
     }
-
 }

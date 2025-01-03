@@ -7,13 +7,20 @@ namespace DayPlanner.Abstractions.Services
     public interface IAppointmentsService
     {
         Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end);
+
         Task<long?> GetAppointmentsCount(string userId);
+
         Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize);
+
         Task DeleteUsersAppointment(string userId, string appointmentId);
+
         Task<Appointment?> GetAppointmentById(string userId,string appointmendId);
+
         Task<Appointment> UpdateAppointment(string appointmentId, string userId, AppointmentRequest request);
+
         Task<Appointment> CreateAppointment(string userId, AppointmentRequest request);
     }
+
     public class AppointmentsService : IAppointmentsService
     {
         private readonly IAppointmentStore _appointmentStore;
@@ -21,6 +28,7 @@ namespace DayPlanner.Abstractions.Services
         public AppointmentsService(IAppointmentStore appointmentStore) => _appointmentStore = appointmentStore;
 
         public async Task<Appointment> CreateAppointment(string userId, AppointmentRequest request) => request is null ? throw new ArgumentNullException(nameof(request), "Appointment cant be null.") : await _appointmentStore.CreateAppointment(userId,request);
+
         public async Task DeleteUsersAppointment(string userId, string appointmentId)
         {
             if (string.IsNullOrEmpty(appointmentId))
@@ -31,7 +39,6 @@ namespace DayPlanner.Abstractions.Services
         public async Task<Appointment?> GetAppointmentById(string userId,string appointmendId) => string.IsNullOrEmpty(appointmendId) ? throw new ArgumentNullException(nameof(appointmendId), "Appointment Id cant be null or empty.") : await _appointmentStore.GetAppointmentById(userId,appointmendId);
 
         public async Task<long?> GetAppointmentsCount(string userId) => string.IsNullOrEmpty(userId) ? throw new ArgumentNullException(nameof(userId), "User id cant be null or empty.") : await _appointmentStore.GetAppointmentsCount(userId);
-
 
         public async Task<List<Appointment>> GetUsersAppointments(string userId, DateTime start, DateTime end)
         {
@@ -55,7 +62,6 @@ namespace DayPlanner.Abstractions.Services
             if (request is null)
                 throw new ArgumentNullException(nameof(appointmentId), "Appointment cant be null.");
             return await _appointmentStore.UpdateAppointment(appointmentId, userId, request);
-
         }
     }
 }
