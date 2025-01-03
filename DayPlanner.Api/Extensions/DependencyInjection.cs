@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Carter;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Abstractions.Stores;
 using DayPlanner.Authorization.Services;
@@ -40,7 +39,6 @@ namespace DayPlanner.Api.Extensions
             AddAuthenticationServices(builder);
             AddCustomServices(builder.Services, projectId, firebaseApp, firestoreDb);
 
-            builder.Services.AddCarter();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
         }
 
