@@ -82,13 +82,13 @@ namespace DayPlanner.FireStore
             ThrowIfUnauthorized(userId, appointments);
             return appointments;
         }
+
         public async Task<List<Appointment>> GetUsersAppointments(string userId, int page, int pageSize)
         {
             if (page < 1) throw new ArgumentException("Page number must be greater than 0.");
 
             Query query = _fireStoreDb.Collection("appointments")
                 .WhereEqualTo("userId", userId)
-                .OrderBy("startTime")
                 .Limit(pageSize);
 
             DocumentSnapshot? lastDocument = null;
@@ -132,6 +132,7 @@ namespace DayPlanner.FireStore
             
             return updatedAppointment;
         }
+
         private static void ThrowIfUnauthorized(string givenUserId, Appointment dbAppointment)
         {
             if(givenUserId != dbAppointment.UserId)
@@ -139,6 +140,7 @@ namespace DayPlanner.FireStore
                 throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
             }
         }
+
         private static void ThrowIfUnauthorized(string givenUserId, List<Appointment> dbAppointments)
         {
             if(dbAppointments.Any(c => c.UserId != givenUserId))
@@ -146,7 +148,5 @@ namespace DayPlanner.FireStore
                 throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
             }
         }
-
     }
-
 }

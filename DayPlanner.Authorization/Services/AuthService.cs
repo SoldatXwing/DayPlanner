@@ -1,32 +1,17 @@
 ﻿using FirebaseAdmin.Auth;
 using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DayPlanner.Abstractions.Services;
 
 namespace DayPlanner.Authorization.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(FirebaseApp app) : IAuthService
     {
-        private readonly FirebaseAuth _firebaseAuth;
-
-        public AuthService(FirebaseApp app)
-        {
-            if(app is null)
-                throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
-            
-            _firebaseAuth = FirebaseAuth.GetAuth(app);
-        }
-
+        private readonly FirebaseAuth _firebaseAuth = FirebaseAuth.GetAuth(app) ?? throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
         public async Task<FirebaseToken> VerifyTokenAsync(string idToken)
         {
             try
             {
-                return await _firebaseAuth.VerifyIdTokenAsync(idToken);
+                return await _firebaseAuth.VerifyIdTokenAsync(idToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -38,7 +23,7 @@ namespace DayPlanner.Authorization.Services
         {
             try
             {              
-                return await _firebaseAuth.GetUserAsync(uid);
+                return await _firebaseAuth.GetUserAsync(uid).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -46,6 +31,6 @@ namespace DayPlanner.Authorization.Services
             }
         }
 
-        public async Task<UserRecord> CreateUserAsync(UserRecordArgs args) => await _firebaseAuth.CreateUserAsync(args);
+        public async Task<UserRecord> CreateUserAsync(UserRecordArgs args) => await _firebaseAuth.CreateUserAsync(args).ConfigureAwait(false);
     }
 }

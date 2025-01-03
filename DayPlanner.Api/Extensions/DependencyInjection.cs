@@ -8,7 +8,6 @@ using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Newtonsoft.Json.Linq;
 
 namespace DayPlanner.Api.Extensions
 {
@@ -22,15 +21,16 @@ namespace DayPlanner.Api.Extensions
                 "Authentication:Audience",
                 "Authentication:ValidIssuer"
             ]);
+            string authFile = builder.Configuration["FireBase:AuthFile"] ?? throw new InvalidOperationException("An authentication file for firebase is required. Config path: 'FireBase:AuthFile'.");
             string basePath = AppContext.BaseDirectory; 
-            string filePath = Path.Combine(basePath, "FireBase/serviceAccountKey.json");
+            string filePath = Path.Combine(basePath, authFile);
 
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"Service account key file not found: {filePath}");
             
 
             var serviceAccountKeyjson = File.ReadAllText(filePath);
-            var projectId = JObject.Parse(serviceAccountKeyjson)["project_id"]?.ToString();
+            string projectId = builder.Configuration["FireBase:ProjectId"] ?? throw new InvalidOperationException("The firebase project id id required. Config path: 'FireBase:ProjectId'.");
             if (string.IsNullOrEmpty(projectId))
                 throw new InvalidOperationException("Project ID is not provided in the service account key file.");
 
@@ -77,8 +77,9 @@ namespace DayPlanner.Api.Extensions
                 var configuration = sp.GetRequiredService<IConfiguration>();
                 httpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]!);
             });
-
             services.AddScoped<IAuthService>(provider => new AuthService(app));
+            services.AddScoped<IUserStore>(provider => new FireStoreUserStore(app));
+
             services.AddScoped<IAppointmentsService, AppointmentsService>();
             services.AddScoped<IAppointmentStore>(provider =>
             {

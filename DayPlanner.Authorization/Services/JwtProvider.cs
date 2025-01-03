@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace DayPlanner.Authorization.Services
 {
-    public partial class JwtProvider : IJwtProvider
+    public partial class JwtProvider(HttpClient client) : IJwtProvider
     {
-        private readonly HttpClient _httpClient;
-        public JwtProvider(HttpClient httpClient) => _httpClient = httpClient;
+        private readonly HttpClient _httpClient = client;
+        
         public async Task<string> GetForCredentialsAsync(string email, string password)
         {
             var request = new
@@ -49,7 +49,7 @@ namespace DayPlanner.Authorization.Services
                 }               
             }
             var authToken = await response.Content.ReadFromJsonAsync<AuthToken>();
-            return authToken.IdToken;
+            return authToken!.IdToken;
         }
     }
 }
