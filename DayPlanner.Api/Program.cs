@@ -5,7 +5,8 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddInfrastructure();
-
+builder.Services.AddControllers();
+builder.Services.AddApiVersioning(options => options.ReportApiVersions = true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swagger =>
 {
@@ -62,7 +63,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapCarter();
-
+app.MapControllers();
 app.UseHttpsRedirection();
 
 
