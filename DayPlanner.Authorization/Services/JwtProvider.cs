@@ -1,20 +1,16 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
+﻿using DayPlanner.Abstractions.Exceptions;
+using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Authorization.Exceptions;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DayPlanner.Authorization.Services
 {
     public partial class JwtProvider(HttpClient client) : IJwtProvider
     {
         private readonly HttpClient _httpClient = client;
-        
+
         public async Task<string> GetForCredentialsAsync(string email, string password)
         {
             var request = new
@@ -40,13 +36,13 @@ namespace DayPlanner.Authorization.Services
                     }
                     else
                     {
-                        throw new Exception(error.Message); 
+                        throw new Exception(error.Message);
                     }
                 }
                 else
                 {
                     throw new Exception("Unknown error occurred while processing the request.");
-                }               
+                }
             }
             var authToken = await response.Content.ReadFromJsonAsync<AuthToken>();
             return authToken!.IdToken;

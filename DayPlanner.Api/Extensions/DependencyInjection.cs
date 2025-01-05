@@ -88,7 +88,7 @@ namespace DayPlanner.Api.Extensions
             services.AddScoped<IUserStore>(provider => new FireStoreUserStore(app));
 
             services.AddScoped<IGoogleRefreshTokenService, GoogleRefreshTokenService>();
-            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db));
+            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db,app));
         }
         private static FirebaseApp InitializeFirebaseApp(string serviceAccountKeyJson, string projectId)
         {
