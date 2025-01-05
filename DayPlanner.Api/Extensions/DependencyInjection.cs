@@ -31,14 +31,12 @@ namespace DayPlanner.Api.Extensions
 
             var serviceAccountKeyjson = File.ReadAllText(filePath);
             string projectId = builder.Configuration["FireBase:ProjectId"] ?? throw new InvalidOperationException("The firebase project id id required. Config path: 'FireBase:ProjectId'.");
-            if (string.IsNullOrEmpty(projectId))
-                throw new InvalidOperationException("Project ID is not provided in the service account key file.");
 
             var firebaseApp = InitializeFirebaseApp(serviceAccountKeyjson, projectId);
             var firestoreDb = InitializeFirestoreDb(filePath, projectId);
 
             AddAuthenticationServices(builder);
-            AddCustomServices(builder.Services, projectId, firebaseApp, firestoreDb);
+            AddCustomServices(builder.Services, firebaseApp, firestoreDb);
 
             builder.Services.AddCarter();
             builder.Services.AddAutoMapper(typeof(MappingProfile));
@@ -70,7 +68,7 @@ namespace DayPlanner.Api.Extensions
             builder.Services.AddAuthorization();
         }
 
-        private static void AddCustomServices(IServiceCollection services, string projectId, FirebaseApp app, FirestoreDb db)
+        private static void AddCustomServices(IServiceCollection services, FirebaseApp app, FirestoreDb db)
         {
             services.AddHttpClient<IJwtProvider, JwtProvider>((sp, httpClient) =>
             {
@@ -88,6 +86,9 @@ namespace DayPlanner.Api.Extensions
             });
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IUserStore>(provider => new FireStoreUserStore(app));
+
+            services.AddScoped<IGoogleRefreshTokenService, GoogleRefreshTokenService>();
+            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db));
         }
         private static FirebaseApp InitializeFirebaseApp(string serviceAccountKeyJson, string projectId)
         {

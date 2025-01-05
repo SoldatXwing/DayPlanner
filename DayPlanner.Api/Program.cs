@@ -52,7 +52,6 @@ builder.Services.AddSwaggerGen(swagger =>
 //    Location = null,
 //    UserId = "1"
 //});
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

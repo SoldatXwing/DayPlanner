@@ -1,8 +1,6 @@
 ﻿using Asp.Versioning;
 using DayPlanner.Abstractions.Models.Backend;
-using Google.Apis.Auth.OAuth2;
-using Google.Apis.Calendar.v3;
-using Google.Apis.Services;
+using DayPlanner.Abstractions.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -21,10 +19,10 @@ namespace DayPlanner.Api.ApiControllers.V1
         /// Redirects to Google OAuth2 login
         /// </summary>
         /// <param name="config"></param>
-        /// <returns></returns>
+        /// <returns>The url to Google OAuth2 login</returns>
         [HttpGet("login")]
         [ProducesResponseType(302)]
-        [AllowAnonymous]
+        //[Authorize]
         public IActionResult Login([FromServices] IConfiguration config)
         {
 
@@ -32,15 +30,23 @@ namespace DayPlanner.Api.ApiControllers.V1
                           $"?client_id={config["GoogleCalendar:client_Id"]}" +
                           $"&redirect_uri={config["GoogleCalendar:redirect_uri"]}" +
                           $"&response_type=code" +
-                          $"&scope=https://www.googleapis.com/auth/calendar.readonly" +
+                          $"&scope=email%20https://www.googleapis.com/auth/calendar.readonly" +
                           $"&access_type=offline";
+            //HttpContext.Session.SetString("UserId", HttpContext.User.Claims.Single(c => c.Type == "user_id").Value);//TODO: implement extension method for getting user id
             return Redirect(authUrl);
 
-        }
+        }/// <summary>
+         /// Callback endpoint for handling the OAuth2 response from Google.
+         /// </summary>
+         /// <param name="code">The authorization code received from Google.</param>
+         /// <param name="config">The configuration settings containing Google client details.</param>
+         /// <returns>The access token if successful, or an error message if unsuccessful.</returns>
         [HttpGet("callback")]
         [ProducesResponseType<ApiErrorModel>(400)]
-        [AllowAnonymous]
-        public async Task<IActionResult> Callback([FromQuery] string code, [FromServices] IConfiguration config)
+        [AllowAnonymous] // Reason: Google sends the request to this endpoint, not the user
+        public async Task<IActionResult> Callback([FromQuery] string code,
+            [FromServices] IConfiguration config,
+            [FromServices] IGoogleRefreshTokenService googleRefreshTokenService)
         {
             if (string.IsNullOrEmpty(code))
             {
@@ -49,10 +55,16 @@ namespace DayPlanner.Api.ApiControllers.V1
             try
             {
                 var tokenResponse = await ExchangeCodeForToken(code, config);
+                //if (tokenResponse!.TryGetValue("refresh_token", out var refreshToken) &&
+                //    !string.IsNullOrEmpty(refreshToken?.ToString()))
+                //{
+                //    ArgumentException.ThrowIfNullOrEmpty(HttpContext.User.Claims.Single(c => c.Type == "user_id").Value); 
+                //    await googleRefreshTokenService.Create(HttpContext.User.Claims.Single(c => c.Type == "user_id").Value, refreshToken.ToString());
+                //}
 
-                var accessToken = tokenResponse["access_token"]!.ToString();
-                return Ok(new { Token = accessToken });
+                return Ok(new { Token = tokenResponse["access_token"]!.ToString(), ExpiresIn = tokenResponse["expires_in"]!.ToString() });
             }
+            
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = ex.Message });
@@ -63,6 +75,12 @@ namespace DayPlanner.Api.ApiControllers.V1
             }
 
         }
+        /// <summary>
+        /// Exchanges the authorization code for an access token from Google's OAuth2 endpoint.
+        /// </summary>
+        /// <param name="code">The authorization code.</param>
+        /// <param name="config">The configuration settings containing Google client details.</param>
+        /// <returns>A JObject containing the access token and other response data.</returns>
         private static async Task<JObject?> ExchangeCodeForToken(string code, IConfiguration config)
         {
             using var client = new HttpClient();
@@ -86,8 +104,8 @@ namespace DayPlanner.Api.ApiControllers.V1
                 }
                 throw new Exception("Error while exchanging code for token");
             }
-
-            return JObject.Parse(await response.Content.ReadAsStringAsync());
+            var content = JObject.Parse(await response.Content.ReadAsStringAsync());
+            return content;
         }
     }
 }

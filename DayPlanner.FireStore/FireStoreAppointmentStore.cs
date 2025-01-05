@@ -44,7 +44,6 @@ namespace DayPlanner.FireStore
         public async Task<Appointment?> GetAppointmentById(string userId,string appointmentId)
         {
             DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(appointmentId);   
-
             DocumentSnapshot snapshot = await appointmentRef.GetSnapshotAsync();
 
             if (snapshot.Exists)
