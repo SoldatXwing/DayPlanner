@@ -5,10 +5,9 @@ namespace DayPlanner.Abstractions.Models.Backend
     [FirestoreData]
     public class GoogleRefreshToken
     {
-        [FirestoreDocumentId]
         [FirestoreProperty("userId")]
         public required string UserId { get; set; }
-        [FirestoreProperty("token")]
+        [FirestoreProperty("refreshToken")]
         public required string RefreshToken { get; set; }
 
     }

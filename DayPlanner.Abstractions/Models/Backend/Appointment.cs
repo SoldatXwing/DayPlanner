@@ -18,7 +18,7 @@ namespace DayPlanner.Abstractions.Models.Backend
         public string Summary { get; set; } = string.Empty;
 
         [FirestoreProperty("location")]
-        public GeoLocation? Location { get; set; } = null;
+        public string Location { get; set; } = string.Empty;
 
         [FirestoreProperty("startDate")]
         public DateTime Start { get; set; }
@@ -28,15 +28,5 @@ namespace DayPlanner.Abstractions.Models.Backend
 
         [FirestoreProperty("createdAt")]
         public DateTime CreatedAt { get; set; }
-    }
-
-    [FirestoreData]
-    public class GeoLocation
-    {
-        [FirestoreProperty("Latitude")]
-        public double Latitude { get; set; }
-
-        [FirestoreProperty("Longitude")]
-        public double Longitude { get; set; }
     }
 }

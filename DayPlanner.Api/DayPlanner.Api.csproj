@@ -22,6 +22,7 @@
     <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
     <ProjectReference Include="..\DayPlanner.Authorization\DayPlanner.Authorization.csproj" />
     <ProjectReference Include="..\DayPlanner.FireStore\DayPlanner.FireStore.csproj" />
+    <ProjectReference Include="..\DayPlanner.ThirdPartyImports\DayPlanner.ThirdPartyImports.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@
 using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.ThirdPartyImports.Google_Calendar;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -31,7 +32,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                           $"?client_id={config["GoogleCalendar:client_Id"]}" +
                           $"&redirect_uri={config["GoogleCalendar:redirect_uri"]}" +
                           $"&response_type=code" +
-                          $"&scope=email%20https://www.googleapis.com/auth/calendar.readonly" +
+                          $"&scope=https://www.googleapis.com/auth/calendar.readonly" +
                           $"&access_type=offline" +
                           $"&state={userId}";
             return Redirect(authUrl);
@@ -116,6 +117,44 @@ namespace DayPlanner.Api.ApiControllers.V1
             }
             var content = JObject.Parse(await response.Content.ReadAsStringAsync());
             return content;
+        }
+        /// <summary>
+        /// Retrieves appointments for the specified date range from the Google Calendar service.
+        /// </summary>
+        /// <param name="start">The start date and time for the range (inclusive).</param>
+        /// <param name="end">The end date and time for the range (inclusive).</param>
+        /// <param name="googleCalendarService">The Google Calendar service used to retrieve appointments.</param>
+        /// <returns></returns>
+        [HttpGet("appointments")]
+        [Authorize]
+        [ProducesResponseType<ApiErrorModel>(400)]
+        [ProducesResponseType(204)]
+        [ProducesResponseType<List<Appointment>>(200)]
+        public async Task<IActionResult> GetAppointments([FromQuery] DateTime start,
+            [FromQuery] DateTime end,
+            [FromServices] GoogleCalendarService googleCalendarService)
+        {
+            if (start == default || end == default)
+                return BadRequest(new ApiErrorModel { Message = "Invalid date", Error = "Start or end date cant be default" });
+            if (start > end)
+                return BadRequest(new ApiErrorModel { Message = "Invalid dates", Error = "Start date cant be greater than end date" });
+            var userId = HttpContext.User.Claims.Single(c => c.Type == "user_id").Value; //TODO: Implement extension method for userid
+            try
+            {
+                var appointments = await googleCalendarService.GetAppointments(userId, start, end);
+                if (appointments is null)
+                    return BadRequest(new ApiErrorModel { Message = "Error recieving appointments", Error = "Appointments are null" });
+                if (appointments.Count < 1)
+                    return NoContent();
+
+                return Ok(appointments);
+            }
+            catch (InvalidOperationException ex)
+            {
+                //TODO: log no refresh token found with given userId
+                return Unauthorized();
+            }
+
         }
     }
 }

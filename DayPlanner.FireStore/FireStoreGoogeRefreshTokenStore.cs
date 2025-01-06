@@ -33,7 +33,7 @@ namespace DayPlanner.FireStore
                 }
                 throw; 
             }
-            DocumentReference refreshTokenRef = _fireStoreDb.Collection("googleRefreshTokens").Document();
+            DocumentReference refreshTokenRef = _fireStoreDb.Collection("googleRefreshTokens").Document(userId);
             var request = new
             {
                 userId,

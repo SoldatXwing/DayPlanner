@@ -10,7 +10,7 @@ namespace DayPlanner.ThirdPartyImports.Outlook
 {
     public class OutlookService : IExternalAppointmentService
     {
-        public Task<List<Appointment>> GetAppointments(DateTime start, DateTime end)
+        public Task<List<Appointment>> GetAppointments(string userId,DateTime start, DateTime end)
         {
             throw new NotImplementedException();
         }

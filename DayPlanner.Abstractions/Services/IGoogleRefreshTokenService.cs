@@ -11,7 +11,7 @@ namespace DayPlanner.Abstractions.Services
     }
     public class GoogleRefreshTokenService(IGoogleRefreshTokenStore store) : IGoogleRefreshTokenService
     {
-        private readonly IGoogleRefreshTokenStore _store = store;
+        private readonly IGoogleRefreshTokenStore _store = store ?? throw new ArgumentNullException(nameof(store), "Store cannot be null.");
         public async Task Delete(string userId) => await _store.Delete(string.IsNullOrEmpty(userId) ? throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty.") : userId);
 
         public async Task<GoogleRefreshToken> Get(string userId) => await _store.Get(string.IsNullOrEmpty(userId) ? throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty.") : userId);
