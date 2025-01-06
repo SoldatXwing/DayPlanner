@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
