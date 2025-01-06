@@ -18,7 +18,7 @@
                 { "endDate", appointment.End },
                 { "createdAt", appointment.CreatedAt },
 
-                { "location", appointment.Location is null ? "" : appointment.Location }
+                { "location", appointment.Location }
             };
     }
 }

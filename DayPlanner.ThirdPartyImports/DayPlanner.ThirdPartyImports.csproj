@@ -14,10 +14,4 @@
     <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Google Calendar\client_secret.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

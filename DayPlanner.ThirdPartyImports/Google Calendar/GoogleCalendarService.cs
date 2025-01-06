@@ -6,10 +6,22 @@ using Google.Apis.Services;
 
 namespace DayPlanner.ThirdPartyImports.Google_Calendar
 {
+    /// <summary>
+    /// Service for interacting with Google Calendar to fetch appointments.
+    /// </summary>
     public class GoogleCalendarService(IGoogleTokenProvider tokenProvider, HttpClient client) : IExternalAppointmentService
     {
         private readonly IGoogleTokenProvider _tokenProvider = tokenProvider;
         private readonly HttpClient _httpClient = client;
+        /// <summary>
+        /// Retrieves a list of appointments for the specified user within the provided time range from Google Calendar.
+        /// </summary>
+        /// <param name="userId">The ID of the user for whom to fetch appointments.</param>
+        /// <param name="start">The start of the time range to fetch appointments.</param>
+        /// <param name="end">The end of the time range to fetch appointments.</param>
+        /// <returns>A list of <see cref="Appointment"/> objects representing the user's appointments.</returns>
+        /// <exception cref="ArgumentException">Thrown when the <paramref name="userId"/> is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when a token cannot be retrieved or an error occurs during API interaction.</exception>
         public async Task<List<Appointment>> GetAppointments(string userId, DateTime start, DateTime end)
         {
             ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
