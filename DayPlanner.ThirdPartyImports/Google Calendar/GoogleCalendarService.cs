@@ -9,10 +9,9 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
     /// <summary>
     /// Service for interacting with Google Calendar to fetch appointments.
     /// </summary>
-    public class GoogleCalendarService(IGoogleTokenProvider tokenProvider, HttpClient client) : IExternalAppointmentService
+    public class GoogleCalendarService(IGoogleTokenProvider tokenProvider) : IExternalAppointmentService
     {
         private readonly IGoogleTokenProvider _tokenProvider = tokenProvider;
-        private readonly HttpClient _httpClient = client;
         /// <summary>
         /// Retrieves a list of appointments for the specified user within the provided time range from Google Calendar.
         /// </summary>

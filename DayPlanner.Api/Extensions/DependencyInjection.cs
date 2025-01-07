@@ -74,7 +74,6 @@ namespace DayPlanner.Api.Extensions
             var configuration = serviceProvider.GetService<IConfiguration>();
 
             string googleCalendarTokenUri = configuration["GoogleCalendar:TokenUri"] ?? throw new("Google token URI is required.");
-            string googleCalendarCalendarUri = configuration["GoogleCalendar:CalendarUri"] ?? throw new("Google calendar URI is required.");
             string googleClientId = configuration["GoogleCalendar:client_Id"] ?? throw new("Google client ID is required.");
             string googleClientSecret = configuration["GoogleCalendar:client_Secret"] ?? throw new("Google client secret is required.");
             string authTokenUri = configuration["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
@@ -82,11 +81,6 @@ namespace DayPlanner.Api.Extensions
             services.AddHttpClient<IJwtProvider, JwtProvider>(httpClient =>
             {
                 httpClient.BaseAddress = new Uri(authTokenUri);
-            });
-
-            services.AddHttpClient<IExternalAppointmentService, GoogleCalendarService>(httpClient =>
-            {
-                httpClient.BaseAddress = new Uri(googleCalendarCalendarUri);
             });
 
             // Google-related services
