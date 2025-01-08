@@ -13,11 +13,11 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
     /// <param name="client">The <see cref="HttpClient"/> instance used to make HTTP requests to Google's token endpoint.</param>
     /// <param name="clientId">The client ID used for authenticating with Google's API.</param>
     /// <param name="clientSecret">The client secret used for authenticating with Google's API.</param>
-    public class GoogleTokenProvider(IGoogleRefreshTokenService googleRefreshTokenService, HttpClient client,
+    public class GoogleTokenProvider(IGoogleTokenService googleRefreshTokenService, HttpClient client,
         string clientId,
         string clientSecret) : IGoogleTokenProvider
     {
-        private HttpClient _httpClient = client;
+        private readonly HttpClient _httpClient = client;
         /// <summary>
         /// Retrieves a new access token from Google, valid for 1 hour, for the specified user.
         /// </summary>
@@ -33,7 +33,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
         public async Task<GoogleTokenResponse?> GetOrRefresh(string userId)
         {
             ArgumentException.ThrowIfNullOrEmpty(userId);
-            var refreshToken = await googleRefreshTokenService.Get(userId) ?? throw new InvalidOperationException($"Error recieving refresh token with userid: {userId}");
+            var refreshToken = await googleRefreshTokenService.GetRefreshToken(userId) ?? throw new InvalidOperationException($"Error recieving refresh token with userid: {userId}");
 
             var request = new
             {

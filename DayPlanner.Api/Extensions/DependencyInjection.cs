@@ -73,7 +73,7 @@ namespace DayPlanner.Api.Extensions
             var serviceProvider = services.BuildServiceProvider();
             var configuration = serviceProvider.GetService<IConfiguration>();
 
-            string googleCalendarTokenUri = configuration["GoogleCalendar:TokenUri"] ?? throw new("Google token URI is required.");
+            string googleCalendarTokenUri = configuration!["GoogleCalendar:TokenUri"] ?? throw new("Google token URI is required.");
             string googleClientId = configuration["GoogleCalendar:client_Id"] ?? throw new("Google client ID is required.");
             string googleClientSecret = configuration["GoogleCalendar:client_Secret"] ?? throw new("Google client secret is required.");
             string authTokenUri = configuration["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
@@ -87,7 +87,7 @@ namespace DayPlanner.Api.Extensions
             services.AddScoped<IGoogleTokenProvider>(sp =>
             {
                 var httpClient = sp.GetRequiredService<HttpClient>();
-                var googleRefreshTokenService = sp.GetRequiredService<IGoogleRefreshTokenService>();
+                var googleRefreshTokenService = sp.GetRequiredService<IGoogleTokenService>();
                 httpClient.BaseAddress = new Uri(googleCalendarTokenUri);
                 return new GoogleTokenProvider(
                     googleRefreshTokenService,
@@ -98,7 +98,7 @@ namespace DayPlanner.Api.Extensions
             });
 
             services.AddScoped<GoogleCalendarService>();
-            services.AddScoped<IGoogleRefreshTokenService, GoogleRefreshTokenService>();
+            services.AddScoped<IGoogleTokenService, GoogleRefreshTokenService>();
             services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db, app));
 
             // Firebase-related services
@@ -109,6 +109,7 @@ namespace DayPlanner.Api.Extensions
                 var mapper = provider.GetRequiredService<IMapper>();
                 return new FireStoreAppointmentStore(db, mapper);
             });
+            services.AddScoped<IGoogleSyncTokenStore>(provider => new FireStoreGoogleSyncTokenStore(db, app));
 
             // Application-specific services
             services.AddScoped<IAppointmentsService, AppointmentsService>();

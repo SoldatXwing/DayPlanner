@@ -19,6 +19,7 @@ namespace DayPlanner.Abstractions.Services
         Task<Appointment> UpdateAppointment(string appointmentId, string userId, AppointmentRequest request);
 
         Task<Appointment> CreateAppointment(string userId, AppointmentRequest request);
+        Task ImportOrUpdateAppointments(string userId, List<Appointment> appointments);
     }
 
     public class AppointmentsService : IAppointmentsService
@@ -28,6 +29,38 @@ namespace DayPlanner.Abstractions.Services
         public AppointmentsService(IAppointmentStore appointmentStore) => _appointmentStore = appointmentStore;
 
         public async Task<Appointment> CreateAppointment(string userId, AppointmentRequest request) => request is null ? throw new ArgumentNullException(nameof(request), "Appointment cant be null.") : await _appointmentStore.CreateAppointment(userId,request);
+
+        public async Task ImportOrUpdateAppointments(string userId, List<Appointment> appointments)
+        {
+            foreach (var appointment in appointments)
+            {
+                if (appointment is null)
+                    throw new ArgumentNullException(nameof(appointment), "Appointment cant be null.");
+                var existingAppointment = await _appointmentStore.GetAppointmentById(userId, appointment.Id);
+                if (existingAppointment is not null)
+                {
+                    await _appointmentStore.UpdateAppointment(appointment.Id, userId, new AppointmentRequest
+                    {
+                        Summary = appointment.Summary,
+                        Start = appointment.Start,
+                        End = appointment.End,
+                        Location = appointment.Location,
+                        Title = appointment.Title,
+                    });
+                }
+                else
+                {
+                    await _appointmentStore.ImportAppointment(userId,appointment.Id, new AppointmentRequest
+                    {
+                        Summary = appointment.Summary,
+                        Start = appointment.Start,
+                        End = appointment.End,
+                        Location = appointment.Location,
+                        Title = appointment.Title,
+                    });
+                }
+            }
+        }
 
         public async Task DeleteUsersAppointment(string userId, string appointmentId)
         {

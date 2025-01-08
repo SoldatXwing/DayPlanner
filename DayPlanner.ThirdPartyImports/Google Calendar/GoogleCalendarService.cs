@@ -9,59 +9,82 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
     /// <summary>
     /// Service for interacting with Google Calendar to fetch appointments.
     /// </summary>
-    public class GoogleCalendarService(IGoogleTokenProvider tokenProvider) : IExternalAppointmentService
+    public class GoogleCalendarService(IGoogleTokenProvider tokenProvider,
+        IGoogleTokenService googleTokenService,
+        IAppointmentsService appointmentService)
     {
         private readonly IGoogleTokenProvider _tokenProvider = tokenProvider;
-        /// <summary>
-        /// Retrieves a list of appointments for the specified user within the provided time range from Google Calendar.
-        /// </summary>
-        /// <param name="userId">The ID of the user for whom to fetch appointments.</param>
-        /// <param name="start">The start of the time range to fetch appointments.</param>
-        /// <param name="end">The end of the time range to fetch appointments.</param>
-        /// <returns>A list of <see cref="Appointment"/> objects representing the user's appointments.</returns>
-        /// <exception cref="ArgumentException">Thrown when the <paramref name="userId"/> is null or empty.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when a token cannot be retrieved or an error occurs during API interaction.</exception>
-        public async Task<List<Appointment>> GetAppointments(string userId, DateTime start, DateTime end)
+        private readonly IGoogleTokenService _googleTokenService = googleTokenService;
+        private readonly IAppointmentsService _appointmentService = appointmentService;
+        /// <summary>Synchronizes appointments from Google Calendar.</summary>
+        /// <param name="userId">The ID of the user whose calendar is being synchronized.</param>
+        /// <param name="googleAccessToken">
+        /// Optional. The Google access token for API calls. If not provided, it will be retrieved using the token provider.
+        /// </param>
+        /// <param name="syncToken">
+        /// Optional. A token representing the last synchronization point. 
+        /// If not provided, it will be retrieved using the token service or a full synchronization (past 1 year) will occur.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains the next synchronization token.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="userId"/> is null or empty.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if a token cannot be retrieved for the specified <paramref name="userId"/>.
+        /// </exception>
+        public async Task<string> SyncAppointments(string userId, string googleAccessToken = "", string? syncToken = "")
         {
             ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
-            try
+
+            //If token is not provided, get it from the token provider
+            string accessToken = string.IsNullOrEmpty(googleAccessToken)
+                        ? (await _tokenProvider.GetOrRefresh(userId))?.AccessToken
+                            ?? throw new UnauthorizedAccessException($"Error receiving token for user with id: {userId}")
+                        : googleAccessToken;
+
+            var credential = GoogleCredential.FromAccessToken(accessToken);
+            var service = new CalendarService(new BaseClientService.Initializer()
             {
-                var token = await _tokenProvider.GetOrRefresh(userId) ?? throw new InvalidOperationException($"Error recieving token from user with id: {userId}");
-                var credential = GoogleCredential.FromAccessToken(token.AccessToken);
-                var service = new CalendarService(new BaseClientService.Initializer()
-                {
-                    HttpClientInitializer = credential,
-                    ApplicationName = "DayPlanner",
-                });
+                HttpClientInitializer = credential,
+                ApplicationName = "DayPlanner",
+            });
 
-                var request = service.Events.List("primary");
-                request.TimeMinDateTimeOffset = start;
-                request.TimeMaxDateTimeOffset = end;
-                request.SingleEvents = true;
-                request.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
-
-
-                var events = await request.ExecuteAsync();
-                List<Appointment> appointments = [];
-                foreach (var @event in events.Items)
-                {
-                    appointments.Add(new Appointment
-                    {
-                        UserId = userId,
-                        Start = @event.Start.DateTimeDateTimeOffset!.Value.DateTime,
-                        End = @event.End.DateTimeDateTimeOffset!.Value.DateTime,
-                        Summary = @event.Description,
-                        CreatedAt = @event.CreatedDateTimeOffset!.Value.DateTime,
-                        Title = @event.Summary,
-                        Location = @event.Location
-                    }); ;
-                }
-                return appointments;
-            }
-            catch (InvalidOperationException ex)
+            var request = service.Events.List("primary");
+            if (string.IsNullOrEmpty(syncToken))
+                syncToken = await _googleTokenService.GetSyncToken(userId);
+            if (!string.IsNullOrEmpty(syncToken))
+                request.SyncToken = syncToken;
+            else
             {
-                throw new InvalidOperationException(ex.Message);
+                request.TimeMinDateTimeOffset = DateTime.UtcNow.AddYears(-1);
+                request.TimeMaxDateTimeOffset = DateTime.UtcNow;
             }
+            request.SingleEvents = true;
+
+            var events = await request.ExecuteAsync();
+            List<Appointment> appointments = [];
+            foreach (var @event in events.Items)
+            {
+                appointments.Add(new Appointment
+                {
+                    UserId = userId,
+                    Start = @event.Start.DateTimeDateTimeOffset!.Value.DateTime,
+                    End = @event.End.DateTimeDateTimeOffset!.Value.DateTime,
+                    Summary = @event.Description,
+                    CreatedAt = @event.CreatedDateTimeOffset!.Value.DateTime,
+                    Title = @event.Summary,
+                    Location = @event.Location,
+                    Id = @event.Id,
+                }); ;
+            }
+            if (appointments.Count > 0)
+                await _appointmentService.ImportOrUpdateAppointments(userId, appointments);
+            if (!syncToken!.Equals(events.NextSyncToken))
+                await _googleTokenService.SaveSyncToken(userId, events.NextSyncToken);
+            return events.NextSyncToken;
+
         }
     }
 }

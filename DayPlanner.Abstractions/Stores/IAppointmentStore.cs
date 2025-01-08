@@ -66,6 +66,7 @@ namespace DayPlanner.Abstractions.Stores
         /// <param name="userId">The ID of the user whose appointment count is being requested.</param>
         /// <returns>The total number of appointments for the user, or <c>null</c> if the count cannot be determined.</returns>
         Task<long?> GetAppointmentsCount(string userId);
+        Task<Appointment> ImportAppointment(string userId,string externalId, AppointmentRequest request);
     }
 
 

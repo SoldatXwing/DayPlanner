@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Api.Extensions;
 using DayPlanner.ThirdPartyImports.Google_Calendar;
@@ -44,6 +45,7 @@ namespace DayPlanner.Api.ApiControllers.V1
          /// <param name="code">The authorization code received from Google.</param>
          /// <param name="state">The user ID of the user who initiated the login.</param>
          /// <param name="config">The configuration settings containing Google client details.</param>
+         /// <param name="googleRefreshTokenService">The service used to store the refresh token for the user.</param>
          /// <returns>The access token if successful, or an error message if unsuccessful.</returns>
         [HttpGet("callback")]
         [ProducesResponseType<ApiErrorModel>(400)]
@@ -52,7 +54,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         public async Task<IActionResult> Callback([FromQuery] string code,
             [FromQuery] string state, //state is the user id
             [FromServices] IConfiguration config,
-            [FromServices] IGoogleRefreshTokenService googleRefreshTokenService)
+            [FromServices] IGoogleTokenService googleRefreshTokenService)
         {
             if (string.IsNullOrEmpty(code))
             {
@@ -66,7 +68,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                     !string.IsNullOrEmpty(refreshToken?.ToString()))
                 {
                     ArgumentException.ThrowIfNullOrEmpty(state);
-                    await googleRefreshTokenService.Create(state, refreshToken.ToString());
+                    await googleRefreshTokenService.CreateRefreshToken(state, refreshToken.ToString());
                 }
 
                 return Ok(new { Token = tokenResponse["access_token"]!.ToString(), ExpiresIn = tokenResponse["expires_in"]!.ToString() });
@@ -119,41 +121,47 @@ namespace DayPlanner.Api.ApiControllers.V1
             var content = JObject.Parse(await response.Content.ReadAsStringAsync());
             return content;
         }
-        /// <summary>
-        /// Retrieves appointments for the specified date range from the Google Calendar service.
-        /// </summary>
-        /// <param name="start">The start date and time for the range (inclusive).</param>
-        /// <param name="end">The end date and time for the range (inclusive).</param>
-        /// <param name="googleCalendarService">The Google Calendar service used to retrieve appointments.</param>
-        /// <returns></returns>
-        [HttpGet("appointments")]
+        /// <summary>Synchronizes appointments from Google Calendar for the authenticated user.</summary>
+        /// <param name="googleCalendarService">
+        /// The service that interacts with the Google Calendar API to sync appointments.
+        /// </param>
+        /// <param name="googleAccessToken">
+        /// Optional. The Google access token for API calls. If not provided, it is expected that the
+        /// token is retrieved via the user's session or other means.
+        /// </param>
+        /// <param name="syncRequestToken">
+        /// Optional. A synchronization token representing the last sync point. If not provided,
+        /// a full synchronization will be performed.
+        /// </param>
+        /// <returns>
+        /// A task representing the asynchronous operation. The task result contains an HTTP response:
+        /// - 200 OK with the next sync token if the sync was successful.
+        /// - 403 Forbidden if the user is not authorized or if no refresh token is found for the user.
+        /// </returns>
+        /// <response code="200">
+        /// Returns the next sync token after successful synchronization of appointments.
+        /// </response>
+        /// <response code="403">
+        /// Returns a Forbidden status if the user is not authorized or a required token is missing.
+        /// </response>
+        [HttpPost("sync")]
         [Authorize]
-        [ProducesResponseType<ApiErrorModel>(400)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType<List<Appointment>>(200)]
-        public async Task<IActionResult> GetAppointments([FromQuery] DateTime start,
-            [FromQuery] DateTime end,
-            [FromServices] GoogleCalendarService googleCalendarService)
-        {
-            if (start == default || end == default)
-                return BadRequest(new ApiErrorModel { Message = "Invalid date", Error = "Start or end date cant be default" });
-            if (start > end)
-                return BadRequest(new ApiErrorModel { Message = "Invalid dates", Error = "Start date cant be greater than end date" });
+        [ProducesResponseType(403)]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> SyncAppointments([FromServices] GoogleCalendarService googleCalendarService,
+            [FromBody] string googleAccessToken = "",
+            string? syncRequestToken = "")
+        { 
             var userId = HttpContext.User.GetUserId()!;
             try
             {
-                var appointments = await googleCalendarService.GetAppointments(userId, start, end);
-                if (appointments is null)
-                    return BadRequest(new ApiErrorModel { Message = "Error recieving appointments", Error = "Appointments are null" });
-                if (appointments.Count < 1)
-                    return NoContent();
-
-                return Ok(appointments);
+                var nextSyncToken = await googleCalendarService.SyncAppointments(userId, googleAccessToken, syncRequestToken);
+                return Ok(nextSyncToken);
             }
-            catch (InvalidOperationException ex)
+            catch (UnauthorizedAccessException ex)
             {
                 //TODO: log no refresh token found with given userId
-                return Unauthorized();
+                return Forbid();
             }
 
         }

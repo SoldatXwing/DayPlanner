@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace DayPlanner.ThirdPartyImports.Outlook
 {
-    public class OutlookService : IExternalAppointmentService
+    public class OutlookService
     {
-        public Task<List<Appointment>> GetAppointments(string userId,DateTime start, DateTime end)
+        public Task SyncAppointments(string userId)
         {
             throw new NotImplementedException();
         }
