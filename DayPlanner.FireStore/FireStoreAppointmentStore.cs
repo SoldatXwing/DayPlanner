@@ -146,11 +146,10 @@ namespace DayPlanner.FireStore
             var appointment = _mapper.Map<Appointment>(request);
 
             appointment.UserId = userId;
-
+            appointment.Id = externalId;
             DocumentReference appointmentRef = _fireStoreDb.Collection("appointments").Document(externalId);
             await appointmentRef.SetAsync(appointment.ToDictionary());
 
-            appointment.Id = appointmentRef.Id;
             return appointment;
         }
 

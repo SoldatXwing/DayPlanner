@@ -81,7 +81,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
             }
             if (appointments.Count > 0)
                 await _appointmentService.ImportOrUpdateAppointments(userId, appointments);
-            if (!syncToken!.Equals(events.NextSyncToken))
+            if (syncToken is not null && !syncToken!.Equals(events.NextSyncToken))
                 await _googleTokenService.SaveSyncToken(userId, events.NextSyncToken);
             return events.NextSyncToken;
 
