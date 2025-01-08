@@ -13,7 +13,7 @@ namespace DayPlanner.Abstractions.Services
         Task DeleteSyncToken(string userId);
         Task SaveSyncToken(string userId, string token);
     }
-    public class GoogleRefreshTokenService(IGoogleRefreshTokenStore store, IGoogleSyncTokenStore syncStore) : IGoogleTokenService
+    public class GoogleTokenService(IGoogleRefreshTokenStore store, IGoogleSyncTokenStore syncStore) : IGoogleTokenService
     {
         private readonly IGoogleRefreshTokenStore _store = store ?? throw new ArgumentNullException(nameof(store), "Store cannot be null.");
         private readonly IGoogleSyncTokenStore _syncStore = syncStore ?? throw new ArgumentNullException(nameof(syncStore), "Sync store cannot be null.");

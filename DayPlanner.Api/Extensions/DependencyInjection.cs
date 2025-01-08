@@ -98,7 +98,7 @@ namespace DayPlanner.Api.Extensions
             });
 
             services.AddScoped<GoogleCalendarService>();
-            services.AddScoped<IGoogleTokenService, GoogleRefreshTokenService>();
+            services.AddScoped<IGoogleTokenService, GoogleTokenService>();
             services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db, app));
 
             // Firebase-related services
