@@ -1,6 +1,5 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
-using Google.Apis.Auth.OAuth2.Responses;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 
@@ -60,7 +59,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
             if (token is null)
                 return false;
 
-            if (token.ExpiresIn <= 0) 
+            if (token.ExpiresIn <= 0)
                 return false;
 
             try
@@ -81,7 +80,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                 return false;
             }
 
-            return false; 
+            return false;
         }
 
 

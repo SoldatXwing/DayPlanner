@@ -11,8 +11,17 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace DayPlanner.Api.Extensions
 {
+    /// <summary>
+    /// Class to add services to the dependency injection container.
+    /// </summary>
     public static class DependencyInjection
     {
+        /// <summary>
+        /// Adds the infrastucture to the webapplication builder.
+        /// </summary>
+        /// <param name="builder">WebApplicationBuilder</param>
+        /// <exception cref="InvalidOperationException">Throws if a appsettings required value is not provided</exception>
+        /// <exception cref="FileNotFoundException">Throws if the service-account-key file isnt found</exception>
         public static void AddInfrastructure(this WebApplicationBuilder builder)
         {
             ValidateConfiguration(builder.Configuration,

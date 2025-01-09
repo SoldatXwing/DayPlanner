@@ -7,10 +7,22 @@ using System.Net.Http.Json;
 
 namespace DayPlanner.Authorization.Services
 {
+    /// <summary>
+    /// JWT provider to get JWT token from Firebase.
+    /// </summary>
+    /// <param name="client"></param>
     public partial class JwtProvider(HttpClient client) : IJwtProvider
     {
         private readonly HttpClient _httpClient = client;
-
+        /// <summary>
+        /// Gets JWT token for the given email and password.
+        /// </summary>
+        /// <param name="email">Email of the user</param>
+        /// <param name="password">Password of the User</param>
+        /// <returns></returns>
+        /// <exception cref="BadCredentialsException">Throws if invalid login credentials are passed</exception>
+        /// <exception cref="InvalidEmailException">Throws if no account with passed email exists</exception>
+        /// <exception cref="Exception">Standart exception</exception>
         public async Task<string> GetForCredentialsAsync(string email, string password)
         {
             var request = new
