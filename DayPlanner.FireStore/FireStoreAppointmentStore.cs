@@ -119,6 +119,9 @@ public class FireStoreAppointmentStore(FirestoreDb db, IMapper mapper) : IAppoin
         updatedAppointment.Id = appointmentId; // Ensure the ID remains consistent
         updatedAppointment.UserId = userId;    // Maintain ownership
 
+        updatedAppointment.Start.ToUniversalTime(); //TODO: check why to double utc (from mapping profile)
+        updatedAppointment.End.ToUniversalTime();
+
         await appointmentRef.SetAsync(updatedAppointment);
 
         var updatedSnapshot = await appointmentRef.GetSnapshotAsync();

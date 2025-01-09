@@ -1,4 +1,5 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Services;
 using DayPlanner.Abstractions.Stores;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
@@ -6,11 +7,11 @@ using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore;
 
-public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, FirebaseApp app) : IGoogleRefreshTokenStore
+public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, IUserService userService) : IGoogleRefreshTokenStore
 {
-    private readonly FirebaseAuth _firebaseAuth = FirebaseAuth.GetAuth(app) ?? throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
-    private readonly FirestoreDb _fireStoreDb = db;
 
+    private readonly FirestoreDb _fireStoreDb = db;
+    private readonly IUserService userService = userService;
     private const string _collectionName = "googleRefreshTokens";
 
     public async Task<GoogleRefreshToken?> Get(string userId)
@@ -34,7 +35,7 @@ public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, FirebaseApp app) : 
 
         try
         {
-            _ = await _firebaseAuth.GetUserAsync(userId);
+            _ = await userService.GetUserByIdAsync(userId) ?? throw new ArgumentException($"Unable to find user with id '{userId}'.");
         }
         catch (FirebaseAuthException ex)
         {
@@ -43,7 +44,6 @@ public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, FirebaseApp app) : 
                 throw new ArgumentException($"Unable to find user with id '{userId}'.", ex);
             }
 
-            throw;
         }
 
         DocumentReference refreshTokenRef = _fireStoreDb.Collection(_collectionName).Document(userId);

@@ -3,7 +3,7 @@
 namespace DayPlanner.FireStore.Models;
 
 [FirestoreData]
-internal class FirestoreAppointment
+public class FirestoreAppointment
 {
     [FirestoreDocumentId]
     public string Id { get; set; } = string.Empty;

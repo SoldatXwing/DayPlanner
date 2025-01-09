@@ -109,7 +109,7 @@ namespace DayPlanner.Api.Extensions
 
             services.AddScoped<GoogleCalendarService>();
             services.AddScoped<IGoogleTokenService, GoogleTokenService>();
-            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db, app));
+            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db,provider.GetRequiredService<IUserService>()));
 
             // Firebase-related services
             services.AddScoped<IAuthService>(provider => new AuthService(app));
@@ -123,7 +123,7 @@ namespace DayPlanner.Api.Extensions
                 var mapper = provider.GetRequiredService<IMapper>();
                 return new FireStoreAppointmentStore(db, mapper);
             });
-            services.AddScoped<IGoogleSyncTokenStore>(provider => new FireStoreGoogleSyncTokenStore(db, app));
+            services.AddScoped<IGoogleSyncTokenStore>(provider => new FireStoreGoogleSyncTokenStore(db, provider.GetRequiredService<IUserService>()));
 
             // Application-specific services
             services.AddScoped<IAppointmentsService, AppointmentsService>();

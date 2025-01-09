@@ -3,14 +3,14 @@ using FirebaseAdmin.Auth;
 using FirebaseAdmin;
 using Google.Cloud.Firestore;
 using DayPlanner.FireStore.Models;
+using DayPlanner.Abstractions.Services;
 
 namespace DayPlanner.FireStore;
 
-public class FireStoreGoogleSyncTokenStore(FirestoreDb db, FirebaseApp app) : IGoogleSyncTokenStore
+public class FireStoreGoogleSyncTokenStore(FirestoreDb db, IUserService userService) : IGoogleSyncTokenStore
 {
-    private readonly FirebaseAuth _firebaseAuth = FirebaseAuth.GetAuth(app) ?? throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
     private readonly FirestoreDb _fireStoreDb = db;
-
+    private readonly IUserService userService = userService;
     private const string _collectionName = "googleSyncTokens";
 
     public async Task<string?> Get(string userId)
@@ -33,7 +33,7 @@ public class FireStoreGoogleSyncTokenStore(FirestoreDb db, FirebaseApp app) : IG
 
         try
         {
-            _ = await _firebaseAuth.GetUserAsync(userId);
+            _ = await userService.GetUserByIdAsync(userId) ?? throw new ArgumentException($"Unable to find user with id '{userId}'."); ;
         }
         catch (FirebaseAuthException ex)
         {

@@ -32,4 +32,12 @@ public class User
     /// Gets the user's photo URL, if available. Otherwise null.
     /// </summary>
     public string? PhotoUrl { get; set; }
+    /// <summary>
+    /// Gets whether the user's email address has been verified.
+    /// </summary>
+    public bool? EmailVerified { get; set; }
+    /// <summary>
+    /// Gets the user's last login timestamp.
+    /// </summary>
+    public DateTime? LastSignInTimestamp { get; set; }
 }
