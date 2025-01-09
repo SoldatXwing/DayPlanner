@@ -2,35 +2,22 @@
 using FirebaseAdmin;
 using DayPlanner.Abstractions.Services;
 
-namespace DayPlanner.Authorization.Services
+namespace DayPlanner.Authorization.Services;
+
+public class AuthService(FirebaseApp app) : IAuthService
 {
-    public class AuthService(FirebaseApp app) : IAuthService
+    private readonly FirebaseAuth _firebaseAuth = FirebaseAuth.GetAuth(app) ?? throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
+
+    public async Task<string?> VerifyTokenAsync(string idToken)
     {
-        private readonly FirebaseAuth _firebaseAuth = FirebaseAuth.GetAuth(app) ?? throw new ArgumentNullException(nameof(app), "The Firebase app cannot be null.");
-        public async Task<FirebaseToken> VerifyTokenAsync(string idToken)
+        try
         {
-            try
-            {
-                return await _firebaseAuth.VerifyIdTokenAsync(idToken).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new UnauthorizedAccessException("Invalid Firebase ID Token.", ex);
-            }
+            FirebaseToken token = await _firebaseAuth.VerifyIdTokenAsync(idToken).ConfigureAwait(false);
+            return token.Uid;
         }
-
-        public async Task<UserRecord> GetUserByIdAsync(string uid)
+        catch (Exception)
         {
-            try
-            {              
-                return await _firebaseAuth.GetUserAsync(uid).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Failed to retrieve user with UID {uid}.", ex);
-            }
+            return null;
         }
-
-        public async Task<UserRecord> CreateUserAsync(UserRecordArgs args) => await _firebaseAuth.CreateUserAsync(args).ConfigureAwait(false);
     }
 }

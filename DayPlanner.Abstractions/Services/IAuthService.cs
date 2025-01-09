@@ -1,9 +1,11 @@
-﻿using FirebaseAdmin.Auth;
+﻿namespace DayPlanner.Abstractions.Services;
 
-namespace DayPlanner.Abstractions.Services
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-        Task<FirebaseToken> VerifyTokenAsync(string idToken);
-    }
+    /// <summary>
+    /// Verifies an auth token.
+    /// </summary>
+    /// <param name="idToken">The token to validate.</param>
+    /// <returns>The user id this auth token belongs to. If <c>null</c> the token were invalid.</returns>
+    Task<string?> VerifyTokenAsync(string idToken);
 }

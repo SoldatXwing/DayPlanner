@@ -1,7 +1,6 @@
-﻿namespace DayPlanner.Abstractions.Services
+﻿namespace DayPlanner.Abstractions.Services;
+
+public interface IJwtProvider
 {
-    public interface IJwtProvider
-    {
-        Task<string> GetForCredentialsAsync(string email, string password);
-    }
+    Task<string> GetForCredentialsAsync(string email, string password);
 }

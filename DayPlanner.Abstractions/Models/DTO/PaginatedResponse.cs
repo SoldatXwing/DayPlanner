@@ -6,11 +6,11 @@
         public int PageSize { get; set; }
         public int TotalPages { get; set; }
         public long? TotalItems { get; set; }
-        public List<T> Items { get; set; }
+        public IEnumerable<T> Items { get; set; }
 
-        public PaginatedResponse(List<T> items, long? count, int page, int pageSize)
+        public PaginatedResponse(IEnumerable<T> items, long? count, int page, int pageSize)
         {
-            Items = items ?? new List<T>();
+            Items = items ?? [];
             TotalItems = count;
             PageSize = pageSize;
             CurrentPage = page;

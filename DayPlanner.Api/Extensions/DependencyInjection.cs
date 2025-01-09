@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Services.Implementations;
 using DayPlanner.Abstractions.Stores;
 using DayPlanner.Authorization.Services;
 using DayPlanner.FireStore;
@@ -112,7 +113,11 @@ namespace DayPlanner.Api.Extensions
 
             // Firebase-related services
             services.AddScoped<IAuthService>(provider => new AuthService(app));
-            services.AddScoped<IUserStore>(provider => new FireStoreUserStore(app));
+            services.AddScoped<IUserStore>(provider =>
+            {
+                var mapper = provider.GetRequiredService<IMapper>();
+                return new FireStoreUserStore(app, mapper);
+            });
             services.AddScoped<IAppointmentStore>(provider =>
             {
                 var mapper = provider.GetRequiredService<IMapper>();

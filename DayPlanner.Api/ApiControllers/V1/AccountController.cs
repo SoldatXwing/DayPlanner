@@ -23,19 +23,19 @@ public sealed class AccountController : ControllerBase
     /// <summary>
     /// Gets the login provider data associated with the user of the current session.
     /// </summary>
-    /// <response code="200">Success - Returns a collection of provider data associated with the user</response>
+    /// <response code="200">Success - Returns the user</response>
     /// <response code="404">Not found - The user were internally not found</response>
     [HttpGet]
-    [ProducesResponseType<IUserInfo[]>(200)]
+    [ProducesResponseType<User>(200)]
     [ProducesResponseType<ApiErrorModel>(404)]
     public async Task<IActionResult> GetAccountInformationAsync([FromServices] IUserService userService)
     {
         string userId = HttpContext.User.GetUserId()!;
-        UserRecord user = await userService.GetUserByIdAsync(userId);
+        User user = await userService.GetUserByIdAsync(userId);
         if (user is null)
             return NotFound(new ApiErrorModel { Error = $"User with uid {userId} not found.", Message = "User not found" });
 
-        return Ok(user.ProviderData);
+        return Ok(user);
     }
 
     /// <summary>
@@ -76,15 +76,10 @@ public sealed class AccountController : ControllerBase
         if (string.IsNullOrEmpty(token))
             return Unauthorized();
 
-        try
-        {
-            FirebaseToken firebaseToken = await authService.VerifyTokenAsync(token);
-            return Ok(firebaseToken.Uid);
-        }
-        catch
-        {
-            return Unauthorized();
-        }
+        string? userId = await authService.VerifyTokenAsync(token);
+        return !string.IsNullOrEmpty(userId)
+            ? Ok(userId)
+            : Unauthorized();
     }
 
     /// <summary>
@@ -92,10 +87,11 @@ public sealed class AccountController : ControllerBase
     /// </summary>
     /// <param name="request">Provided data for the new user.</param>
     /// <param name="userService"></param>
-    /// <response code="200">Success - Returns the Uid of the created user</response>
+    /// <response code="200">Success - Returns the created user</response>
     /// <response code="400">Bad request - Invalid data were provided</response>
     [AllowAnonymous]
     [HttpPost("register")]
+    [ProducesResponseType<User>(200)]
     [ProducesResponseType<ApiErrorModel>(400)]
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserRequest request, [FromServices] IUserService userService)
     {
@@ -104,15 +100,8 @@ public sealed class AccountController : ControllerBase
 
         try
         {
-            UserRecordArgs userRecordArgs = new()
-            {
-                Email = request.Email,
-                Password = request.Password,
-                DisplayName = request.DisplayName
-            };
-
-            UserRecord userRecord = await userService.CreateUserAsync(userRecordArgs);
-            return Ok(userRecord.Uid);
+            User userRecord = await userService.CreateUserAsync(request);
+            return Ok(userRecord);
         }
         catch (Exception ex)
         {

@@ -29,7 +29,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         try
         {
             long? totalItems = await appointmentService.GetAppointmentsCount(userId);
-            List<Appointment> appointments = await appointmentService.GetUsersAppointments(userId, page, pageSize);
+            IEnumerable<Appointment> appointments = await appointmentService.GetUsersAppointments(userId, page, pageSize);
 
             return Ok(new PaginatedResponse<Appointment>(appointments, totalItems, page, pageSize));
         }

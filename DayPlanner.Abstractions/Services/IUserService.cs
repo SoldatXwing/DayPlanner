@@ -1,21 +1,11 @@
-﻿using DayPlanner.Abstractions.Stores;
-using FirebaseAdmin.Auth;
+﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Models.DTO;
 
-namespace DayPlanner.Abstractions.Services
+namespace DayPlanner.Abstractions.Services;
+
+public interface IUserService
 {
-    public interface IUserService
-    {
-        Task<UserRecord> GetUserByIdAsync(string uid);
-        Task<UserRecord> CreateUserAsync(UserRecordArgs args);
-    }
-    public class UserService : IUserService
-    {
-        private readonly IUserStore _userRepository;
-        public UserService(IUserStore userRepository) =>
-            _userRepository = userRepository;
+    Task<User> GetUserByIdAsync(string uid);
 
-        public async Task<UserRecord> GetUserByIdAsync(string uid) => await _userRepository.GetByIdAsync(uid);
-        public async Task<UserRecord> CreateUserAsync(UserRecordArgs args) => await _userRepository.CreateAsync(args);
-    }
-
+    Task<User> CreateUserAsync(RegisterUserRequest args);
 }
