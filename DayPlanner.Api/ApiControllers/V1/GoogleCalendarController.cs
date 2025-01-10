@@ -23,9 +23,9 @@ namespace DayPlanner.Api.ApiControllers.V1
         /// Redirects to Google OAuth2 login
         /// </summary>
         /// <param name="config"></param>
-        /// <returns>The url to Google OAuth2 login</returns>
+        /// <response code="200">Success - Returns the authorization url for the user</response>
         [HttpGet("login")]
-        [ProducesResponseType(302)]
+        [ProducesResponseType<string>(200)]
         [Authorize]
         public IActionResult Login([FromServices] IConfiguration config)
         {
@@ -37,7 +37,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                           $"&scope=https://www.googleapis.com/auth/calendar.readonly" +
                           $"&access_type=offline" +
                           $"&state={userId}";
-            return Redirect(authUrl);
+            return Ok(authUrl);
 
         }/// <summary>
          /// Callback endpoint for handling the OAuth2 response from Google.
@@ -88,6 +88,7 @@ namespace DayPlanner.Api.ApiControllers.V1
             }
 
         }
+
         /// <summary>
         /// Exchanges the authorization code for an access token from Google's OAuth2 endpoint.
         /// </summary>
@@ -121,49 +122,43 @@ namespace DayPlanner.Api.ApiControllers.V1
             var content = JObject.Parse(await response.Content.ReadAsStringAsync());
             return content;
         }
+
         /// <summary>Synchronizes appointments from Google Calendar for the authenticated user.</summary>
         /// <param name="googleCalendarService">
         /// The service that interacts with the Google Calendar API to sync appointments.
         /// </param>
-        /// <param name="googleAccessToken">
-        /// Optional. The Google access token for API calls. If not provided, it is expected that the
-        /// token is retrieved via the user's session or other means.
-        /// </param>
-        /// <param name="syncRequestToken">
-        /// Optional. A synchronization token representing the last sync point. If not provided,
-        /// a full synchronization will be performed.
-        /// </param>
+        /// <param name="tokenService">The google token service to use.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains an HTTP response:
         /// - 200 OK with the next sync token if the sync was successful.
         /// - 403 Forbidden if the user is not authorized or if no refresh token is found for the user.
         /// </returns>
-        /// <response code="200">
-        /// Returns the next sync token after successful synchronization of appointments.
+        /// <response code="204">
+        /// The synchronization were successfully.
         /// </response>
         /// <response code="403">
         /// Returns a Forbidden status if the user is not authorized or a required token is missing.
         /// </response>
         [HttpPost("sync")]
         [Authorize]
+        [ProducesResponseType(204)]
         [ProducesResponseType(403)]
-        [ProducesResponseType(200)]
-        public async Task<IActionResult> SyncAppointments([FromServices] GoogleCalendarService googleCalendarService,
-            [FromBody] string googleAccessToken = "",
-            string? syncRequestToken = "")
+        public async Task<IActionResult> SyncAppointments([FromServices] GoogleCalendarService googleCalendarService, [FromServices] IGoogleTokenService tokenService)
         { 
             var userId = HttpContext.User.GetUserId()!;
             try
             {
-                var nextSyncToken = await googleCalendarService.SyncAppointments(userId, googleAccessToken, syncRequestToken);
-                return Ok(nextSyncToken);
+                string? syncToken = await tokenService.GetSyncToken(userId).ConfigureAwait(false);
+                string nextSyncToken = await googleCalendarService.SyncAppointments(userId, syncToken: syncToken);
+                await tokenService.SaveSyncToken(userId, nextSyncToken).ConfigureAwait(false);
+
+                return NoContent();
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 //TODO: log no refresh token found with given userId
                 return Forbid();
             }
-
         }
     }
 }
