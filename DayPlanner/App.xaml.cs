@@ -1,12 +1,17 @@
-﻿namespace DayPlanner
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            InitializeComponent();
+﻿namespace DayPlanner;
 
-            MainPage = new MainPage();
-        }
+public partial class App : Application
+{
+    public App()
+    {
+        InitializeComponent();
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(new MainPage())
+        {
+            Title = "DayPlanner"
+        };
     }
 }

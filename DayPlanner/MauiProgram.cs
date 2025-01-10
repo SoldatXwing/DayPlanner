@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Blazored.LocalStorage;
+using DayPlanner.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 
@@ -15,12 +18,19 @@ public static class MauiProgram
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
-
         builder.Services.AddMauiBlazorWebView();
 
         builder.Services
+            .AddAuthorizationCore()
+            .AddCascadingAuthenticationState()
+            .AddScoped<AuthenticationStateProvider, LocalStorageAuthenticationProvider>();
+
+        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Localization");
+
+        builder.Services
             .AddMudServices()
-            .AddMudTranslations();
+            .AddMudTranslations()
+            .AddBlazoredLocalStorage();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();

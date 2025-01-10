@@ -25,7 +25,7 @@
         <ApplicationTitle>DayPlanner</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.dayplanner</ApplicationId>
+        <ApplicationId>com.soldatxwing.dayplanner</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -58,6 +58,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.0" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
@@ -65,6 +68,15 @@
         <PackageReference Include="MudBlazor" Version="7.15.0" />
         <PackageReference Include="MudBlazor.FontIcons.MaterialSymbols" Version="1.2.0" />
         <PackageReference Include="MudBlazor.Translations" Version="1.6.0" />
+        <PackageReference Include="Suiram1.BlazorRoutesGenerator" Version="1.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources\Localization\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>
