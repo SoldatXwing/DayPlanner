@@ -18,8 +18,13 @@ namespace DayPlanner.Api.ApiControllers.V1;
 [ApiController]
 [ApiVersion(1)]
 [Route("v{version:apiVersion}/account")]
-public sealed class AccountController : ControllerBase
+public sealed class AccountController(ILogger<AccountController> logger) : ControllerBase
 {
+    /// <summary>
+    /// Gets the logger instance for this controller
+    /// </summary>
+    public ILogger<AccountController> Logger { get; } = logger;
+
     /// <summary>
     /// Gets the login provider data associated with the user of the current session.
     /// </summary>
@@ -33,7 +38,10 @@ public sealed class AccountController : ControllerBase
         string userId = HttpContext.User.GetUserId()!;
         User user = await userService.GetUserByIdAsync(userId);
         if (user is null)
+        {
+            Logger.LogWarning($"User with uid {userId} not found.");
             return NotFound(new ApiErrorModel { Error = $"User with uid {userId} not found.", Message = "User not found" });
+        }
 
         return Ok(user);
     }
@@ -57,6 +65,7 @@ public sealed class AccountController : ControllerBase
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException)|| ex.GetType() == typeof(InvalidEmailException))
         {
+            Logger.LogWarning($"Invalid email or password. Ex: {ex.Message}");
             return BadRequest(new ApiErrorModel { Error = ex.Message, Message = "Invalid email or password." });
         }
     }
@@ -74,8 +83,10 @@ public sealed class AccountController : ControllerBase
     {
         string? token = authorization?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
+        {
+            Logger.LogWarning("No token provided.");
             return Unauthorized();
-
+        }
         string? userId = await authService.VerifyTokenAsync(token);
         return !string.IsNullOrEmpty(userId)
             ? Ok(userId)
@@ -96,8 +107,10 @@ public sealed class AccountController : ControllerBase
     public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserRequest request, [FromServices] IUserService userService)
     {
         if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+        {
+            Logger.LogWarning("Invalid data. Email and password are required.");
             return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
-
+        }
         try
         {
             User userRecord = await userService.CreateUserAsync(request);
@@ -105,6 +118,7 @@ public sealed class AccountController : ControllerBase
         }
         catch (Exception ex)
         {
+            Logger.LogError($"Failed to register user. Ex: {ex.Message}");
             return BadRequest(new ApiErrorModel { Message = "Failed to register user.", Error = ex.Message });
         }
     }

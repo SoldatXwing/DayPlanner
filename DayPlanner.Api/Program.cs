@@ -1,52 +1,76 @@
 using DayPlanner.Api.Extensions;
 using DayPlanner.Api.Swagger;
 using Microsoft.Extensions.Options;
+using NLog;
+using NLog.Extensions.Logging;
+using NLog.Web;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
-var builder = WebApplication.CreateBuilder(args);
+var logger = LogManager.Setup()
+    .LoadConfigurationFromAppSettings()
+    .GetCurrentClassLogger();
+try
+{
+    logger.Info("Starting application");
+    var builder = WebApplication.CreateBuilder(args);
 
-builder.AddInfrastructure();
+    builder.AddInfrastructure();
 
-builder.Services.AddControllers();
+    //Logging
+    builder.Logging.ClearProviders();
+    builder.Logging.AddNLog();
 
-builder.Services
-    .AddApiVersioning(options => options.ReportApiVersions = true)
-    .AddApiExplorer(options =>
+    builder.Services.AddControllers();
+
+    builder.Services
+        .AddApiVersioning(options => options.ReportApiVersions = true)
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        });
+
+    if (builder.Configuration.GetValue<bool?>("Swagger:Enabled") ?? false)
     {
-        options.GroupNameFormat = "'v'VVV";
-        options.SubstituteApiVersionInUrl = true;
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwagger>();
+
+        if (builder.Configuration.GetValue<bool?>("Swagger:UiEnabled") ?? false)
+        {
+            builder.Services.AddTransient<IConfigureOptions<SwaggerUIOptions>, ConfigureSwaggerUi>();
+        }
+    }
+
+    var app = builder.Build();
+    app.UseHttpsRedirection();
+
+    if (app.Configuration.GetValue<bool?>("Swagger:Enabled") ?? false)
+    {
+        app.UseSwagger();
+
+        if (app.Configuration.GetValue<bool?>("Swagger:UiEnabled") ?? false)
+            app.UseSwaggerUI();
+    }
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers().RequireAuthorization(defaultPolicy =>
+    {
+        defaultPolicy.RequireAuthenticatedUser();
+        defaultPolicy.RequireAssertion(context => !string.IsNullOrEmpty(context.User.GetUserId()));
     });
 
-if (builder.Configuration.GetValue<bool?>("Swagger:Enabled") ?? false)
-{
-    builder.Services.AddSwaggerGen();
-    builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwagger>();
+    app.Run();
 
-    if (builder.Configuration.GetValue<bool?>("Swagger:UiEnabled") ?? false)
-    {
-        builder.Services.AddTransient<IConfigureOptions<SwaggerUIOptions>, ConfigureSwaggerUi>();
-    }
 }
-
-var app = builder.Build();
-app.UseHttpsRedirection();
-
-if (app.Configuration.GetValue<bool?>("Swagger:Enabled") ?? false)
+catch (Exception ex)
 {
-    app.UseSwagger();
-
-    if (app.Configuration.GetValue<bool?>("Swagger:UiEnabled") ?? false)
-        app.UseSwaggerUI();
+    logger.Error(ex, "Application stopped due to an exception");
+    throw;
 }
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers().RequireAuthorization(defaultPolicy =>
+finally
 {
-    defaultPolicy.RequireAuthenticatedUser();
-    defaultPolicy.RequireAssertion(context => !string.IsNullOrEmpty(context.User.GetUserId()));
-});
-
-app.Run();
+    LogManager.Shutdown(); // Ensure that NLog releases resources
+}
