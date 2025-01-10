@@ -148,10 +148,7 @@ namespace DayPlanner.Api.ApiControllers.V1
             var userId = HttpContext.User.GetUserId()!;
             try
             {
-                string? syncToken = await tokenService.GetSyncToken(userId).ConfigureAwait(false);
-                string nextSyncToken = await googleCalendarService.SyncAppointments(userId, syncToken: syncToken);
-                await tokenService.SaveSyncToken(userId, nextSyncToken).ConfigureAwait(false);
-
+                await googleCalendarService.SyncAppointments(userId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
