@@ -17,8 +17,10 @@ namespace DayPlanner.Api.ApiControllers.V1
     [ApiController]
     [ApiVersion(1)]
     [Route("v{version:apiVersion}/googlecalendar")]
-    public class GoogleCalendarController : Controller
+    public class GoogleCalendarController(ILogger<GoogleCalendarController> logger) : ControllerBase
     {
+        private ILogger<GoogleCalendarController> _Logger { get; } = logger;
+
         /// <summary>
         /// Redirects to Google OAuth2 login
         /// </summary>
@@ -58,6 +60,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         {
             if (string.IsNullOrEmpty(code))
             {
+                _Logger.LogWarning("Error recieving callback: Code is null or empty");
                 return BadRequest(new ApiErrorModel { Message = "Error recieving callback", Error = "Code is null or empty" });
             }
             try
@@ -67,7 +70,11 @@ namespace DayPlanner.Api.ApiControllers.V1
                 if (tokenResponse!.TryGetValue("refresh_token", out var refreshToken) &&
                     !string.IsNullOrEmpty(refreshToken?.ToString()))
                 {
-                    ArgumentException.ThrowIfNullOrEmpty(state);
+                    if (string.IsNullOrEmpty(state))
+                    {
+                        _Logger.LogWarning("State (userId) is null or empty");
+                        ArgumentException.ThrowIfNullOrEmpty(state);
+                    }
                     await googleRefreshTokenService.CreateRefreshToken(state, refreshToken.ToString());
                 }
 
@@ -76,14 +83,17 @@ namespace DayPlanner.Api.ApiControllers.V1
 
             catch (InvalidOperationException ex)
             {
+                _Logger.LogWarning("Invalid google callback code provided");
                 return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = ex.Message });
             }
             catch (BadCredentialsException ex)
             {
+                _Logger.LogWarning($"User not with id: {state} not found");
                 return NotFound(new ApiErrorModel { Message = "User not found", Error = ex.Message });
             }
             catch (Exception ex)
             {
+                _Logger.LogWarning($"Error while exchanging code for token. Ex: {ex.Message}");
                 return BadRequest(new ApiErrorModel { Message = "Error while exchanging code for token", Error = ex.Message });
             }
 
@@ -149,11 +159,12 @@ namespace DayPlanner.Api.ApiControllers.V1
             try
             {
                 await googleCalendarService.SyncAppointments(userId);
+                _Logger.LogInformation($"Google appointments synchronized for user with uid {userId}");
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
             {
-                //TODO: log no refresh token found with given userId
+                _Logger.LogInformation($"Unauthorized access attempt by user with uid {userId}");
                 return Forbid();
             }
         }
