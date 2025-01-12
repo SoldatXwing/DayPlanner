@@ -36,7 +36,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
     public async Task<IActionResult> GetAccountInformationAsync([FromServices] IUserService userService)
     {
         string userId = HttpContext.User.GetUserId()!;
-        User user = await userService.GetUserByIdAsync(userId);
+        User? user = await userService.GetUserByIdAsync(userId);
         if (user is null)
         {
             _Logger.LogWarning("User with uid {UserId} not found.", userId);
