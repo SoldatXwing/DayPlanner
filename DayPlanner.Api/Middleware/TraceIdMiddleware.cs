@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Diagnostics;
 
 namespace DayPlanner.Api.Middleware
 {
@@ -11,7 +12,7 @@ namespace DayPlanner.Api.Middleware
         public async Task InvokeAsync(HttpContext context)
         {
             // Generate traceId
-            var traceId = Guid.NewGuid().ToString();
+            var traceId = Activity.Current?.TraceId.ToString();
             context.Items["TraceId"] = traceId;
 
             // Add traceId to NLog context
