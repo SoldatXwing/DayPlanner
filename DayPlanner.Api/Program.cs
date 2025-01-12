@@ -1,4 +1,5 @@
 using DayPlanner.Api.Extensions;
+using DayPlanner.Api.Middleware;
 using DayPlanner.Api.Swagger;
 using Microsoft.Extensions.Options;
 using NLog;
@@ -55,6 +56,9 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    // Use TraceId middleware
+    app.UseMiddleware<TraceIdMiddleware>();
 
     app.MapControllers().RequireAuthorization(defaultPolicy =>
     {

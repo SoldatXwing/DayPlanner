@@ -83,17 +83,17 @@ namespace DayPlanner.Api.ApiControllers.V1
 
             catch (InvalidOperationException ex)
             {
-                _Logger.LogWarning("Invalid google callback code provided");
+                _Logger.LogWarning(ex, "Invalid Google callback code provided");
                 return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = ex.Message });
             }
             catch (BadCredentialsException ex)
             {
-                _Logger.LogWarning($"User not with id: {state} not found");
+                _Logger.LogWarning(ex, "User not found for id: {UserId}", state);
                 return NotFound(new ApiErrorModel { Message = "User not found", Error = ex.Message });
             }
             catch (Exception ex)
             {
-                _Logger.LogWarning($"Error while exchanging code for token. Ex: {ex.Message}");
+                _Logger.LogError(ex, "Unexpected error while exchanging code for token");
                 return BadRequest(new ApiErrorModel { Message = "Error while exchanging code for token", Error = ex.Message });
             }
 
@@ -159,12 +159,12 @@ namespace DayPlanner.Api.ApiControllers.V1
             try
             {
                 await googleCalendarService.SyncAppointments(userId);
-                _Logger.LogInformation($"Google appointments synchronized for user with uid {userId}");
+                _Logger.LogInformation("Google appointments synchronized for user with uid {UserId}", userId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
             {
-                _Logger.LogInformation($"Unauthorized access attempt by user with uid {userId}");
+                _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
                 return Forbid();
             }
         }

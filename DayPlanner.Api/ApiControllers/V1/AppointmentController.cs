@@ -37,7 +37,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning($"Unauthorized access attempt by user with uid {userId}");
+            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Unauthorized();
         }
 
@@ -59,7 +59,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
     {
         if (start > end)
         {
-            _Logger.LogWarning("Invalid date times: Start date cant be greater than end date.");
+            _Logger.LogWarning("Invalid date range: Start date {StartDate} cannot be greater than end date {EndDate}", start, end);
             return BadRequest(new ApiErrorModel { Message = "Invalid date times", Error = "Start date cant be greater than end date." });
         }
         var userId = HttpContext.User.GetUserId()!;
@@ -69,7 +69,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning($"Unauthorized access attempt by user with uid {userId}");
+            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Forbid();
         }
     }
@@ -92,7 +92,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         }
         var userId = HttpContext.User.GetUserId()!;
         Appointment appointment = await appointmentService.CreateAppointment(userId, request);
-        _Logger.LogInformation($"Appointment with id {appointment.Id} created for user with uid {userId}");
+        _Logger.LogInformation("Appointment with id {AppointmentId} created for user with uid {UserId}", appointment.Id, userId);
         return Created($"/v1/appointments/{appointment.Id}", appointment);
     }
 
@@ -111,7 +111,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         Appointment? appointment = await appointmentService.GetAppointmentById(userId, appointmentId);
         if (appointment is null)
         {
-            _Logger.LogWarning($"Appointment with id {appointmentId} not found for user with uid {userId}");
+            _Logger.LogWarning("Appointment with id {AppointmentId} not found for user with uid {UserId}", appointmentId, userId);
             return AppointmentNotFound(appointmentId);
         }
         return Ok(appointment);
@@ -135,12 +135,12 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         try
         {
             Appointment appointment = await appointmentService.UpdateAppointment(appointmentId, userId, request);
-            _Logger.LogInformation($"Appointment with id {appointmentId} updated for user with uid {userId}");
+            _Logger.LogInformation("Appointment with id {AppointmentId} updated for user with uid {UserId}", appointmentId, userId);
             return Ok(appointment);
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning($"Unauthorized access attempt by user with uid {userId}");
+            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Forbid();
         }
     }
@@ -160,17 +160,17 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         try
         {
             await appointmentService.DeleteUsersAppointment(userId, appointmentId);
-            _Logger.LogInformation($"Appointment with id {appointmentId} deleted for user with uid {userId}");
+            _Logger.LogInformation("Appointment with id {AppointmentId} deleted for user with uid {UserId}", appointmentId, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning($"Unauthorized access attempt by user with uid {userId}");
+            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Forbid();
         }
         catch (InvalidOperationException ex)
         {
-            _Logger.LogWarning($"Appointment with id {appointmentId} not found for user with uid {userId}");
+            _Logger.LogWarning(ex, "Failed to delete appointment with id {AppointmentId} for user with uid {UserId}", appointmentId, userId);
             return NotFound(new ApiErrorModel { Message = "Appointment not found", Error = ex.Message });
         }
     }

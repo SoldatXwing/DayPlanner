@@ -39,7 +39,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
         User user = await userService.GetUserByIdAsync(userId);
         if (user is null)
         {
-            _Logger.LogWarning($"User with uid {userId} not found.");
+            _Logger.LogWarning("User with uid {UserId} not found.", userId);
             return NotFound(new ApiErrorModel { Error = $"User with uid {userId} not found.", Message = "User not found" });
         }
 
@@ -65,7 +65,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException)|| ex.GetType() == typeof(InvalidEmailException))
         {
-            _Logger.LogWarning($"Invalid email or password. Ex: {ex.Message}");
+            _Logger.LogWarning("Invalid email or password provided for login attempt. Email: {Email}", request.Email);
             return BadRequest(new ApiErrorModel { Error = ex.Message, Message = "Invalid email or password." });
         }
     }
@@ -118,7 +118,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
         }
         catch (Exception ex)
         {
-            _Logger.LogError($"Failed to register user. Ex: {ex.Message}");
+            _Logger.LogError(ex, "Failed to register user with email {Email}.", request.Email);
             return BadRequest(new ApiErrorModel { Message = "Failed to register user.", Error = ex.Message });
         }
     }
