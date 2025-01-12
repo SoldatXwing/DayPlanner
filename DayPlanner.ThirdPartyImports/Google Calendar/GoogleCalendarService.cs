@@ -58,8 +58,8 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                 request.SyncToken = syncToken;
             else
             {
-                request.TimeMinDateTimeOffset = DateTime.UtcNow.AddYears(-1);
-                request.TimeMaxDateTimeOffset = DateTime.UtcNow;
+                request.TimeMinDateTimeOffset = DateTime.UtcNow.AddMonths(-1);
+                request.TimeMaxDateTimeOffset = DateTime.UtcNow.AddYears(1);
             }
             request.SingleEvents = true;
 
@@ -81,7 +81,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
             }
             if (appointments.Count > 0)
                 await _appointmentService.ImportOrUpdateAppointments(userId, appointments);
-            if (syncToken is not null && !syncToken!.Equals(events.NextSyncToken))
+            if (!string.IsNullOrEmpty(events.NextSyncToken) && (syncToken is null || !syncToken.Equals(events.NextSyncToken)))
                 await _googleTokenService.SaveSyncToken(userId, events.NextSyncToken);
             return events.NextSyncToken;
 
