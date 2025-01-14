@@ -1,3 +1,25 @@
-@layout EmptyLayout
+@using Components.Layout;
+@using System.ComponentModel.DataAnnotations;
 
-login
+@layout CentralLayout
+
+<MudPaper Class="px-3 py-3">
+    <MudText Typo="Typo.h4" Align="Align.Center">@Localizer["login"]</MudText>
+
+    <MudForm @ref="_form" Model="@_model">
+        <MudTextField @ref="_emailField" @bind-Value="@_model.Email" @bind-Value:after="OnInputChanged"
+                      Class="mb-2" InputType="InputType.Email" Label="@Localizer["form_Email"]"
+                      Validation="@(new EmailAddressAttribute { ErrorMessage = Localizer["form_Email_Invalid"] })"
+                      RequiredError="@Localizer["form_Required"]" Required Error="_loginError" />
+        <MudTextField @bind-Value="@_model.Password" @bind-Value:after="OnInputChanged"
+                      Class="mb-4" InputType="InputType.Password" Label="@Localizer["form_Password"]"
+                      RequiredError="@Localizer["form_Required"]" Required ErrorText="@Localizer["form_Invalid"]" Error="_loginError" />
+
+        <MudButton OnClick="Form_OnClickAsync" Color="Color.Primary" Variant="Variant.Filled">@Localizer["form_LoginBtn"]</MudButton>
+    </MudForm>
+
+    <MudText Class="mt-5">
+        @Localizer["noAccount"]
+        <MudLink Href="@Routes.Register()">@Localizer["noAccount_Register"]</MudLink>
+    </MudText>
+</MudPaper>
