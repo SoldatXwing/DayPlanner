@@ -131,6 +131,13 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
     [ProducesResponseType<Appointment>(200)]
     public async Task<IActionResult> UpdateAppointmentAsync([FromRoute] string appointmentId, [FromBody] AppointmentRequest request)
     {
+        if (string.IsNullOrEmpty(request.Title) ||
+               request.Start == default ||
+               request.End == default)
+        {
+            _Logger.LogWarning("Invalid request attributes: At least one attribute is not valid.");
+            return BadRequest(new ApiErrorModel { Message = "Invalid request attributes", Error = "At least one attribute is not valid." });
+        }
         var userId = HttpContext.User.GetUserId()!;
         try
         {
