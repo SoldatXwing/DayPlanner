@@ -1,5 +1,4 @@
-﻿using Blazored.LocalStorage;
-using DayPlanner.Authentication;
+﻿using DayPlanner.Authentication;
 using DayPlanner.Extensions;
 using DayPlanner.Refit;
 using DayPlanner.Services;
@@ -27,26 +26,7 @@ public static class MauiProgram
             });
         builder.Services.AddMauiBlazorWebView();
 
-        builder.Services.AddRefitClient<IDayPlannerApi>(sp =>
-        {
-            AuthProvider provider = sp.GetRequiredService<AuthProvider>();
-            return new()
-            {
-                AuthorizationHeaderValueGetter = async (_, _) =>
-                {
-                    AuthenticationState state = await provider.GetAuthenticationStateAsync();
-                    if (state.User.Identity?.IsAuthenticated ?? false)
-                    {
-                        _ = state.User.ToUser(out string authToken);
-                        return authToken;
-                    }
-                    else
-                    {
-                        return string.Empty;
-                    }
-                }
-            };
-        })
+        builder.Services.AddRefitClient<IDayPlannerApi>(ConfigureDayPlannerRefit, httpClientName: "RefitClient.DayPlanner")
             .ConfigureHttpClient(client => builder.Configuration.Bind("DayPlannerApi:HttpClient", client));
 
         builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -61,8 +41,7 @@ public static class MauiProgram
 
         builder.Services
             .AddMudServices()
-            .AddMudTranslations()
-            .AddBlazoredLocalStorage();
+            .AddMudTranslations();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
@@ -70,5 +49,26 @@ public static class MauiProgram
 #endif
 
         return builder.Build();
+    }
+
+    private static RefitSettings? ConfigureDayPlannerRefit(IServiceProvider provider)
+    {
+        AuthProvider authProvider = provider.GetRequiredService<AuthProvider>();
+        return new()
+        {
+            AuthorizationHeaderValueGetter = async (_, _) =>
+            {
+                AuthenticationState state = await authProvider.GetAuthenticationStateAsync();
+                if (state.User.Identity?.IsAuthenticated ?? false)
+                {
+                    _ = state.User.ToUser(out string authToken);
+                    return authToken;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+        };
     }
 }
