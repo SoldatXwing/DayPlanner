@@ -1,4 +1,5 @@
-﻿using Google.Cloud.Firestore;
+﻿using DayPlanner.Abstractions.Enums;
+using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore.Models;
 
@@ -19,6 +20,8 @@ public class FirestoreAppointment
 
     [FirestoreProperty("location")]
     public string Location { get; set; } = string.Empty;
+    [FirestoreProperty("origin")]
+    public CalendarOrigin Origin { get; set; } = CalendarOrigin.Unspecified;
 
     [FirestoreProperty("startDate")]
     public DateTime Start { get; set; }

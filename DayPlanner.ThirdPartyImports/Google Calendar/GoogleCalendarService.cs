@@ -34,15 +34,13 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
         /// <exception cref="InvalidOperationException">
         /// Thrown if a token cannot be retrieved for the specified <paramref name="userId"/>.
         /// </exception>
-        public async Task<string> SyncAppointments(string userId, string googleAccessToken = "", string? syncToken = "")
+        public async Task<string> SyncAppointments(string userId)
         {
             ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
 
             //If token is not provided, get it from the token provider
-            string accessToken = string.IsNullOrEmpty(googleAccessToken)
-                        ? (await _tokenProvider.GetOrRefresh(userId))?.AccessToken
-                            ?? throw new UnauthorizedAccessException($"Error receiving token for user with id: {userId}")
-                        : googleAccessToken;
+            string accessToken = (await _tokenProvider.GetOrRefresh(userId))?.AccessToken
+                ?? throw new UnauthorizedAccessException($"Error receiving token for user with id: {userId}");
 
             var credential = GoogleCredential.FromAccessToken(accessToken);
             var service = new CalendarService(new BaseClientService.Initializer()
@@ -52,8 +50,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
             });
 
             var request = service.Events.List("primary");
-            if (string.IsNullOrEmpty(syncToken))
-                syncToken = await _googleTokenService.GetSyncToken(userId);
+            string? syncToken = await _googleTokenService.GetSyncToken(userId)!;
             if (!string.IsNullOrEmpty(syncToken))
                 request.SyncToken = syncToken;
             else
@@ -77,7 +74,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                     Title = @event.Summary,
                     Location = @event.Location,
                     Id = @event.Id,
-                }); ;
+                });
             }
             if (appointments.Count > 0)
                 await _appointmentService.ImportOrUpdateAppointments(userId, appointments);

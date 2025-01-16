@@ -46,7 +46,7 @@ public class AppointmentsService(IAppointmentStore appointmentStore) : IAppointm
         {
             if (await _appointmentStore.GetAppointmentById(userId, appointment.Id) is not null)
             {
-                await _appointmentStore.UpdateAppointment(appointment.Id, userId, new AppointmentRequest
+                await _appointmentStore.UpdateAppointment(appointment.Id, userId, new AppointmentRequest(Enums.CalendarOrigin.GoogleCalendar)
                 {
                     Summary = appointment.Summary,
                     Start = appointment.Start,
@@ -57,7 +57,7 @@ public class AppointmentsService(IAppointmentStore appointmentStore) : IAppointm
             }
             else
             {
-                await _appointmentStore.ImportAppointment(userId, appointment.Id, new AppointmentRequest
+                await _appointmentStore.ImportAppointment(userId, appointment.Id, new AppointmentRequest(Enums.CalendarOrigin.GoogleCalendar)
                 {
                     Summary = appointment.Summary,
                     Start = appointment.Start,

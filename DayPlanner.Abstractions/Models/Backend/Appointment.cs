@@ -1,4 +1,6 @@
-﻿namespace DayPlanner.Abstractions.Models.Backend;
+﻿using DayPlanner.Abstractions.Enums;
+
+namespace DayPlanner.Abstractions.Models.Backend;
 
 public class Appointment
 {
@@ -11,6 +13,7 @@ public class Appointment
     public string Summary { get; set; } = string.Empty;
 
     public string Location { get; set; } = string.Empty;
+    public CalendarOrigin Origin { get; set; } = CalendarOrigin.Unspecified;
 
     public DateTime Start { get; set; }
 
