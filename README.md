@@ -19,206 +19,25 @@ DayPlanner is a web application that helps users organize their daily tasks and 
 
 ## API Reference
 
-### Account Management
+### Swagger Documentation
+![Swagger Badge](https://img.shields.io/badge/Swagger-Interactive%20API-blue?style=flat-square)
 
-#### Get Account Information
-```http
-GET /v1/account
-```
+This API supports and uses Swagger for interactive documentation and testing. To enable Swagger, ensure the following configurations are in place:
 
-| Parameter  | Type      | Description                |
-| :--------- | :-------- | :------------------------- |
-| `api_key`  | `string`  | **Required**. Your API key |
+1. **Enable Swagger in the Application:**
+   - Ensure the Swagger services are added in your `Program.cs` file:
+     ```csharp
+     builder.Services.AddSwaggerGen();
+     ```
 
-**Response Codes:**
-- `200 OK` - Returns the user account information.
-- `404 Not Found` - User not found.
+2. **Enable Swagger Middleware:**
+   - Include the Swagger middleware in the HTTP request pipeline:
+     ```csharp
+     app.UseSwagger();
+     app.UseSwaggerUI();
+     ```
 
----
 
-#### Login
-```http
-POST /v1/account/login
-```
 
-| Parameter      | Type     | Description                       |
-| :------------- | :------- | :-------------------------------- |
-| `email`        | `string` | **Required**. User email address  |
-| `password`     | `string` | **Required**. User password       |
-
-**Response Codes:**
-- `200 OK` - Returns the bearer access token.
-- `400 Bad Request` - Invalid email or password.
-
----
-
-#### Validate Token
-```http
-POST /v1/account/validate
-```
-
-| Parameter          | Type     | Description                       |
-| :----------------- | :------- | :-------------------------------- |
-| `authorization`    | `string` | **Required**. Bearer token header |
-
-**Response Codes:**
-- `200 OK` - Returns the user ID associated with the token.
-- `401 Unauthorized` - Token is invalid.
-
----
-
-#### Register
-```http
-POST /v1/account/register
-```
-
-| Parameter      | Type     | Description                              |
-| :------------- | :------- | :--------------------------------------- |
-| `email`        | `string` | **Required**. Email address of the user |
-| `password`     | `string` | **Required**. User password             |
-
-**Response Codes:**
-- `200 OK` - Returns the newly created user.
-- `400 Bad Request` - Invalid data provided.
-
----
-
-### Appointments Management
-
-#### Get All Appointments
-```http
-GET /v1/appointments
-```
-
-| Parameter  | Type   | Description                           |
-| :--------- | :----- | :------------------------------------ |
-| `page`     | `int`  | Page number (default: 1)              |
-| `pageSize` | `int`  | Items per page (default: 10)          |
-
-**Response Codes:**
-- `200 OK` - Returns a paginated list of appointments.
-
----
-
-#### Get Appointments by Date Range
-```http
-GET /v1/appointments/range
-```
-
-| Parameter  | Type      | Description                               |
-| :--------- | :-------- | :---------------------------------------- |
-| `start`    | `datetime`| **Required**. Start date of the range    |
-| `end`      | `datetime`| **Required**. End date of the range      |
-
-**Response Codes:**
-- `200 OK` - Returns appointments within the range.
-- `400 Bad Request` - Invalid date range provided.
-
----
-
-#### Create Appointment
-```http
-POST /v1/appointments
-```
-
-| Parameter      | Type      | Description                              |
-| :------------- | :-------- | :--------------------------------------- |
-| `title`        | `string`  | **Required**. Title of the appointment  |
-| `start`        | `datetime`| **Required**. Start time of appointment |
-| `end`          | `datetime`| **Required**. End time of appointment   |
-
-**Response Codes:**
-- `201 Created` - Appointment created successfully.
-- `400 Bad Request` - Invalid request attributes.
-
----
-
-#### Get Appointment by ID
-```http
-GET /v1/appointments/{appointmentId}
-```
-
-| Parameter        | Type     | Description                           |
-| :--------------- | :------- | :------------------------------------ |
-| `appointmentId`  | `string` | **Required**. ID of the appointment   |
-
-**Response Codes:**
-- `200 OK` - Returns the appointment.
-- `404 Not Found` - Appointment not found.
-
----
-
-#### Update Appointment
-```http
-PUT /v1/appointments/{appointmentId}
-```
-
-| Parameter        | Type      | Description                            |
-| :--------------- | :-------- | :------------------------------------- |
-| `appointmentId`  | `string`  | **Required**. ID of the appointment    |
-| `title`          | `string`  | **Required**. Title of the appointment |
-| `start`          | `datetime`| **Required**. Start time of appointment|
-| `end`            | `datetime`| **Required**. End time of appointment  |
-
-**Response Codes:**
-- `200 OK` - Appointment updated successfully.
-- `400 Bad Request` - Invalid request attributes.
-- `403 Forbidden` - Unauthorized access.
-
----
-
-#### Delete Appointment
-```http
-DELETE /v1/appointments/{appointmentId}
-```
-
-| Parameter        | Type     | Description                           |
-| :--------------- | :------- | :------------------------------------ |
-| `appointmentId`  | `string` | **Required**. ID of the appointment   |
-
-**Response Codes:**
-- `204 No Content` - Appointment deleted successfully.
-- `403 Forbidden` - Unauthorized access.
-- `404 Not Found` - Appointment not found.
-
----
-
-### Google Calendar Integration
-
-#### Google Login URL
-```http
-GET /v1/googlecalendar/login
-```
-
-**Response Codes:**
-- `200 OK` - Returns the authorization URL for Google OAuth2 login.
-
----
-
-#### Callback for Google OAuth2
-```http
-GET /v1/googlecalendar/callback
-```
-
-| Parameter | Type     | Description                     |
-| :-------- | :------- | :------------------------------ |
-| `code`    | `string` | **Required**. Google auth code  |
-| `state`   | `string` | **Required**. User ID           |
-
-**Response Codes:**
-- `200 OK` - Token exchanged successfully.
-- `400 Bad Request` - Invalid code provided.
-- `404 Not Found` - User not found.
-
----
-
-#### Sync Appointments
-```http
-POST /v1/googlecalendar/sync
-```
-
-**Response Codes:**
-- `204 No Content` - Sync completed successfully.
-- `403 Forbidden` - Unauthorized access or missing token.
 
 
