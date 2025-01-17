@@ -11,6 +11,7 @@ public static class AppointmentExtensions
         { "startDate", appointment.Start },
         { "endDate", appointment.End },
         { "createdAt", appointment.CreatedAt },
-        { "location", appointment.Location }
+        { "location", appointment.Location },
+        { "origin", (int)appointment.Origin }
     };
 }

@@ -1,4 +1,5 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
+﻿using DayPlanner.Abstractions.Enums;
+using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 
 namespace DayPlanner.Abstractions.Services;
@@ -19,5 +20,6 @@ public interface IAppointmentsService
 
     Task<Appointment> CreateAppointment(string userId, AppointmentRequest request);
 
-    Task ImportOrUpdateAppointments(string userId, List<Appointment> appointments);
+    Task ImportOrUpdateAppointments(string userId, List<Appointment> appointments, CalendarOrigin calendarOrigin);
+    Task DeleteAppointmentsByCalendarOrigin(string userId, CalendarOrigin origin);
 }

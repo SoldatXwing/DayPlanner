@@ -42,7 +42,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                 client_secret = clientSecret
             };
 
-            var response = await _httpClient.PostAsJsonAsync("", request);
+            var response = await _httpClient.PostAsJsonAsync("/token", request);
             if (!response.IsSuccessStatusCode)
                 throw new InvalidOperationException($"Error fetching refresh token for user with id: {userId}");
 
@@ -81,6 +81,24 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
             }
 
             return false;
+        }
+        /// <summary>
+        /// Revokes the given access token
+        /// </summary>
+        /// <param name="accessToken">Acces token from the user</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task RevokeToken(string accessToken)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(accessToken, nameof(accessToken));
+
+            var response = await _httpClient.PostAsync($"/revoke?token={accessToken}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException("Error revoking token");
+            }
+
+
         }
 
 

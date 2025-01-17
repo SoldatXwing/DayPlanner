@@ -1,4 +1,5 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
+﻿using DayPlanner.Abstractions.Enums;
+using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 
 namespace DayPlanner.Abstractions.Stores;
@@ -75,4 +76,6 @@ public interface IAppointmentStore
     /// <param name="request"></param>
     /// <returns></returns>
     Task<Appointment> ImportAppointment(string userId, string externalId, AppointmentRequest request);
+    Task DeleteAppointmentsByCalendarOrigin(string userId, CalendarOrigin origin);
+
 }

@@ -1,4 +1,5 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
+﻿using DayPlanner.Abstractions.Enums;
+using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Stores;
 using System;
@@ -37,7 +38,7 @@ public class AppointmentsService(IAppointmentStore appointmentStore) : IAppointm
     /// <param name="userId">The ID of the user whose appointments are being managed.</param>
     /// <param name="appointments">The list of appointments to import or update.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task ImportOrUpdateAppointments(string userId, List<Appointment> appointments)
+    public async Task ImportOrUpdateAppointments(string userId, List<Appointment> appointments, CalendarOrigin calendarOrigin)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(userId);
         ArgumentNullException.ThrowIfNull(appointments);
@@ -46,7 +47,7 @@ public class AppointmentsService(IAppointmentStore appointmentStore) : IAppointm
         {
             if (await _appointmentStore.GetAppointmentById(userId, appointment.Id) is not null)
             {
-                await _appointmentStore.UpdateAppointment(appointment.Id, userId, new AppointmentRequest(Enums.CalendarOrigin.GoogleCalendar)
+                await _appointmentStore.UpdateAppointment(appointment.Id, userId, new AppointmentRequest(calendarOrigin)
                 {
                     Summary = appointment.Summary,
                     Start = appointment.Start,
@@ -57,7 +58,7 @@ public class AppointmentsService(IAppointmentStore appointmentStore) : IAppointm
             }
             else
             {
-                await _appointmentStore.ImportAppointment(userId, appointment.Id, new AppointmentRequest(Enums.CalendarOrigin.GoogleCalendar)
+                await _appointmentStore.ImportAppointment(userId, appointment.Id, new AppointmentRequest(calendarOrigin)
                 {
                     Summary = appointment.Summary,
                     Start = appointment.Start,
@@ -152,5 +153,17 @@ public class AppointmentsService(IAppointmentStore appointmentStore) : IAppointm
         ArgumentNullException.ThrowIfNull(request);
 
         return await _appointmentStore.UpdateAppointment(appointmentId, userId, request);
+    }
+    /// <summary>
+    /// Deletes appointments by calendar origin.
+    /// </summary>
+    /// <param name="userId">Id of the user</param>
+    /// <param name="origin">Calendar origin, which appointments should be deleted</param>
+    /// <returns></returns>
+    public async Task DeleteAppointmentsByCalendarOrigin(string userId, CalendarOrigin origin)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(userId);
+        ArgumentNullException.ThrowIfNull(origin);
+        await _appointmentStore.DeleteAppointmentsByCalendarOrigin(userId, origin);
     }
 }

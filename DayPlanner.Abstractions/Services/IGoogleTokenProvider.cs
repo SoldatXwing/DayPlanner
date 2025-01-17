@@ -20,4 +20,10 @@ public interface IGoogleTokenProvider
     /// <param name="token">Token from the user</param>
     /// <returns>True if the token is valid; otherwise, false.</returns>
     Task<bool> IsTokenValid(GoogleTokenResponse token);
+    /// <summary>
+    /// Revokes the given access token
+    /// </summary>
+    /// <param name="accessToken">Acces token from the user</param>
+    /// <returns></returns>
+    Task RevokeToken(string accessToken);
 }

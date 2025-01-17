@@ -167,6 +167,39 @@ namespace DayPlanner.Api.ApiControllers.V1
                 _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
                 return Forbid();
             }
+            catch (InvalidOperationException)
+            {
+                _Logger.LogWarning("Error recieving refresh token for user with id {UserId}", userId);
+                return Forbid();
+            }
+        }
+        [HttpPost("disconnect")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(403)]
+        public async Task<IActionResult> DisconnectGoogleAccount(
+            [FromServices] GoogleCalendarService googleCalendarService,
+            [FromServices] IConfiguration config,
+            [FromQuery] bool deleteImportedAppointments)
+        {
+            var userId = HttpContext.User.GetUserId()!;
+            try
+            {
+                await googleCalendarService.UnSync(userId, deleteImportedAppointments);
+
+                _Logger.LogInformation("Google account disconnected for user with ID {UserId}.", userId);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Error disconnecting Google account for user with ID {UserId}.", userId);
+                return Forbid();
+            }
         }
     }
 }
