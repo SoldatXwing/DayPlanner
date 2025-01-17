@@ -24,6 +24,7 @@ namespace DayPlanner.Api.Extensions
             
             CreateMap<UserRecord, User>()
                 .ForMember(dest => dest.LastSignInTimestamp, opt => opt.MapFrom(src => src.UserMetaData.LastSignInTimestamp));
+            CreateMap<RegisterUserRequest, UserRecordArgs>();
             CreateMap<FirestoreAppointment, Appointment>();
             CreateMap<AppointmentRequest, FirestoreAppointment>()
                         .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow)) //TODO: maybe change createdAt to lastUpdated
