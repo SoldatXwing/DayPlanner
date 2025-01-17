@@ -15,9 +15,27 @@ public class FireStoreUserStore(FirebaseApp app, IMapper mapper) : IUserStore
 
     public async Task<User> CreateAsync(RegisterUserRequest args)
     {
-        ArgumentNullException.ThrowIfNull(args);
-        UserRecord firebaseUser = await _firebaseAuth.CreateUserAsync(_mapper.Map<UserRecordArgs>(args));
-        return _mapper.Map<User>(firebaseUser);
+        try
+        {
+            ArgumentNullException.ThrowIfNull(args);
+            UserRecord firebaseUser = await _firebaseAuth.CreateUserAsync(_mapper.Map<UserRecordArgs>(args));
+            return _mapper.Map<User>(firebaseUser);
+        }
+        catch (FirebaseAuthException ex) //abstract the exception
+            when (ex.AuthErrorCode == AuthErrorCode.EmailAlreadyExists)
+        {
+            throw new InvalidOperationException("Email already in use");          
+        }
+        catch (FirebaseAuthException ex)
+            when (ex.AuthErrorCode == AuthErrorCode.PhoneNumberAlreadyExists)
+        {
+            throw new InvalidOperationException("Phone number already in use");
+        }
+        catch(Exception ex)
+        {
+            throw new InvalidOperationException("Failed to create user", ex);
+        }
+
     }
 
     public async Task<User> GetByIdAsync(string uid)

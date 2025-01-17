@@ -5,10 +5,9 @@ using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Api.Extensions;
 using DayPlanner.Authorization.Exceptions;
-using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.RegularExpressions;
 
 namespace DayPlanner.Api.ApiControllers.V1;
 
@@ -18,7 +17,7 @@ namespace DayPlanner.Api.ApiControllers.V1;
 [ApiController]
 [ApiVersion(1)]
 [Route("v{version:apiVersion}/account")]
-public sealed class AccountController(ILogger<AccountController> logger) : ControllerBase
+public sealed partial class AccountController(ILogger<AccountController> logger) : ControllerBase
 {
     /// <summary>
     /// Gets the logger instance for this controller
@@ -63,7 +62,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
             string token = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
             return Ok(token);
         }
-        catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException)|| ex.GetType() == typeof(InvalidEmailException))
+        catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException) || ex.GetType() == typeof(InvalidEmailException))
         {
             _Logger.LogWarning("Invalid email or password provided for login attempt. Email: {Email}", request.Email);
             return BadRequest(new ApiErrorModel { Error = ex.Message, Message = "Invalid email or password." });
@@ -111,15 +110,42 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
             _Logger.LogWarning("Invalid data. Email and password are required.");
             return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
         }
+        if (request.Password.Length < 6)
+        {
+            _Logger.LogWarning("Password is less than 6 characters long.");
+            return BadRequest(new ApiErrorModel { Message = "Invalid password", Error = "Password must be at least 6 characters long." });
+        }
+        if (!ValidEmail().Match(request.Email).Success)
+        {
+            _Logger.LogWarning("Invalid email provided: {Email}", request.Email);
+            return BadRequest(new ApiErrorModel { Message = "Invalid email", Error = "Invalid email provided." });
+        }
+        if (request.PhoneNumber is not null && !ValidPhoneNumber().Match(request.PhoneNumber).Success)
+        {
+            _Logger.LogWarning("Invalid phone number provided: {PhoneNumber}", request.PhoneNumber);
+            return BadRequest(new ApiErrorModel { Message = "Invalid phone number", Error = "Invalid phone number provided." });
+        }
         try
         {
             User userRecord = await userService.CreateUserAsync(request);
             return Ok(userRecord);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+            when (ex.Message == "Email already in use")
         {
-            _Logger.LogError(ex, "Failed to register user with email {Email}.", request.Email);
-            return BadRequest(new ApiErrorModel { Message = "Failed to register user.", Error = ex.Message });
+            _Logger.LogWarning("Email {Email} is already in use.", request.Email);
+            return BadRequest(new ApiErrorModel { Message = "Invalid Email", Error = "Email is already in use" });
+        }
+        catch (InvalidOperationException ex)
+            when (ex.Message == "Phone number already in use")
+        {
+            _Logger.LogWarning("Phone number {PhoneNumber} is already in use.", request.PhoneNumber);
+            return BadRequest(new ApiErrorModel { Message = "Invalid Phone Number", Error = "Phone number is already in use" });
         }
     }
+    [GeneratedRegex(@"^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$")]
+    private static partial Regex ValidPhoneNumber();
+    [GeneratedRegex(@"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|""(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*"")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])")]
+    private static partial Regex ValidEmail();
+
 }
