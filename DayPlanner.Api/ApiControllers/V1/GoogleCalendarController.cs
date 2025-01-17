@@ -17,8 +17,10 @@ namespace DayPlanner.Api.ApiControllers.V1
     [ApiController]
     [ApiVersion(1)]
     [Route("v{version:apiVersion}/googlecalendar")]
-    public class GoogleCalendarController : Controller
+    public class GoogleCalendarController(ILogger<GoogleCalendarController> logger) : ControllerBase
     {
+        private ILogger<GoogleCalendarController> _Logger { get; } = logger;
+
         /// <summary>
         /// Redirects to Google OAuth2 login
         /// </summary>
@@ -58,6 +60,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         {
             if (string.IsNullOrEmpty(code))
             {
+                _Logger.LogWarning("Error recieving callback: Code is null or empty");
                 return BadRequest(new ApiErrorModel { Message = "Error recieving callback", Error = "Code is null or empty" });
             }
             try
@@ -67,7 +70,11 @@ namespace DayPlanner.Api.ApiControllers.V1
                 if (tokenResponse!.TryGetValue("refresh_token", out var refreshToken) &&
                     !string.IsNullOrEmpty(refreshToken?.ToString()))
                 {
-                    ArgumentException.ThrowIfNullOrEmpty(state);
+                    if (string.IsNullOrEmpty(state))
+                    {
+                        _Logger.LogWarning("State (userId) is null or empty");
+                        ArgumentException.ThrowIfNullOrEmpty(state);
+                    }
                     await googleRefreshTokenService.CreateRefreshToken(state, refreshToken.ToString());
                 }
 
@@ -76,14 +83,17 @@ namespace DayPlanner.Api.ApiControllers.V1
 
             catch (InvalidOperationException ex)
             {
+                _Logger.LogWarning(ex, "Invalid Google callback code provided");
                 return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = ex.Message });
             }
             catch (BadCredentialsException ex)
             {
+                _Logger.LogWarning(ex, "User not found for id: {UserId}", state);
                 return NotFound(new ApiErrorModel { Message = "User not found", Error = ex.Message });
             }
             catch (Exception ex)
             {
+                _Logger.LogError(ex, "Unexpected error while exchanging code for token");
                 return BadRequest(new ApiErrorModel { Message = "Error while exchanging code for token", Error = ex.Message });
             }
 
@@ -149,11 +159,45 @@ namespace DayPlanner.Api.ApiControllers.V1
             try
             {
                 await googleCalendarService.SyncAppointments(userId);
+                _Logger.LogInformation("Google appointments synchronized for user with uid {UserId}", userId);
                 return NoContent();
             }
             catch (UnauthorizedAccessException)
             {
-                //TODO: log no refresh token found with given userId
+                _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+                return Forbid();
+            }
+            catch (InvalidOperationException)
+            {
+                _Logger.LogWarning("Error recieving refresh token for user with id {UserId}", userId);
+                return Forbid();
+            }
+        }
+        [HttpPost("disconnect")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(403)]
+        public async Task<IActionResult> DisconnectGoogleAccount(
+            [FromServices] GoogleCalendarService googleCalendarService,
+            [FromServices] IConfiguration config,
+            [FromQuery] bool deleteImportedAppointments)
+        {
+            var userId = HttpContext.User.GetUserId()!;
+            try
+            {
+                await googleCalendarService.UnSync(userId, deleteImportedAppointments);
+
+                _Logger.LogInformation("Google account disconnected for user with ID {UserId}.", userId);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Error disconnecting Google account for user with ID {UserId}.", userId);
                 return Forbid();
             }
         }

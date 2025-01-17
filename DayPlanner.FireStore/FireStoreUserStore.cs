@@ -16,7 +16,6 @@ public class FireStoreUserStore(FirebaseApp app, IMapper mapper) : IUserStore
     public async Task<User> CreateAsync(RegisterUserRequest args)
     {
         ArgumentNullException.ThrowIfNull(args);
-
         UserRecord firebaseUser = await _firebaseAuth.CreateUserAsync(_mapper.Map<UserRecordArgs>(args));
         return _mapper.Map<User>(firebaseUser);
     }

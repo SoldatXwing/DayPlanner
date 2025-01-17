@@ -1,4 +1,5 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
+﻿using DayPlanner.Abstractions.Enums;
+using DayPlanner.Abstractions.Models.Backend;
 
 namespace DayPlanner.Abstractions.Models.DTO
 {
@@ -10,5 +11,8 @@ namespace DayPlanner.Abstractions.Models.DTO
         public string Location = string.Empty;
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
+        public CalendarOrigin Origin { get; private set; } = CalendarOrigin.Unspecified;
+        public AppointmentRequest() { }
+        public AppointmentRequest(CalendarOrigin calendarOrigin) => Origin = calendarOrigin;
     }
 }

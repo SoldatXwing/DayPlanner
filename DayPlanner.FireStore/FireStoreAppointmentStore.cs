@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DayPlanner.Abstractions.Enums;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.Backend.Extensions;
 using DayPlanner.Abstractions.Models.DTO;
@@ -8,7 +9,7 @@ using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore;
 
-public class FireStoreAppointmentStore(FirestoreDb db, IMapper mapper) : IAppointmentStore
+public class FireStoreAppointmentStore(FirestoreDb db, IMapper mapper) : IAppointmentStore //TODO: log
 {
     private readonly FirestoreDb _fireStoreDb = db;
     private readonly IMapper _mapper = mapper;
@@ -150,6 +151,28 @@ public class FireStoreAppointmentStore(FirestoreDb db, IMapper mapper) : IAppoin
         if (dbAppointments.Any(c => c.UserId != givenUserId))
         {
             throw new UnauthorizedAccessException("User is not authorized to access this appointment.");
+        }
+    }
+
+    public async Task DeleteAppointmentsByCalendarOrigin(string userId, CalendarOrigin origin)
+    {
+        Query query = _fireStoreDb.Collection(_collectionName)
+         .WhereEqualTo("userId", userId)
+         .WhereEqualTo("origin", (int)origin);
+
+        QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+        IEnumerable<FirestoreAppointment> appointments = snapshot.Documents.Select(doc => doc.ConvertTo<FirestoreAppointment>());
+        ThrowIfUnauthorized(userId, appointments);
+
+        if (snapshot.Documents.Count == 0)
+        {
+            return;
+        }
+
+        foreach (DocumentSnapshot doc in snapshot.Documents)
+        {
+            await doc.Reference.DeleteAsync();
         }
     }
 }

@@ -1,4 +1,5 @@
 using DayPlanner.Api.Extensions;
+using DayPlanner.Api.Middleware;
 using DayPlanner.Api.Swagger;
 using Microsoft.Extensions.Options;
 using NLog;
@@ -43,6 +44,10 @@ try
     }
 
     var app = builder.Build();
+
+    // Use TraceId middleware
+    app.UseMiddleware<TraceIdMiddleware>();
+
     app.UseHttpsRedirection();
 
     if (app.Configuration.GetValue<bool?>("Swagger:Enabled") ?? false)
@@ -55,6 +60,7 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
 
     app.MapControllers().RequireAuthorization(defaultPolicy =>
     {

@@ -23,7 +23,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
     /// <summary>
     /// Gets the logger instance for this controller
     /// </summary>
-    public ILogger<AccountController> Logger { get; } = logger;
+    private ILogger<AccountController> _Logger { get; } = logger;
 
     /// <summary>
     /// Gets the login provider data associated with the user of the current session.
@@ -36,10 +36,10 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
     public async Task<IActionResult> GetAccountInformationAsync([FromServices] IUserService userService)
     {
         string userId = HttpContext.User.GetUserId()!;
-        User user = await userService.GetUserByIdAsync(userId);
+        User? user = await userService.GetUserByIdAsync(userId);
         if (user is null)
         {
-            Logger.LogWarning($"User with uid {userId} not found.");
+            _Logger.LogWarning("User with uid {UserId} not found.", userId);
             return NotFound(new ApiErrorModel { Error = $"User with uid {userId} not found.", Message = "User not found" });
         }
 
@@ -65,7 +65,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException)|| ex.GetType() == typeof(InvalidEmailException))
         {
-            Logger.LogWarning($"Invalid email or password. Ex: {ex.Message}");
+            _Logger.LogWarning("Invalid email or password provided for login attempt. Email: {Email}", request.Email);
             return BadRequest(new ApiErrorModel { Error = ex.Message, Message = "Invalid email or password." });
         }
     }
@@ -84,7 +84,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
         string? token = authorization?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
         {
-            Logger.LogWarning("No token provided.");
+            _Logger.LogWarning("No token provided.");
             return Unauthorized();
         }
         string? userId = await authService.VerifyTokenAsync(token);
@@ -108,7 +108,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
     {
         if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
-            Logger.LogWarning("Invalid data. Email and password are required.");
+            _Logger.LogWarning("Invalid data. Email and password are required.");
             return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
         }
         try
@@ -118,7 +118,7 @@ public sealed class AccountController(ILogger<AccountController> logger) : Contr
         }
         catch (Exception ex)
         {
-            Logger.LogError($"Failed to register user. Ex: {ex.Message}");
+            _Logger.LogError(ex, "Failed to register user with email {Email}.", request.Email);
             return BadRequest(new ApiErrorModel { Message = "Failed to register user.", Error = ex.Message });
         }
     }
