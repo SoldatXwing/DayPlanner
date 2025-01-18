@@ -159,7 +159,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         }
 
         [Test]
-        public async Task RegisterUserAsync_InvalidRequest_ReturnsBadRequest()
+        public async Task RegisterUserAsync_MissingEmailAndPassword_ReturnsBadRequest()
         {
             var request = new RegisterUserRequest { Email = "", Password = "" };
 
@@ -169,10 +169,112 @@ namespace DayPlanner.Tests.ApiControllers.V1
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-                var notFoundResult = result as BadRequestObjectResult;
-                Assert.That(notFoundResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Error, Is.EqualTo("Invalid data"));
+                Assert.That(apiError.Message, Is.EqualTo("Email and password are required."));
             });
-
         }
+        [Test]
+        public async Task RegisterUserAsync_ShortPassword_ReturnsBadRequest()
+        {
+            var request = new RegisterUserRequest { Email = "test@example.com", Password = "123" };
+
+            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Error, Is.EqualTo("Password must be at least 6 characters long."));
+            });
+        }
+        [Test]
+        public async Task RegisterUserAsync_InvalidEmailFormat_ReturnsBadRequest()
+        {
+            var request = new RegisterUserRequest { Email = "invalid-email", Password = "test123456" };
+
+            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Error, Is.EqualTo("Invalid email provided."));
+            });
+        }
+        [Test]
+        public async Task RegisterUserAsync_InvalidPhoneNumberFormat_ReturnsBadRequest()
+        {
+            var request = new RegisterUserRequest { Email = "test@example.com", Password = "test123456", PhoneNumber = "12345" };
+
+            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Error, Is.EqualTo("Invalid phone number provided."));
+            });
+        }
+
+
+        [Test]
+        public async Task RegisterUserAsync_EmailAlreadyInUse_ReturnsBadRequest()
+        {
+            var request = new RegisterUserRequest { Email = "existing@email.com", Password = "test123456" };
+
+            _userServiceMock!.Setup(s => s.CreateUserAsync(request))
+                .ThrowsAsync(new InvalidOperationException("Email already in use"));
+
+            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Error, Is.EqualTo("Email is already in use"));
+            });
+        }
+
+        [Test]
+        public async Task RegisterUserAsync_PhoneNumberAlreadyInUse_ReturnsBadRequest()
+        {
+            var request = new RegisterUserRequest
+            {
+                Email = "test@example.com",
+                Password = "test123456",
+                PhoneNumber = "+4918334984823"
+            };
+
+            _userServiceMock!.Setup(s => s.CreateUserAsync(request))
+                .ThrowsAsync(new InvalidOperationException("Phone number already in use"));
+
+            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Error, Is.EqualTo("Phone number is already in use"));
+            });
+        }
+
     }
 }
