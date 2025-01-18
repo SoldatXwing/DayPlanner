@@ -8,14 +8,14 @@
 
     <MudForm @ref="_form" Model="@_model">
         <MudTextField @ref="_emailField" @bind-Value="@_model.Email" @bind-Value:after="OnInputChanged"
-                      Class="mb-2" InputType="InputType.Email" Label="@Localizer["form_Email"]"
+                      Class="mb-2" InputType="InputType.Email" InputMode="InputMode.email" Label="@Localizer["form_Email"]"
                       Validation="@(new EmailAddressAttribute { ErrorMessage = Localizer["form_Email_Invalid"] })"
                       RequiredError="@Localizer["form_Required"]" Required Error="_loginError" />
         <MudTextField @bind-Value="@_model.Password" @bind-Value:after="OnInputChanged"
                       Class="mb-4" InputType="InputType.Password" Label="@Localizer["form_Password"]"
                       RequiredError="@Localizer["form_Required"]" Required ErrorText="@Localizer["form_Invalid"]" Error="_loginError" />
 
-        <MudButton OnClick="Form_OnClickAsync" Color="Color.Primary" Variant="Variant.Filled">@Localizer["form_LoginBtn"]</MudButton>
+        <MudButton OnClick="Form_OnSubmitAsync" Color="Color.Primary" Variant="Variant.Filled">@Localizer["form_LoginBtn"]</MudButton>
     </MudForm>
 
     <MudText Class="mt-5">

@@ -1,1 +1,21 @@
-register
+@using Components.Layout
+@using System.ComponentModel.DataAnnotations;
+
+@layout CentralLayout
+
+<MudPaper Class="px-2 py-3">
+    <MudText Typo="Typo.h4" Align="Align.Center">@Localizer["register"]</MudText>
+
+    <MudForm @ref="_form" Model="@_model">
+        <MudTextField @bind-Value="@_model.DisplayName" Class="mb-2" Label="@Localizer["form_Name"]" />
+        <MudTextField @bind-Value="@_model.Email" @bind-Value:after="FormEmail_OnValueChanged" InputType="InputType.Email" 
+                      InputMode="InputMode.email" Class="mb-2" Label="@Localizer["form_Email"]"
+                      Validation="@(new EmailAddressAttribute { ErrorMessage = Localizer["form_Email_Invalid"] })"
+                      Error="@_emailTaken" ErrorText="@Localizer["form_Email_Taken"]" RequiredError="@Localizer["form_Required"]" Required />
+        <MudTextField @bind-Value="@_model.Password" InputType="InputType.Password" Class="mb-4" Label="@Localizer["form_Password"]"
+                      Validation="@((string value) => ValidatePassword(value))" RequiredError="@Localizer["form_Required"]" Required />
+        <MudTextField @bind-Value="@_model.ConfirmPassword" InputType="InputType.Password" Class="mb-4" Label="@Localizer["form_ConfirmPassword"]"
+                      Validation="@((string value) => ValidateConfirmedPassword(value))" RequiredError="@Localizer["form_Required"]" Required />
+        <MudButton OnClick="Form_OnSubmitAsync" Color="Color.Primary" Variant="Variant.Filled">@Localizer["form_RegisterBtn"]</MudButton>
+    </MudForm>
+</MudPaper>

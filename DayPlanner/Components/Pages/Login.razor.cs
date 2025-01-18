@@ -29,7 +29,7 @@ public sealed partial class Login : ComponentBase
     private readonly UserRequest _model = new();
     private bool _loginError = false;
 
-    private async Task Form_OnClickAsync()
+    private async Task Form_OnSubmitAsync()
     {
         await _emailField.Validate();     // Only email and pwd field existing and pwd can only be validated by login attempt
         if (_emailField.ValidationErrors.Count == 0)
