@@ -78,7 +78,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                     await googleRefreshTokenService.CreateRefreshToken(state, refreshToken.ToString());
                 }
 
-                return Ok(new { Token = tokenResponse["access_token"]!.ToString(), ExpiresIn = tokenResponse["expires_in"]!.ToString() });
+                return NoContent();
             }
 
             catch (InvalidOperationException ex)
