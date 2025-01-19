@@ -10,13 +10,18 @@ internal static class MauiAppBuilderExtensions
     /// <param name="builder">The builder to use.</param>
     /// <param name="settingsFile">The name of the default settings file.</param>
     /// <returns>The builder pipeline.</returns>
-    public static MauiAppBuilder AddJsonConfiguration(this MauiAppBuilder builder, string settingsFile)
+    public static MauiAppBuilder AddJsonConfiguration(this MauiAppBuilder builder, string settingsFile, bool optional = true)
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        Stream settingsStream = typeof(MauiProgram).Assembly.GetManifestResourceStream(settingsFile)
-            ?? throw new FileNotFoundException($"Unable to find settings file {settingsFile} in manifest.");
-        builder.Configuration.AddJsonStream(settingsStream);
+        Stream? settingsStream = typeof(MauiProgram).Assembly.GetManifestResourceStream(settingsFile);
+        if (!optional && settingsStream is null)
+        {
+            throw new FileNotFoundException($"Unable to find json configuration resource '{settingsFile}'.");
+        }
+
+        if (settingsStream is not null)
+            builder.Configuration.AddJsonStream(settingsStream);
 
         return builder;
     }

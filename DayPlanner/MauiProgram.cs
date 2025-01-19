@@ -22,7 +22,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
-            .AddJsonConfiguration($"{typeof(MauiProgram).Assembly.GetName().Name}.appsettings.json")
+            .AddDefaultJsonConfigs()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -39,7 +39,8 @@ public static class MauiProgram
         builder.Services
             .AddAuthorizationCore()
             .AddCascadingAuthenticationState()
-            .AddSingleton<AuthenticationStateProvider, StoreAuthStateProvider>();
+            .AddSingleton<StoreAuthStateProvider>()
+            .AddSingleton<AuthenticationStateProvider>(sp => sp.GetRequiredService<StoreAuthStateProvider>());
 
         builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Localization");
 
@@ -53,6 +54,18 @@ public static class MauiProgram
 #endif
 
         return builder.Build();
+    }
+
+    private static MauiAppBuilder AddDefaultJsonConfigs(this MauiAppBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        string assemblyName = typeof(MauiProgram).Assembly.GetName().Name!;
+        return builder
+            .AddJsonConfiguration($"{assemblyName}.appsettings.json", optional: false)
+            .AddJsonConfiguration($"{assemblyName}.appsettings.{Environment.CurrentEnv}.json")
+            .AddJsonConfiguration($"{assemblyName}.appsettings.{Environment.Platform}.json")
+            .AddJsonConfiguration($"{assemblyName}.appsettings.{Environment.Platform}.{Environment.CurrentEnv}.json");
     }
 
     private static MauiAppBuilder AddRefitClients(this MauiAppBuilder builder)
