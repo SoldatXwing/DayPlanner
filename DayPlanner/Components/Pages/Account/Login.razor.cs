@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using MudBlazor;
 
-namespace DayPlanner.Components.Pages;
+namespace DayPlanner.Components.Pages.Account;
 
 [AllowAnonymous]
-[Route("/login")]
+[Route("/account/login")]
 public sealed partial class Login : ComponentBase
 {
     #region Injections

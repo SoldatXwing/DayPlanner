@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using MudBlazor;
 
-namespace DayPlanner.Components.Pages;
+namespace DayPlanner.Components.Pages.Account;
 
 [AllowAnonymous]
-[Route("/register")]
+[Route("/account/register")]
 public sealed partial class Register : ComponentBase
 {
     #region Injections
@@ -36,6 +36,9 @@ public sealed partial class Register : ComponentBase
         await _form.Validate();
         if (!_form.IsValid)
             return;
+
+        if (string.IsNullOrWhiteSpace(_model.DisplayName))
+            _model.DisplayName = _model.Email![.._model.Email!.IndexOf('@')];
 
         (User? user, ApiErrorModel? error) = await AuthenticationService.RegisterAsync(_model);
         if (user is null)

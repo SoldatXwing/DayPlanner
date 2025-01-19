@@ -1,5 +1,5 @@
-@using Components.Layout
-@using System.ComponentModel.DataAnnotations;
+@using Components.Layouts
+@using System.ComponentModel.DataAnnotations
 
 @layout CentralLayout
 
@@ -18,4 +18,9 @@
                       Validation="@((string value) => ValidateConfirmedPassword(value))" RequiredError="@Localizer["form_Required"]" Required />
         <MudButton OnClick="Form_OnSubmitAsync" Color="Color.Primary" Variant="Variant.Filled">@Localizer["form_RegisterBtn"]</MudButton>
     </MudForm>
+
+    <MudText Class="mt-5">
+        @Localizer["hasAccount"]
+        <MudLink Href="@Routes.Login()">@Localizer["hasAccount_Login"]</MudLink>
+    </MudText>
 </MudPaper>

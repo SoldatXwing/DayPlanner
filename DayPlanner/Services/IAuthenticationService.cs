@@ -18,6 +18,12 @@ internal interface IAuthenticationService
     public Task<User?> LoginAsync(UserRequest request);
 
     /// <summary>
+    /// Tries to logout a currently logged in user.
+    /// </summary>
+    /// <returns>A task to await this operatopn.</returns>
+    public Task LogoutAsync();
+
+    /// <summary>
     /// Tries to register a new user.
     /// </summary>
     /// <remarks>

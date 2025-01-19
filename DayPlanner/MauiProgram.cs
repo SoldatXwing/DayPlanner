@@ -9,6 +9,9 @@ using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using Refit;
+using System.Resources;
+
+[assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]     // Sets the default fallback culture
 
 namespace DayPlanner;
 
@@ -26,16 +29,17 @@ public static class MauiProgram
             });
         builder.Services.AddMauiBlazorWebView();
 
-        builder.Services.AddRefitClient<IDayPlannerApi>(ConfigureDayPlannerRefit, httpClientName: "RefitClient.DayPlanner")
-            .ConfigureHttpClient(client => builder.Configuration.Bind("DayPlannerApi:HttpClient", client));
+        builder.AddRefitClients();
+        builder.Services.AddMemoryCache();
 
-        builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+        builder.Services
+            .AddScoped<IAuthenticationService, DefaultAuthenticationService>()
+            .AddSingleton<IPersistentStore, DefaultPersistentStore>();
 
         builder.Services
             .AddAuthorizationCore()
             .AddCascadingAuthenticationState()
-            .AddSingleton<AuthProvider>()
-            .AddSingleton<AuthenticationStateProvider>(sp => sp.GetRequiredService<AuthProvider>());
+            .AddSingleton<AuthenticationStateProvider, StoreAuthStateProvider>();
 
         builder.Services.AddLocalization(options => options.ResourcesPath = "Resources/Localization");
 
@@ -51,24 +55,24 @@ public static class MauiProgram
         return builder.Build();
     }
 
-    private static RefitSettings? ConfigureDayPlannerRefit(IServiceProvider provider)
+    private static MauiAppBuilder AddRefitClients(this MauiAppBuilder builder)
     {
-        AuthProvider authProvider = provider.GetRequiredService<AuthProvider>();
-        return new()
-        {
-            AuthorizationHeaderValueGetter = async (_, _) =>
+        ArgumentNullException.ThrowIfNull(builder);
+
+        builder.Services
+            .AddRefitClient<IDayPlannerAccountApi>(null, httpClientName: "RefitClient.DayPlannerAccount")
+            .ConfigureHttpClient(client => builder.Configuration.Bind("DayPlannerApi:HttpClient", client));
+        builder.Services
+            .AddRefitClient<IDayPlannerApi>(settingsAction: sp =>
             {
-                AuthenticationState state = await authProvider.GetAuthenticationStateAsync();
-                if (state.User.Identity?.IsAuthenticated ?? false)
+                IPersistentStore store = sp.GetRequiredService<IPersistentStore>();
+                return new()
                 {
-                    _ = state.User.ToUser(out string authToken);
-                    return authToken;
-                }
-                else
-                {
-                    return string.Empty;
-                }
-            }
-        };
+                    AuthorizationHeaderValueGetter = async (_, _) => (await store.GetUserAsync())?.accessToken ?? string.Empty
+                };
+            }, httpClientName: "RefitClient.DayPlanner")
+            .ConfigureHttpClient(client => builder.Configuration.Bind("DayPlannerApi:HttpClient", client));
+
+        return builder;
     }
 }

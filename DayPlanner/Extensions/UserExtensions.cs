@@ -10,14 +10,11 @@ namespace DayPlanner.Extensions;
 
 internal static class UserExtensions
 {
-    private static string _authTokenKey = "authToken";
-
-    public static ClaimsPrincipal ToClaimsPrincipial(this User user, string auth)
+    public static ClaimsPrincipal ToClaimsPrincipial(this User user)
     {
         ArgumentNullException.ThrowIfNull(user);
 
         List<Claim> claims = [
-            new Claim(_authTokenKey, auth),
             new Claim(nameof(User.Uid), user.Uid),
             new Claim(nameof(User.DisplayName), user.DisplayName ?? string.Empty),
             new Claim(nameof(User.Email), user.Email ?? string.Empty),
@@ -34,7 +31,7 @@ internal static class UserExtensions
         return new(new ClaimsIdentity(claims, authenticationType: "API"));
     }
 
-    public static User ToUser(this ClaimsPrincipal claimsPrincipal, out string auth)
+    public static User ToUser(this ClaimsPrincipal claimsPrincipal)
     {
         ArgumentNullException.ThrowIfNull(claimsPrincipal);
 
@@ -46,7 +43,6 @@ internal static class UserExtensions
         if (claimsPrincipal.FindFirst(nameof(User.LastSignInTimestamp)) is Claim lastSignInClaim)
             lastSignIn = DateTime.Parse(lastSignInClaim.Value);
 
-        auth = claimsPrincipal.FindFirst(_authTokenKey)!.Value;
         return new()
         {
             Uid = claimsPrincipal.FindFirst(nameof(User.Uid))!.Value,

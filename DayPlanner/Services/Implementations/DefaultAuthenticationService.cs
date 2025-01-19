@@ -1,14 +1,13 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Authentication;
-using DayPlanner.Extensions;
 using DayPlanner.Refit;
 using Refit;
 using System.Net;
 
 namespace DayPlanner.Services.Implementations;
 
-internal class AuthenticationService(IDayPlannerApi api, AuthProvider authenticationProvider) : IAuthenticationService
+internal class DefaultAuthenticationService(IDayPlannerAccountApi api, IPersistentStore store, StoreAuthStateProvider authStateProvider) : IAuthenticationService
 {
     public async Task<User?> LoginAsync(UserRequest request)
     {
@@ -26,8 +25,16 @@ internal class AuthenticationService(IDayPlannerApi api, AuthProvider authentica
         }
 
         User user = await api.GetCurrentUserAsync(authToken);
-        await authenticationProvider.SetUserAsync(user.ToClaimsPrincipial(authToken));
+        await store.SetUserAsync(user, authToken);
+        authStateProvider.NotifyUserChanged();
+
         return user;
+    }
+
+    public async Task LogoutAsync()
+    {
+        await store.RemoveUserAsync();
+        authStateProvider.NotifyUserChanged();
     }
 
     public async Task<(User? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request)
@@ -47,7 +54,9 @@ internal class AuthenticationService(IDayPlannerApi api, AuthProvider authentica
             return (null, errorModel);
         }
 
-        await authenticationProvider.SetUserAsync(user.ToClaimsPrincipial(authToken));
+        await store.SetUserAsync(user, authToken);
+        authStateProvider.NotifyUserChanged();
+
         return (user, null);
     }
 }

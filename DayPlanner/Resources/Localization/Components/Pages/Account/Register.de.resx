@@ -139,4 +139,10 @@
   <data name="form_Email_Taken" xml:space="preserve">
     <value>Diese E-Mail Adresse wird bereits verwendet. Bitte nutzen Sie eine andere.</value>
   </data>
+  <data name="hasAccount" xml:space="preserve">
+    <value>Sie haben schon ein Konto?</value>
+  </data>
+  <data name="hasAccount_Login" xml:space="preserve">
+    <value>Melden Sie sich an</value>
+  </data>
 </root>
