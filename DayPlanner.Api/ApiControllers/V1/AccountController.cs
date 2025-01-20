@@ -51,6 +51,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// <param name="jwtProvider"></param>
     /// <returns>The new token, valid for 1 hour</returns>
     [HttpPost("refresh")]
+    [AllowAnonymous] // This endpoint is allowed to be accessed without a valid token
     [ProducesResponseType<ApiErrorModel>(400)]
     [ProducesResponseType(200)]
     public async Task<IActionResult> RefreshTokenAsync(string refreshToken,
