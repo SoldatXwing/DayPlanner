@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using Refit;
+using Serilog;
+using Serilog.Settings.Configuration;
 using System.Resources;
 
 [assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]     // Sets the default fallback culture
@@ -19,10 +21,13 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+        //AppContext.SetSwitch("System.Reflection.NullabilityInfoContext.IsSupported", true);     // Required otherwise app craches instantly on startup
+
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
             .AddDefaultJsonConfigs()
+            .ConfigureLogging()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -50,7 +55,6 @@ public static class MauiProgram
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
-        builder.Logging.AddDebug();
 #endif
 
         return builder.Build();
@@ -85,6 +89,29 @@ public static class MauiProgram
                 };
             }, httpClientName: "RefitClient.DayPlanner")
             .ConfigureHttpClient(client => builder.Configuration.Bind("DayPlannerApi:HttpClient", client));
+
+        return builder;
+    }
+
+    private static MauiAppBuilder ConfigureLogging(this MauiAppBuilder builder)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+
+        builder.Logging.ClearProviders();
+
+        Serilog.Core.Logger logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .WriteTo.File(Path.Combine(FileSystem.AppDataDirectory, "logs", ".log"), rollingInterval: RollingInterval.Day)
+#if DEBUG
+            .WriteTo.Debug()
+#endif
+#if ANDROID
+            .WriteTo.Sink(new AndroidEventSink())
+#elif WINDOWS
+            .WriteTo.EventLog("DayPlanner")
+#endif
+            .CreateLogger();
+        builder.Logging.AddSerilog(logger);
 
         return builder;
     }

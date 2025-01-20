@@ -38,7 +38,7 @@ public sealed partial class MainLayout : LayoutComponentBase, IDisposable
     private string GetUserAvatar()
     {
         if (_user is null)
-            throw new InvalidOperationException();
+            return string.Empty;
 
         char[] chars = !string.IsNullOrWhiteSpace(_user.DisplayName)
             ? [.. _user.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(part => part[0]).Take(2)]
