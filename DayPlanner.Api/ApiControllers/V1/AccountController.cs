@@ -44,7 +44,34 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
 
         return Ok(user);
     }
-
+    /// <summary>
+    /// Refreshes the current login token.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token</param>
+    /// <param name="jwtProvider"></param>
+    /// <returns>The new token, valid for 1 hour</returns>
+    [HttpPost("refresh")]
+    [ProducesResponseType<ApiErrorModel>(400)]
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> RefreshTokenAsync(string refreshToken,
+        IJwtProvider jwtProvider)
+    {
+        if(string.IsNullOrEmpty(refreshToken))
+        {
+            _Logger.LogWarning("No refresh token provided.");
+            return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Refresh token is required." });
+        }
+        try
+        {
+            var token = await jwtProvider.RefreshIdTokenAsync(refreshToken);
+            return Ok(token);
+        }
+        catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException))
+        {
+            _Logger.LogWarning("Invalid refresh token provided.");
+            return BadRequest(new ApiErrorModel { Error = "Error", Message = "Invalid refresh token." });
+        }
+    }
     /// <summary>
     /// Tries to sign in for a user.
     /// </summary>
@@ -64,8 +91,8 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         try
         {
-            string token = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
-            return Ok(token);
+            var (token, refreshToken) = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
+            return Ok(new { token, refreshToken});
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException) || ex.GetType() == typeof(InvalidEmailException))
         {

@@ -79,15 +79,24 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new UserRequest { Email = "test@example.com", Password = "password123" };
             string token = "mock-jwt-token";
-            _jwtProviderMock!.Setup(p => p.GetForCredentialsAsync(request.Email, request.Password)).ReturnsAsync(token);
+            string refreshToken = "mock-refresh-token";
+            _jwtProviderMock!
+                .Setup(p => p.GetForCredentialsAsync(request.Email, request.Password))
+                .ReturnsAsync((token, refreshToken));
 
             var result = await _controller!.LoginAsync(request, _jwtProviderMock.Object);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.InstanceOf<OkObjectResult>());
+
                 var okResult = result as OkObjectResult;
-                Assert.That(okResult!.Value, Is.EqualTo(token));
+                Assert.That(okResult, Is.Not.Null);
+
+                var resultTuple = okResult!.Value as (string token, string refreshToken)?;
+                Assert.That(resultTuple, Is.Not.Null);
+                Assert.That(resultTuple!.Value.token, Is.EqualTo(token));
+                Assert.That(resultTuple.Value.refreshToken, Is.EqualTo(refreshToken));
             });
         }
 

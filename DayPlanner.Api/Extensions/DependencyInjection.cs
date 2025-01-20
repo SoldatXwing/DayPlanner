@@ -86,12 +86,21 @@ namespace DayPlanner.Api.Extensions
             string googleCalendarTokenUri = configuration!["GoogleCalendar:TokenUri"] ?? throw new("Google token URI is required.");
             string googleClientId = configuration["GoogleCalendar:client_Id"] ?? throw new("Google client ID is required.");
             string googleClientSecret = configuration["GoogleCalendar:client_Secret"] ?? throw new("Google client secret is required.");
-            string authTokenUri = configuration["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
+            string authTokenUri = configuration!["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
+            string refreshTokenUri = configuration["Authentication:RefreshTokenUri"] ?? throw new("Refresh token URI is required.");
 
-            services.AddHttpClient<IJwtProvider, JwtProvider>(httpClient =>
+            // HttpClient for Authentication Token
+            services.AddHttpClient("AuthTokenClient", client =>
             {
-                httpClient.BaseAddress = new Uri(authTokenUri);
+                client.BaseAddress = new Uri(authTokenUri);
             });
+
+            // HttpClient for Refresh Token
+            services.AddHttpClient("RefreshTokenClient", client =>
+            {
+                client.BaseAddress = new Uri(refreshTokenUri);
+            });
+            services.AddScoped<IJwtProvider, JwtProvider>();
 
             // Google-related services
             services.AddScoped<IGoogleTokenProvider>(sp =>
