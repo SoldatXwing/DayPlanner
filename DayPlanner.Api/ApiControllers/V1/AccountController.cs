@@ -57,6 +57,11 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     [ProducesResponseType<ApiErrorModel>(400)]
     public async Task<IActionResult> LoginAsync([FromBody] UserRequest request, [FromServices] IJwtProvider jwtProvider)
     {
+        if(string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+        {
+            _Logger.LogWarning("Invalid data. Email and password are required.");
+            return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
+        }
         try
         {
             string token = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
@@ -80,6 +85,11 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     [HttpPost("validate")]
     public async Task<IActionResult> ValidateTokenAsync([FromHeader] string authorization, [FromServices] IAuthService authService)
     {
+        if (string.IsNullOrEmpty(authorization))
+        {
+            _Logger.LogWarning("No authorization header provided.");
+            return Unauthorized();
+        }
         string? token = authorization?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
         {

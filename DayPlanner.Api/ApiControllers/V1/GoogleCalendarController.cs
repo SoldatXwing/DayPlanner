@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
-using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Api.Extensions;
 using DayPlanner.ThirdPartyImports.Google_Calendar;
@@ -20,6 +19,8 @@ namespace DayPlanner.Api.ApiControllers.V1
     public class GoogleCalendarController(ILogger<GoogleCalendarController> logger) : ControllerBase
     {
         private ILogger<GoogleCalendarController> _Logger { get; } = logger;
+        private const string GoogleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+        private const string GoogleTokenUrl = "https://oauth2.googleapis.com/token";
 
         /// <summary>
         /// Redirects to Google OAuth2 login
@@ -32,7 +33,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         public IActionResult Login([FromServices] IConfiguration config)
         {
             var userId = HttpContext.User.GetUserId()!;
-            var authUrl = $"https://accounts.google.com/o/oauth2/v2/auth" +
+            var authUrl = $"{GoogleAuthUrl}" +
                           $"?client_id={config["GoogleCalendar:client_Id"]}" +
                           $"&redirect_uri={config["GoogleCalendar:redirect_uri"]}" +
                           $"&response_type=code" +
@@ -118,7 +119,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                 grant_type = "authorization_code"
             };
 
-            var response = await client.PostAsJsonAsync("https://oauth2.googleapis.com/token", request);
+            var response = await client.PostAsJsonAsync(GoogleTokenUrl, request);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -154,7 +155,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         [ProducesResponseType(204)]
         [ProducesResponseType(403)]
         public async Task<IActionResult> SyncAppointments([FromServices] GoogleCalendarService googleCalendarService, [FromServices] IGoogleTokenService tokenService)
-        { 
+        {
             var userId = HttpContext.User.GetUserId()!;
             try
             {
@@ -173,13 +174,18 @@ namespace DayPlanner.Api.ApiControllers.V1
                 return Forbid();
             }
         }
+        /// <summary>
+        /// Disconnects the Google account from the user account.
+        /// </summary>
+        /// <param name="googleCalendarService">Service to unsync the user</param>
+        /// <param name="deleteImportedAppointments">Indicates if imported appointments should be removed</param>
+        /// <returns></returns>
         [HttpPost("disconnect")]
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(403)]
         public async Task<IActionResult> DisconnectGoogleAccount(
             [FromServices] GoogleCalendarService googleCalendarService,
-            [FromServices] IConfiguration config,
             [FromQuery] bool deleteImportedAppointments)
         {
             var userId = HttpContext.User.GetUserId()!;
