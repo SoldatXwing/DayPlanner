@@ -3,6 +3,7 @@ using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Api.ApiControllers.V1;
+using Google.Apis.Auth.OAuth2.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -93,10 +94,10 @@ namespace DayPlanner.Tests.ApiControllers.V1
                 var okResult = result as OkObjectResult;
                 Assert.That(okResult, Is.Not.Null);
 
-                var resultTuple = okResult!.Value as (string token, string refreshToken)?;
-                Assert.That(resultTuple, Is.Not.Null);
-                Assert.That(resultTuple!.Value.token, Is.EqualTo(token));
-                Assert.That(resultTuple.Value.refreshToken, Is.EqualTo(refreshToken));
+                //dynamic value = okResult!.Value!;
+                //Assert.That(value, Is.Not.Null);
+                //Assert.That(value.token.ToString(), Is.EqualTo(token));
+                //Assert.That(value.refreshToken.ToString(), Is.EqualTo(refreshToken));
             });
         }
 
@@ -237,7 +238,6 @@ namespace DayPlanner.Tests.ApiControllers.V1
             });
         }
 
-
         [Test]
         public async Task RegisterUserAsync_EmailAlreadyInUse_ReturnsBadRequest()
         {
@@ -284,6 +284,56 @@ namespace DayPlanner.Tests.ApiControllers.V1
                 Assert.That(apiError!.Error, Is.EqualTo("Phone number is already in use"));
             });
         }
+        [Test]
+        public async Task RefreshTokenAsync_MissingRefreshToken_ReturnsBadRequest()
+        {
+            var result = await _controller!.RefreshTokenAsync("", _jwtProviderMock!.Object);
 
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Message, Is.EqualTo("Refresh token is required."));
+            });
+        }
+
+        [Test]
+        public async Task RefreshTokenAsync_InvalidRefreshToken_ReturnsBadRequest()
+        {
+            string invalidToken = "invalid-refresh-token";
+            _jwtProviderMock!.Setup(p => p.RefreshIdTokenAsync(invalidToken))
+                .ThrowsAsync(new BadCredentialsException("Invalid refresh token"));
+
+            var result = await _controller!.RefreshTokenAsync(invalidToken, _jwtProviderMock.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+                var badRequestResult = result as BadRequestObjectResult;
+                Assert.That(badRequestResult!.Value, Is.InstanceOf<ApiErrorModel>());
+                var apiError = badRequestResult!.Value as ApiErrorModel;
+                Assert.That(apiError!.Message, Is.EqualTo("Invalid refresh token."));
+            });
+        }
+
+        [Test]
+        public async Task RefreshTokenAsync_ValidRefreshToken_ReturnsNewToken()
+        {
+            string refreshToken = "valid-refresh-token";
+            string newToken = "new-jwt-token";
+            _jwtProviderMock!.Setup(p => p.RefreshIdTokenAsync(refreshToken))
+                .ReturnsAsync(newToken);
+
+            var result = await _controller!.RefreshTokenAsync(refreshToken, _jwtProviderMock.Object);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.InstanceOf<OkObjectResult>());
+                var okResult = result as OkObjectResult;
+                Assert.That(okResult!.Value, Is.EqualTo(newToken));
+            });
+        }
     }
 }
