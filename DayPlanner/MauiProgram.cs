@@ -10,7 +10,6 @@ using MudBlazor.Services;
 using MudBlazor.Translations;
 using Refit;
 using Serilog;
-using Serilog.Settings.Configuration;
 using System.Resources;
 
 [assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]     // Sets the default fallback culture
@@ -21,7 +20,9 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        //AppContext.SetSwitch("System.Reflection.NullabilityInfoContext.IsSupported", true);     // Required otherwise app craches instantly on startup
+#if ANDROID
+        AppContext.SetSwitch("System.Reflection.NullabilityInfoContext.IsSupported", true);     // Required otherwise app craches on android
+#endif
 
         var builder = MauiApp.CreateBuilder();
         builder
