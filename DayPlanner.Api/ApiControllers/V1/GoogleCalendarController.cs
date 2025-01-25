@@ -3,6 +3,7 @@ using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Api.Extensions;
+using DayPlanner.Authorization.Services;
 using DayPlanner.ThirdPartyImports.Google_Calendar;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,27 +20,19 @@ namespace DayPlanner.Api.ApiControllers.V1
     public class GoogleCalendarController(ILogger<GoogleCalendarController> logger) : ControllerBase
     {
         private ILogger<GoogleCalendarController> _Logger { get; } = logger;
-        private const string GoogleAuthUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-        private const string GoogleTokenUrl = "https://oauth2.googleapis.com/token";
-
+       
         /// <summary>
         /// Redirects to Google OAuth2 login
         /// </summary>
-        /// <param name="config"></param>
+        /// <param name="googleOAuthService">Service to interact with google OAuth</param>
         /// <response code="200">Success - Returns the authorization url for the user</response>
         [HttpGet("login")]
         [ProducesResponseType<string>(200)]
         [Authorize]
-        public IActionResult Login([FromServices] IConfiguration config)
+        public IActionResult Login([FromServices] GoogleOAuthService googleOAuthService)
         {
             var userId = HttpContext.User.GetUserId()!;
-            var authUrl = $"{GoogleAuthUrl}" +
-                          $"?client_id={config["GoogleCalendar:client_Id"]}" +
-                          $"&redirect_uri={config["GoogleCalendar:redirect_uri"]}" +
-                          $"&response_type=code" +
-                          $"&scope=https://www.googleapis.com/auth/calendar.readonly" +
-                          $"&access_type=offline" +
-                          $"&state={userId}";
+            var authUrl = googleOAuthService.GenerateCalendarAuthUrl(userId); //Provide user id as state
             return Ok(authUrl);
 
         }/// <summary>
@@ -47,7 +40,7 @@ namespace DayPlanner.Api.ApiControllers.V1
          /// </summary>
          /// <param name="code">The authorization code received from Google.</param>
          /// <param name="state">The user ID of the user who initiated the login.</param>
-         /// <param name="config">The configuration settings containing Google client details.</param>
+         /// <param name="googleOAuthService">Service to interact with google OAuth</param>
          /// <param name="googleRefreshTokenService">The service used to store the refresh token for the user.</param>
          /// <returns>The access token if successful, or an error message if unsuccessful.</returns>
         [HttpGet("callback")]
@@ -56,7 +49,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         [AllowAnonymous] // Reason: Google sends the request to this endpoint, not the user
         public async Task<IActionResult> Callback([FromQuery] string code,
             [FromQuery] string state, //state is the user id
-            [FromServices] IConfiguration config,
+            [FromServices] GoogleOAuthService googleOAuthService,
             [FromServices] IGoogleTokenService googleRefreshTokenService)
         {
             if (string.IsNullOrEmpty(code))
@@ -66,7 +59,7 @@ namespace DayPlanner.Api.ApiControllers.V1
             }
             try
             {
-                var tokenResponse = await ExchangeCodeForToken(code, config);
+                var tokenResponse = await googleOAuthService.AuthenticateCalendar(code);
                 //First time login
                 if (tokenResponse!.TryGetValue("refresh_token", out var refreshToken) &&
                     !string.IsNullOrEmpty(refreshToken?.ToString()))
@@ -100,40 +93,7 @@ namespace DayPlanner.Api.ApiControllers.V1
 
         }
 
-        /// <summary>
-        /// Exchanges the authorization code for an access token from Google's OAuth2 endpoint.
-        /// </summary>
-        /// <param name="code">The authorization code.</param>
-        /// <param name="config">The configuration settings containing Google client details.</param>
-        /// <returns>A JObject containing the access token and other response data.</returns>
-        private static async Task<JObject?> ExchangeCodeForToken(string code,
-            IConfiguration config)
-        {
-            using var client = new HttpClient();
-            var request = new
-            {
-                code,
-                client_id = config["GoogleCalendar:client_Id"]!,
-                client_secret = config["GoogleCalendar:client_Secret"]!,
-                redirect_uri = config["GoogleCalendar:redirect_uri"]!,
-                grant_type = "authorization_code"
-            };
-
-            var response = await client.PostAsJsonAsync(GoogleTokenUrl, request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = JObject.Parse(await response.Content.ReadAsStringAsync());
-                if (error["error_description"]!.ToString() == "Malformed auth code.")
-                {
-                    throw new InvalidOperationException("Invalid code provided");
-                }
-                throw new Exception("Error while exchanging code for token");
-            }
-            var content = JObject.Parse(await response.Content.ReadAsStringAsync());
-            return content;
-        }
-
+       
         /// <summary>Synchronizes appointments from Google Calendar for the authenticated user.</summary>
         /// <param name="googleCalendarService">
         /// The service that interacts with the Google Calendar API to sync appointments.
@@ -188,6 +148,7 @@ namespace DayPlanner.Api.ApiControllers.V1
             [FromServices] GoogleCalendarService googleCalendarService,
             [FromQuery] bool deleteImportedAppointments)
         {
+
             var userId = HttpContext.User.GetUserId()!;
             try
             {
