@@ -89,7 +89,7 @@ namespace DayPlanner.Authorization.Services
         }
         public async Task<JObject?> AuthenticateAccountWithFirebaseViaIdp(string requestUri, string idToken)
         {
-            if (Uri.TryCreate(requestUri, UriKind.Absolute, out var uri))
+            if (Uri.TryCreate(requestUri, UriKind.Absolute, out _))
             {
                 var request = new
                 {
