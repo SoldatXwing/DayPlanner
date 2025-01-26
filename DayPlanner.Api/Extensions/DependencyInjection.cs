@@ -75,6 +75,7 @@ namespace DayPlanner.Api.Extensions
                 });
 
             builder.Services.AddAuthorization();
+            builder.Services.AddScoped<GoogleOAuthService>();
         }
 
         private static void AddCustomServices(IServiceCollection services, FirebaseApp app, FirestoreDb db)
@@ -83,15 +84,31 @@ namespace DayPlanner.Api.Extensions
             var serviceProvider = services.BuildServiceProvider();
             var configuration = serviceProvider.GetService<IConfiguration>();
 
-            string googleCalendarTokenUri = configuration!["GoogleCalendar:TokenUri"] ?? throw new("Google token URI is required.");
-            string googleClientId = configuration["GoogleCalendar:client_Id"] ?? throw new("Google client ID is required.");
-            string googleClientSecret = configuration["GoogleCalendar:client_Secret"] ?? throw new("Google client secret is required.");
-            string authTokenUri = configuration["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
+            string googleCalendarTokenUri = configuration!["GoogleConfig:TokenUri"] ?? throw new("Google token URI is required.");
+            string googleClientId = configuration["GoogleConfig:client_Id"] ?? throw new("Google client ID is required.");
+            string googleClientSecret = configuration["GoogleConfig:client_Secret"] ?? throw new("Google client secret is required.");
 
-            services.AddHttpClient<IJwtProvider, JwtProvider>(httpClient =>
+            string authTokenUri = configuration!["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
+            string refreshTokenUri = configuration["Authentication:RefreshTokenUri"] ?? throw new("Refresh token URI is required.");
+            string idpUri = configuration["Authentication:IdpUri"] ?? throw new("Idp URI is required.");
+
+            // HttpClient for Authentication Token
+            services.AddHttpClient("AuthTokenClient", client =>
             {
-                httpClient.BaseAddress = new Uri(authTokenUri);
+                client.BaseAddress = new Uri(authTokenUri);
             });
+
+            // HttpClient for Refresh Token
+            services.AddHttpClient("RefreshTokenClient", client =>
+            {
+                client.BaseAddress = new Uri(refreshTokenUri);
+            });
+            // HttpClient for Idp
+            services.AddHttpClient("IdpClient", client =>
+            {
+                client.BaseAddress = new Uri(idpUri);
+            });
+            services.AddScoped<IJwtProvider, JwtProvider>();
 
             // Google-related services
             services.AddScoped<IGoogleTokenProvider>(sp =>

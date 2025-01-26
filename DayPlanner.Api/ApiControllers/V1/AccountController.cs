@@ -5,6 +5,7 @@ using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Api.Extensions;
 using DayPlanner.Authorization.Exceptions;
+using DayPlanner.Authorization.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
@@ -44,7 +45,35 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
 
         return Ok(user);
     }
-
+    /// <summary>
+    /// Refreshes the current login token.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token</param>
+    /// <param name="jwtProvider"></param>
+    /// <returns>The new token, valid for 1 hour</returns>
+    [HttpPost("refresh")]
+    [AllowAnonymous] // This endpoint is allowed to be accessed without a valid token
+    [ProducesResponseType<ApiErrorModel>(400)]
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> RefreshTokenAsync(string refreshToken,
+        IJwtProvider jwtProvider)
+    {
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            _Logger.LogWarning("No refresh token provided.");
+            return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Refresh token is required." });
+        }
+        try
+        {
+            var token = await jwtProvider.RefreshIdTokenAsync(refreshToken);
+            return Ok(token);
+        }
+        catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException))
+        {
+            _Logger.LogWarning("Invalid refresh token provided.");
+            return BadRequest(new ApiErrorModel { Error = "Error", Message = "Invalid refresh token." });
+        }
+    }
     /// <summary>
     /// Tries to sign in for a user.
     /// </summary>
@@ -57,10 +86,15 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     [ProducesResponseType<ApiErrorModel>(400)]
     public async Task<IActionResult> LoginAsync([FromBody] UserRequest request, [FromServices] IJwtProvider jwtProvider)
     {
+        if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
+        {
+            _Logger.LogWarning("Invalid data. Email and password are required.");
+            return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
+        }
         try
         {
-            string token = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
-            return Ok(token);
+            var (token, refreshToken) = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
+            return Ok(new { token, refreshToken });
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException) || ex.GetType() == typeof(InvalidEmailException))
         {
@@ -68,7 +102,53 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
             return BadRequest(new ApiErrorModel { Error = ex.Message, Message = "Invalid email or password." });
         }
     }
-
+    /// <summary>
+    /// Return the url where a user can login via google
+    /// </summary>
+    /// <param name="googleOAuthService">Service to interact with google auth</param>
+    /// <returns>The url</returns>
+    [AllowAnonymous]
+    [HttpGet("login/google")]
+    public IActionResult GoogleLogin([FromServices] GoogleOAuthService googleOAuthService)
+    {
+        var url = googleOAuthService.GenerateAccountAuthUrl();
+        return Ok(url);
+    }
+    /// <summary>
+    /// Retreives google callback, and return exchanged token from given code
+    /// </summary>
+    /// <param name="code">Googles code</param>
+    /// <param name="googleOAuthService">Service to interact with google auth</param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("login/google/callback")]
+    public async Task<IActionResult> GoogleCallback([FromQuery] string code, [FromServices] GoogleOAuthService googleOAuthService)
+    {
+        if (string.IsNullOrEmpty(code))
+        {
+            _Logger.LogWarning("Error recieving callback: Code is null or empty");
+            return BadRequest(new ApiErrorModel { Message = "Error recieving callback", Error = "Code is null or empty" });
+        }
+        try
+        {
+            var tokenResponse = await googleOAuthService.AuthenticateAccount(code);
+            if (tokenResponse is null)
+            {
+                _Logger.LogWarning("Invalid Google callback code provided");
+                return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = "Invalid Google callback code provided" });
+            }
+            var request = HttpContext.Request;
+            string dynamicRequestUri = $"{request.Scheme}://{request.Host}";
+            var idpToken = await googleOAuthService.AuthenticateAccountWithFirebaseViaIdp(dynamicRequestUri, tokenResponse["id_token"]!.ToString());
+            //TODO: Redirect to maui app with needed token data
+            return Ok(idpToken!.ToString()); //Just demo purposes
+        }
+        catch (InvalidOperationException ex)
+        {
+            _Logger.LogWarning(ex, "Invalid Google callback code provided");
+            return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = ex.Message });
+        }
+    }
     /// <summary>
     /// Validates the current login token.
     /// </summary>
@@ -80,6 +160,11 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     [HttpPost("validate")]
     public async Task<IActionResult> ValidateTokenAsync([FromHeader] string authorization, [FromServices] IAuthService authService)
     {
+        if (string.IsNullOrEmpty(authorization))
+        {
+            _Logger.LogWarning("No authorization header provided.");
+            return Unauthorized();
+        }
         string? token = authorization?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
         {
@@ -143,8 +228,16 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
             return BadRequest(new ApiErrorModel { Message = "Invalid Phone Number", Error = "Phone number is already in use" });
         }
     }
+    /// <summary>
+    /// Validates a phone number.
+    /// </summary>
+    /// <returns>True if valid, otherwise false</returns>
     [GeneratedRegex(@"^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$")]
     private static partial Regex ValidPhoneNumber();
+    /// <summary>
+    /// Validates an email address.
+    /// </summary>
+    /// <returns>True if valid, otherwise false</returns>
     [GeneratedRegex(@"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|""(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*"")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])")]
     private static partial Regex ValidEmail();
 

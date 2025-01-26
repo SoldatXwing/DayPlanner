@@ -25,8 +25,13 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
     /// <response code="200">Success - Returns a collection with the appointments</response>
     [HttpGet]
     [ProducesResponseType<PaginatedResponse<Appointment>>(200)]
-    public async Task<IActionResult> GetAllAppointmentsAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAllAppointmentsAsync([FromQuery] int page = 0, [FromQuery] int pageSize = 10)
     {
+        if (page < 0 || pageSize < 1)
+        {
+            _Logger.LogWarning("Invalid pagination parameters: Page {Page} and PageSize {PageSize} are invalid.", page, pageSize);
+            return BadRequest(new ApiErrorModel { Message = "Invalid pagination parameters", Error = "Page has to satrt with 0, and PageSize must be greater than 1." });
+        }
         string userId = HttpContext.User.GetUserId()!;
         try
         {
