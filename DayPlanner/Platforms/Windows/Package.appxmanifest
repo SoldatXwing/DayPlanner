@@ -38,6 +38,11 @@
         <uap:InitialRotationPreference>
           <uap:Rotation Preference="landscape"/></uap:InitialRotationPreference>
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.protocol">
+          <uap:Protocol Name="dayplanner"/>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

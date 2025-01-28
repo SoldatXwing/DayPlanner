@@ -71,4 +71,29 @@ internal class DefaultAuthenticationService(IDayPlannerAccountApi api, IPersiste
 
         return (user, null);
     }
+
+    public async Task<(User? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(token);
+        try
+        {
+            User user = await api.GetCurrentUserAsync(token);
+            await store.SetUserAsync(user, token);
+            authStateProvider.NotifyUserChanged();
+
+            return (user, null);
+        }
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+        {
+            ApiErrorModel? errorModel = await ex.GetContentAsAsync<ApiErrorModel>();
+            return (null, errorModel);
+        }
+
+    }
+
+    public async Task<bool> IsLoggedInAsync()
+    {
+        var user = await store.GetUserAsync();        
+        return user != null;
+    }
 }

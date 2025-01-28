@@ -37,4 +37,16 @@ internal interface IAuthenticationService
     /// </summary>
     /// <returns>The url</returns>
     public Task<string> GetGoogleAuthUrlAsync();
+    /// <summary>
+    /// Tries to sign in a user via google.
+    /// </summary>
+    /// <param name="token">Token provided from google</param>
+    /// <returns>The signed in user. If <c>null</c> the credentials were invalid.</returns>
+    public Task<(User? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token);
+    /// <summary>
+    /// Checks if a user is currently logged in.
+    /// </summary>
+    /// <returns>True if logged in, otherwise false</returns>
+    Task<bool> IsLoggedInAsync();
+
 }
