@@ -43,4 +43,10 @@ internal interface IDayPlannerAccountApi
     /// <returns>The created user.</returns>
     [Post("/account/register")]
     Task<User> RegisterUserAsync([Body] RegisterUserRequest request);
+    /// <summary>
+    /// Return the url where the user can authenticate himself via google
+    /// </summary>
+    /// <returns>The Url</returns>
+    [Get("/account/login/google")]
+    Task<string> GetGoogleAuthUrl();
 }

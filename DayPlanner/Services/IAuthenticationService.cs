@@ -32,4 +32,9 @@ internal interface IAuthenticationService
     /// <param name="request">The register request</param>
     /// <returns>If the registration is successful <c>user</c> is not null. If an error occurred while the registration <c>error</c> contains the returned error.</returns>
     public Task<(User? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request);
+    /// <summary>
+    /// Returns the auth url where the user can authenticate himself via google
+    /// </summary>
+    /// <returns>The url</returns>
+    public Task<string> GetGoogleAuthUrlAsync();
 }

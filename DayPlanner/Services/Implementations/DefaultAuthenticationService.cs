@@ -1,7 +1,9 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Authentication;
+using DayPlanner.Models;
 using DayPlanner.Refit;
+using Newtonsoft.Json;
 using Refit;
 using System.Net;
 
@@ -13,22 +15,32 @@ internal class DefaultAuthenticationService(IDayPlannerAccountApi api, IPersiste
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        string authToken;
+        TokenResponse tokenData;
         try
         {
-            authToken = await api.LoginAsync(request);
-            authToken = authToken.Trim('"');     // Idk why but when the request is send using Refit a single " char is leading and trailing in front of the payload.
+            tokenData = JsonConvert.DeserializeObject<TokenResponse>(await api.LoginAsync(request))!;
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
         {
             return null;
         }
 
-        User user = await api.GetCurrentUserAsync(authToken);
-        await store.SetUserAsync(user, authToken);
+        User user = await api.GetCurrentUserAsync(tokenData.Token);
+        await store.SetUserAsync(user, tokenData.Token);
         authStateProvider.NotifyUserChanged();
 
         return user;
+    }
+    public async Task<string> GetGoogleAuthUrlAsync()
+    {
+        try
+        {
+            return await api.GetGoogleAuthUrl();
+        }
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+        {
+            return null!;
+        }
     }
 
     public async Task LogoutAsync()

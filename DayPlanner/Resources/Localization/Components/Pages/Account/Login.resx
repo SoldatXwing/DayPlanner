@@ -118,36 +118,36 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="login" xml:space="preserve">
-    <value>Login</value>
+    <value />
   </data>
   <data name="form_Email" xml:space="preserve">
-    <value>email</value>
+    <value />
   </data>
   <data name="form_Password" xml:space="preserve">
-    <value>password</value>
+    <value />
   </data>
   <data name="form_LoginBtn" xml:space="preserve">
-    <value>Login</value>
+    <value />
   </data>
   <data name="noAccount" xml:space="preserve">
-    <value>No account yet?</value>
+    <value />
   </data>
   <data name="noAccount_Register" xml:space="preserve">
-    <value>Sign up now!</value>
+    <value />
   </data>
   <data name="form_Required" xml:space="preserve">
-    <value>This field shouldn't be empty</value>
+    <value />
   </data>
   <data name="form_Email_Invalid" xml:space="preserve">
-    <value>Please enter a valid email address</value>
+    <value />
   </data>
   <data name="form_Invalid" xml:space="preserve">
-    <value>The email address or the password are invalid.</value>
+    <value />
   </data>
   <data name="form_LoginDivider" xml:space="preserve">
-    <value>Or</value>
+    <value />
   </data>
   <data name="form_LoginGoogleBtn" xml:space="preserve">
-    <value>Login via Google</value>
+    <value />
   </data>
 </root>

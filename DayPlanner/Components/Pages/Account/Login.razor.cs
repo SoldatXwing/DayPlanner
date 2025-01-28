@@ -29,6 +29,7 @@ public sealed partial class Login : ComponentBase
     private readonly UserRequest _model = new();
     private bool _loginError = false;
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "<Pending>")]
     private async Task Form_OnSubmitAsync()
     {
         await _emailField.Validate();     // Only email and pwd field existing and pwd can only be validated by login attempt
@@ -46,6 +47,11 @@ public sealed partial class Login : ComponentBase
         }
     }
 
+    private async Task GoogleLogin_OnClickAsync()
+    {
+        string authUrl = await AuthenticationService.GetGoogleAuthUrlAsync();
+        await Browser.Default.OpenAsync(authUrl.Trim('"'), BrowserLaunchMode.SystemPreferred);
+    }
     private void OnInputChanged()
     {
         _loginError = false;
