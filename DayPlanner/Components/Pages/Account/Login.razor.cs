@@ -57,15 +57,13 @@ public sealed partial class Login : ComponentBase
         _loginError = false;
         _form.ResetValidation();
     }
-    protected async override Task OnAfterRenderAsync(bool firstRender) // Primary needed for google sign in
+
+    protected async override Task OnInitializedAsync()
     {
-        if (firstRender)
+        bool isLoggedIn = await AuthenticationService.IsLoggedInAsync(); // Directly nesting in if isnt working
+        if (isLoggedIn)
         {
-            bool isLoggedIn = await AuthenticationService.IsLoggedInAsync(); // Directly nesting in if isnt working
-            if (isLoggedIn)
-            {
-                NavigationManager.NavigateToDashboard();
-            }
+            NavigationManager.NavigateToDashboard();
         }
     }
 }
