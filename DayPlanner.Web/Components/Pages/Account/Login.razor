@@ -1,0 +1,48 @@
+@using System.ComponentModel.DataAnnotations
+@using DayPlanner.Abstractions.Models.DTO
+
+
+<RadzenTemplateForm TItem="UserRequest" Data=_model Submit="Form_OnSubmitAsync">
+    <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
+
+        <RadzenRow>
+            <RadzenFormField Text="@Localizer["form_Email"]" Style="width: 100%;">
+                <RadzenTextBox Name="Email" @bind-Value="@_model.Email" Style="width: 100%;" />
+            </RadzenFormField>
+            <RadzenRequiredValidator Component="Email"
+                                     Text="Email is required"
+                                     Popup="false"
+                                     Style="display: block; margin-top: -14px;" />
+            <RadzenEmailValidator Component="Email"
+                                  Text="@Localizer["form_Email_Invalid"]"
+                                  Popup="false"
+                                  Style="display: block; margin-top: -14px;" />
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenFormField Text="@Localizer["form_Password"]" Variant="@Variant.Outlined" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="@_model.Password"
+                                   Name="Password"
+                                   Visible="@(!_passwordNotVisible)" />
+
+                    <RadzenPassword @bind-Value="@_model.Password"
+                                    Name="Password"
+                                    Visible="@_passwordNotVisible" />
+                </ChildContent>
+                <End>
+                    <RadzenButton Icon="@(_passwordNotVisible ? "visibility" : "visibility_off")"
+                                  Click="() => _passwordNotVisible = !_passwordNotVisible"
+                                  Variant="Variant.Text" Size="ButtonSize.Small" />
+                </End>
+            </RadzenFormField>
+            <RadzenRequiredValidator Component="Password"
+                                     Text="Password is required"
+                                     Popup="false"
+                                     Style="display: block; margin-top: -14px;" />
+        </RadzenRow>
+        <RadzenRow>
+            <RadzenButton Text="@Localizer["form_LoginBtn"]" ButtonStyle="ButtonStyle.Primary" class="mt-2" ButtonType="ButtonType.Submit" />
+        </RadzenRow>
+    </RadzenCard>
+
+</RadzenTemplateForm>

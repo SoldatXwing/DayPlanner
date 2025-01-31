@@ -1,4 +1,9 @@
 using DayPlanner.Web.Components;
+using DayPlanner.Web.Extensions;
+using DayPlanner.Web.Services;
+using DayPlanner.Web.Services.Implementations;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +12,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddRefitClients(builder.Configuration);
 builder.Services.AddRadzenComponents();
 
+builder.Services.AddScoped<DefaultAuthenticationService>()
+    .AddScoped<IAuthenticationService>(sp => sp.GetRequiredService<DefaultAuthenticationService>())
+    .AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<DefaultAuthenticationService>());
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+}).AddCookie(IdentityConstants.ApplicationScheme);
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Localization");
+
+builder.Services.AddAuthorizationCore();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

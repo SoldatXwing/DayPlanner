@@ -2,24 +2,28 @@
 <RadzenComponents @rendermode="InteractiveAuto" />
 <RadzenLayout>
     <RadzenHeader>
-        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-            <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
-            <RadzenLabel Text="DayPlanner" />
-            <RadzenAppearanceToggle />
-        </RadzenStack>
+        <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
+                <RadzenLabel Text="DayPlanner" />
+                <RadzenAppearanceToggle />
+            </RadzenStack>
+        </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>      
     </RadzenHeader>
-    <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
-        <RadzenPanelMenu>
-            <RadzenPanelMenuItem Text="Home" Icon="home" />
-            <RadzenPanelMenuItem Text="Users" Icon="account_box" />
-        </RadzenPanelMenu>
-        <div class="rz-p-4">
-            
-        </div>
-    </RadzenSidebar>
+    <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+        <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
+            <RadzenPanelMenu>
+                <RadzenPanelMenuItem Text="Home" Icon="home" />
+                <RadzenPanelMenuItem Text="Users" Icon="account_box" />
+            </RadzenPanelMenu>
+            <div class="rz-p-4">
+            </div>
+        </RadzenSidebar>
+    </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+
     <RadzenBody>
         <div class="rz-p-4">
-            Body
+            @Body
         </div>
     </RadzenBody>
     <RadzenFooter Style="background-color: #2c3e50; color: white; border-top: 2px solid #3498db; padding: 0;">

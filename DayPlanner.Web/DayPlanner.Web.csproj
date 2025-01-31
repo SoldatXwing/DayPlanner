@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <PackageReference Include="Radzen.Blazor" Version="5.9.6" />
+    <PackageReference Include="Refit" Version="8.0.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+    <PackageReference Include="Suiram1.BlazorRoutesGenerator" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
