@@ -154,7 +154,7 @@
     <value>Bitte bestätigen Sie das Passwort indem Sie es erneut eingeben</value>
   </data>
   <data name="form_Password_TooShort" xml:space="preserve">
-    <value>Das Passwort muss mindestens aus {0} Zeichen bestehen.</value>
+    <value>Das Passwort muss mindestens aus 6 Zeichen bestehen.</value>
   </data>
   <data name="form_Email_Taken" xml:space="preserve">
     <value>Diese E-Mail Adresse wird bereits verwendet. Bitte nutzen Sie eine andere.</value>

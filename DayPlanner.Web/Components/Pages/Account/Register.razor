@@ -14,10 +14,6 @@
                                @bind-Value="@_model.DisplayName"
                                Style="width: 100%;" />
             </RadzenFormField>
-            <RadzenRequiredValidator Component="DisplayName"
-                                     Text="@Localizer["form_Required"]"
-                                     Popup="false"
-                                     Style="display: block; margin-top: -14px;" />
         </RadzenRow>
 
         <!-- Email -->
@@ -25,7 +21,6 @@
             <RadzenFormField Text="@Localizer["form_Email"]" Style="width: 100%;">
                 <RadzenTextBox Name="Email"
                                @bind-Value="@_model.Email"
-                               Change="FormEmail_OnValueChanged"
                                Style="width: 100%;" />
             </RadzenFormField>
             <RadzenRequiredValidator Component="Email"
@@ -51,7 +46,8 @@
                     <RadzenTextBox @bind-Value="@_model.Password"
                                    Name="Password"
                                    Visible="@(!_passwordNotVisible)"
-                                   Style="width: 100%;" />
+                                   Style="width: 100%;"
+                                   />
 
                     <RadzenPassword @bind-Value="@_model.Password"
                                     Name="Password"
@@ -69,11 +65,12 @@
                                      Text="@Localizer["form_Required"]"
                                      Popup="false"
                                      Style="display: block; margin-top: -14px;" />
-            @* <RadzenCustomValidator Component="Password"
-                                   Popup="false"
-                                   Text="@Localizer["form_PasswordInvalid"]"
-                                   Style="display: block; margin-top: -14px;"                                 
-                                   Validator="@((args) => args.IsValid = ValidatePassword(args.Value?.ToString()) == null)" /> *@
+            <RadzenLengthValidator Component="Password"
+                Min="6"
+                                   Text=@Localizer["form_Password_TooShort"]
+                Popup=false
+                Style="display: block; margin-top: -14px;" />
+
         </RadzenRow>
 
         <!-- Confirm Password -->
@@ -98,13 +95,11 @@
                 </End>
             </RadzenFormField>
 
-            <!-- Required validator -->
             <RadzenRequiredValidator Component="ConfirmPassword"
                                      Text="@Localizer["form_Required"]"
                                      Popup="false"
                                      Style="display: block; margin-top: -14px;" />
 
-            <!-- Compare validator must use CompareOperator.Equals for "must match" -->
             <RadzenCompareValidator Visible=@(!string.IsNullOrEmpty(_model.ConfirmPassword))
                                     Value=@_model.Password
                                     Component="ConfirmPassword"
@@ -126,9 +121,14 @@
 
     </RadzenTemplateForm>
 
-    <!-- Link to Login -->
     <RadzenText class="mt-5">
         @Localizer["hasAccount"]
         <RadzenLink Path="@Routes.Login()">@Localizer["hasAccount_Login"]</RadzenLink>
     </RadzenText>
+    @if (_errorMessage is not "")
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Close="@ChangeErrorState">
+            @_errorMessage
+        </RadzenAlert>
+    }
 </RadzenCard>

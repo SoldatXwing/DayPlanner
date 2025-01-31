@@ -24,34 +24,26 @@ public sealed partial class Register : ComponentBase
     #endregion
 
 
-    //private readonly RegisterUserModel _model = new() { Password = string.Empty };
-    private bool _emailTaken = false;
+    private string _errorMessage = string.Empty;
     private RegisterUserModel _model = new() { Password = string.Empty };
-    private bool _confirmPasswordNotVisible = false;
-    private bool _passwordNotVisible = false;
+    private bool _confirmPasswordNotVisible = true;
+    private bool _passwordNotVisible = true;
 
     private async Task Form_OnSubmitAsync()
     {
-        //await _form.Validate();
-        //if (!_form.IsValid)
-        //    return;
+        if (string.IsNullOrWhiteSpace(_model.DisplayName))
+            _model.DisplayName = _model.Email![.._model.Email!.IndexOf('@')];
 
-        //if (string.IsNullOrWhiteSpace(_model.DisplayName))
-        //    _model.DisplayName = _model.Email![.._model.Email!.IndexOf('@')];
-
-        (User? user, ApiErrorModel? error) = await AuthenticationService.RegisterAsync(null);
+        (User? user, ApiErrorModel? error) = await AuthenticationService.RegisterAsync(_model);
         if (user is null)
         {
             if (error?.Error == "Email is already in use")
             {
-                _emailTaken = true;
+                _errorMessage = Localizer["form_Email_Taken"];
             }
             else
             {
-                //await DialogService.ShowMessageBox(
-                //title: Localizer["error_Title"],
-                //message: Localizer["error_Message", error?.Error ?? "Unknown"],
-                //yesText: Localizer["error_ConfirmBtn"]);
+                _errorMessage = Localizer["error_Message", error?.Error ?? "Unknown"];
             }
         }
         else
@@ -60,11 +52,7 @@ public sealed partial class Register : ComponentBase
         }
     }
 
-    private void FormEmail_OnValueChanged()
-    {
-        _emailTaken = false;
-        //_form.ResetValidation();
-    }
+    private void ChangeErrorState() => _errorMessage = string.Empty;
 
     private string? ValidatePassword(string password)
     {

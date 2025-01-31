@@ -24,8 +24,15 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
     options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
     options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-}).AddCookie(IdentityConstants.ApplicationScheme);
-
+})
+.AddCookie(IdentityConstants.ApplicationScheme, options =>
+{
+    options.LoginPath = "/account/login"; // Login-Seite
+    options.LogoutPath = "/account/logout"; // Logout-Seite
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie-Ablaufzeit
+    options.SlidingExpiration = true; // Verlängert Cookie bei Aktivität
+    options.AccessDeniedPath = "/account/access-denied"; // Zugriff verweigert
+});
 builder.Services.AddLocalization(options => options.ResourcesPath = "Localization");
 
 builder.Services.AddAuthorizationCore();

@@ -154,7 +154,7 @@
     <value>Please confirm the password by entering it again</value>
   </data>
   <data name="form_Password_TooShort" xml:space="preserve">
-    <value>The password have to be at least {0} characters long.</value>
+    <value>The password have to be at least 6 characters long.</value>
   </data>
   <data name="form_Email_Taken" xml:space="preserve">
     <value>This email address is already in use. Please use a different one.</value>

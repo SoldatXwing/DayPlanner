@@ -1,16 +1,15 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
+@using DayPlanner.Web.Components.Layout
+
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(Program).Assembly">
         <Found Context="routeData">
-            <LayoutView Layout="typeof(Layout.MainLayout)">
-                <AuthorizeRouteView RouteData="routeData">
-                    <NotAuthorized>
-                        <RedirectToLogin />
-                    </NotAuthorized>
-                </AuthorizeRouteView>
-            </LayoutView>
-
-            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p>Page not found. <a href="/home">Go back to Home</a></p>
+            </LayoutView>
+        </NotFound>
     </Router>
 </CascadingAuthenticationState>

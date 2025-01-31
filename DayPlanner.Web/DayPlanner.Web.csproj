@@ -17,4 +17,10 @@
     <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="Components\Pages\Home.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
 </Project>
