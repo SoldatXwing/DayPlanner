@@ -6,15 +6,7 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>20ac6602-2836-4ce0-9305-ffdcb9c5a09c</UserSecretsId>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="FireBase\serviceAccountKey.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
+	
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

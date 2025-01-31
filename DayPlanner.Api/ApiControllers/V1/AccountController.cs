@@ -139,9 +139,11 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
             }
             var request = HttpContext.Request;
             string dynamicRequestUri = $"{request.Scheme}://{request.Host}";
+
             var idpToken = await googleOAuthService.AuthenticateAccountWithFirebaseViaIdp(dynamicRequestUri, tokenResponse["id_token"]!.ToString());
-            //TODO: Redirect to maui app with needed token data
-            return Ok(idpToken!.ToString()); //Just demo purposes
+
+            var redirectUri = $"dayplanner://googleAuth?token={Uri.EscapeDataString(idpToken!["idToken"]!.ToString())}&refreshToken={Uri.EscapeDataString(idpToken!["refreshToken"]!.ToString())}";
+            return Redirect(redirectUri);
         }
         catch (InvalidOperationException ex)
         {

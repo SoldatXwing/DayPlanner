@@ -1,0 +1,16 @@
+﻿@using DayPlanner.Components.Layouts
+@using Microsoft.AspNetCore.Components.Authorization
+
+<Router AppAssembly="@typeof(MauiProgram).Assembly">
+    <Found Context="routeData">
+        <LayoutView Layout="typeof(MainLayout)">
+            <AuthorizeRouteView RouteData="routeData">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </LayoutView>
+
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>
