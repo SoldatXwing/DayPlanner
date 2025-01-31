@@ -27,30 +27,27 @@ public sealed partial class Login : ComponentBase
 
     private bool _passwordNotVisible = true;
     private UserRequest _model = new UserRequest();
+    private bool _loginError = false;
     private async Task Form_OnSubmitAsync()
     {
         if (true)
         {       
-            User? user = await AuthenticationService.LoginAsync(null);
-
+            User? user = await AuthenticationService.LoginAsync(_model);
             if (user is not null)
             {
-                Navigation.NavigateTo("/");
+                Navigation.NavigateToDashboard();
             }
             else
             {
-                //_loginError = true;
+                _loginError = true;
             }
         }
     }
 
     private async Task GoogleLogin_OnClickAsync()
     {
-        //await AuthenticationService.LoginViaGoogleAsync();
+        Navigation.NavigateTo(await AuthenticationService.GetGoogleAuthUrlAsync());
     }
+    private void ChangeErrorState() => _loginError = false;
 
-    private void OnInputChanged(object value)
-    {
-        //_loginError = false; // Fehleranzeige zurücksetzen, wenn der Nutzer etwas eingibt
-    }
 }
