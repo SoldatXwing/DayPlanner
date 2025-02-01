@@ -169,7 +169,10 @@
     <value>Jetzt planen</value>
   </data>
   <data name="SupportAvailability" xml:space="preserve">
-    <value>Support verfügbar</value>
+    <value>Verfügbarer Support</value>
+  </data>
+  <data name="TryNow" xml:space="preserve">
+    <value>Jetzt testen</value>
   </data>
   <data name="WelcomeToDayPlanner" xml:space="preserve">
     <value>Wilkommen bei DayPlanner</value>

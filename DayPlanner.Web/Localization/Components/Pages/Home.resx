@@ -171,6 +171,9 @@
   <data name="SupportAvailability" xml:space="preserve">
     <value />
   </data>
+  <data name="TryNow" xml:space="preserve">
+    <value />
+  </data>
   <data name="WelcomeToDayPlanner" xml:space="preserve">
     <value />
   </data>
