@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AIIntegration" xml:space="preserve">
+    <value>KI-Integration</value>
+  </data>
+  <data name="AIIntegrationDescription" xml:space="preserve">
+    <value>Wir arbeiten an einem KI-gestützten Assistenten, der dir hilft, deinen Tag noch effizienter zu planen!</value>
+  </data>
+  <data name="DayPlannerDescription" xml:space="preserve">
+    <value>DayPlanner ist eine leistungsstarke Webanwendung, die dir hilft, deinen Tag strukturiert und effizient zu planen.</value>
+  </data>
+  <data name="Feature1" xml:space="preserve">
+    <value>Erstelle Aufgaben</value>
+  </data>
+  <data name="Feature1Description" xml:space="preserve">
+    <value>Erstelle und organisiere deine täglichen Aufgaben in wenigen Sekunden.</value>
+  </data>
+  <data name="Feature2" xml:space="preserve">
+    <value>Setze Erinnerungen</value>
+  </data>
+  <data name="Feature2Description" xml:space="preserve">
+    <value>Setze Erinnerungen, damit du keine wichtigen Aufgaben verpasst.</value>
+  </data>
+  <data name="Feature3" xml:space="preserve">
+    <value>Verbinde dich mit anderen Diensten</value>
+  </data>
+  <data name="Feature3Description" xml:space="preserve">
+    <value>Verbinde dich mit anderen Diensten wie z.B. Google Calendar und synchronisiere deine Termine nahtlos.</value>
+  </data>
+  <data name="GetStarted" xml:space="preserve">
+    <value>Loslegen</value>
+  </data>
+  <data name="GetStartedDescription" xml:space="preserve">
+    <value>Fange noch heute an, deinen Tag zu planen. Schnell, einfach und kostenlos!</value>
+  </data>
+  <data name="Introduction" xml:space="preserve">
+    <value>Plane deinen Tag mühelos und bleibe produktiv mit DayPlanner.</value>
+  </data>
+  <data name="KeyFeatures" xml:space="preserve">
+    <value>Hauptfunktionen</value>
+  </data>
+  <data name="ReadyToStart" xml:space="preserve">
+    <value>Bereit loszulegen?</value>
+  </data>
+  <data name="ReadyToStartDescription" xml:space="preserve">
+    <value>Melde dich an oder erstelle dir ein Konto</value>
+  </data>
+  <data name="SatisfactionRate" xml:space="preserve">
+    <value>Zufriedenheitsrate</value>
+  </data>
+  <data name="StartPlanning" xml:space="preserve">
+    <value>Jetzt planen</value>
+  </data>
+  <data name="SupportAvailability" xml:space="preserve">
+    <value>Support verfügbar</value>
+  </data>
+  <data name="WelcomeToDayPlanner" xml:space="preserve">
+    <value>Wilkommen bei DayPlanner</value>
+  </data>
+  <data name="WhatIsDayPlanner" xml:space="preserve">
+    <value>Was ist DayPlanner?</value>
+  </data>
+  <data name="YearsExperience" xml:space="preserve">
+    <value>Jahre Entwicklungserfahrung</value>
+  </data>
+</root>
