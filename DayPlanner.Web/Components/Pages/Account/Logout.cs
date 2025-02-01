@@ -17,6 +17,6 @@ public sealed class Logout : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         await AuthenticationService.LogoutAsync();
-        NavigationManager.NavigateToLogin();
+        NavigationManager.NavigateToHome();
     }
-}
+}   
