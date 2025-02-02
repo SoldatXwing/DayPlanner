@@ -24,14 +24,15 @@ namespace DayPlanner.Authorization.Services
                          $"&state={state}";
             return url;
         }
-        public string GenerateAccountAuthUrl()
+        public string GenerateAccountAuthUrl(string os)
         {
             string url = $"{Config["GoogleConfig:auth_url"]}" +
                          $"?client_id={Config["GoogleConfig:client_Id"]}" +
                          $"&redirect_uri={Config["GoogleConfig:AccountLogin:redirect_uri"]}" +
                          $"&response_type=code" +
                          $"&scope={Uri.EscapeDataString("email profile")}" +
-                         $"&access_type=offline";
+                         $"&access_type=offline" +
+                         $"&state={os}";
             return url;
         }
         /// <summary>

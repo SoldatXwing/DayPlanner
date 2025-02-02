@@ -48,5 +48,5 @@ internal interface IDayPlannerAccountApi
     /// </summary>
     /// <returns>The Url</returns>
     [Get("/account/login/google")]
-    Task<string> GetGoogleAuthUrl();
+    Task<string> GetGoogleAuthUrl([Query] string os);
 }

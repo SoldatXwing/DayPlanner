@@ -75,9 +75,7 @@ namespace DayPlanner.Web.Services.Implementations
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
 
             return user;
-        }
-        
-
+        }     
         public async Task LogoutAsync()
         {
             await _localStorage.DeleteAsync(AuthTokenKey);
@@ -85,7 +83,6 @@ namespace DayPlanner.Web.Services.Implementations
             _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
-
         public async Task<(User? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -108,33 +105,30 @@ namespace DayPlanner.Web.Services.Implementations
 
             return (user, null);
         }
-
         public async Task<string> GetGoogleAuthUrlAsync()
         {
-            return await _api.GetGoogleAuthUrl();
+            return await _api.GetGoogleAuthUrl("web");
         }
-
         public async Task<(User? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token)
         {
-            //try
-            //{
-            //    var userId = await _api.ValidateTokenAsync(token);
-            //    if (string.IsNullOrEmpty(userId))
-            //        return (null, new ApiErrorModel { Message = "Invalid Google token" });
+            try
+            {
+                var userId = await _api.ValidateTokenAsync(token);
+                if (string.IsNullOrEmpty(userId))
+                    return (null, new ApiErrorModel { Message = "Invalid Google token" });
 
-            //    var user = await _api.GetCurrentUserAsync(token);
-            //    await SaveUserAndTokenAsync(user, token);
+                var user = await _api.GetCurrentUserAsync(token);
+                await SaveUserAndTokenAsync(user, token);
 
-            //    _currentUser = new ClaimsPrincipal(CreateIdentity(user, token));
-            //    NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+                _currentUser = new ClaimsPrincipal(user.ToClaimsPrincipial());
+                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
 
-            //    return (user, null);
-            //}
-            //catch (ApiException ex)
-            //{
-            //    return (null, new ApiErrorModel { Message = ex.Content });
-            //}
-            return (null, null);
+                return (user, null);
+            }
+            catch (ApiException ex)
+            {
+                return (null, new ApiErrorModel { Message = ex.Content! });
+            }
         }
 
         private async Task SaveUserAndTokenAsync(User user, string token)

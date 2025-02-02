@@ -46,7 +46,8 @@ public sealed partial class Login : ComponentBase
 
     private async Task GoogleLogin_OnClickAsync()
     {
-        Navigation.NavigateTo(await AuthenticationService.GetGoogleAuthUrlAsync());
+        string url = await AuthenticationService.GetGoogleAuthUrlAsync();
+        Navigation.NavigateTo(url.Trim('"'), true);
     }
     private void ChangeErrorState() => _loginError = false;
 

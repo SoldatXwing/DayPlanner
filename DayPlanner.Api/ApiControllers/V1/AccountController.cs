@@ -106,12 +106,14 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// Return the url where a user can login via google
     /// </summary>
     /// <param name="googleOAuthService">Service to interact with google auth</param>
+    /// <param name="os">The OS of for the redirect</param>
     /// <returns>The url</returns>
     [AllowAnonymous]
     [HttpGet("login/google")]
-    public IActionResult GoogleLogin([FromServices] GoogleOAuthService googleOAuthService)
+    public IActionResult GoogleLogin([FromQuery] string os,//OS is used as state, and represents the maui app or web app
+        [FromServices] GoogleOAuthService googleOAuthService)
     {
-        var url = googleOAuthService.GenerateAccountAuthUrl();
+        var url = googleOAuthService.GenerateAccountAuthUrl(os);
         return Ok(url);
     }
     /// <summary>
@@ -119,10 +121,15 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// </summary>
     /// <param name="code">Googles code</param>
     /// <param name="googleOAuthService">Service to interact with google auth</param>
+    /// <param name="configuration">Config</param>
+    /// <param name="state">The OS of for the redirect</param>
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("login/google/callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string code, [FromServices] GoogleOAuthService googleOAuthService)
+    public async Task<IActionResult> GoogleCallback([FromQuery] string state, 
+        [FromQuery] string code,
+        [FromServices] GoogleOAuthService googleOAuthService,
+        [FromServices] IConfiguration configuration)
     {
         if (string.IsNullOrEmpty(code))
         {
@@ -142,7 +149,14 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
 
             var idpToken = await googleOAuthService.AuthenticateAccountWithFirebaseViaIdp(dynamicRequestUri, tokenResponse["id_token"]!.ToString());
 
-            var redirectUri = $"dayplanner://googleAuth?token={Uri.EscapeDataString(idpToken!["idToken"]!.ToString())}&refreshToken={Uri.EscapeDataString(idpToken!["refreshToken"]!.ToString())}";
+            string redirectUri;
+            string queryParams = $"?token={Uri.EscapeDataString(idpToken!["idToken"]!.ToString())}&refreshToken={Uri.EscapeDataString(idpToken!["refreshToken"]!.ToString())}";
+            if (state == "maui")
+                redirectUri = configuration["FrontEnd:Maui:GoogleCallBackUrl"] + queryParams;
+            else if (state == "web")
+                redirectUri = configuration["FrontEnd:Web:GoogleCallBackUrl"] + queryParams;
+            else
+                return BadRequest(new ApiErrorModel { Message = "Invalid OS", Error = "Invalid OS provided" });
             return Redirect(redirectUri);
         }
         catch (InvalidOperationException ex)

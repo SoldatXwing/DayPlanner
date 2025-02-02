@@ -45,6 +45,7 @@
     <RadzenRow>
         <RadzenButton ButtonStyle="ButtonStyle.Warning"
                       class="mt-3"
+                      Click=@(async () => await GoogleLogin_OnClickAsync())
                       ButtonType="ButtonType.Submit"
                       Style="width: 100%;">
             <div style="display: flex; align-items: center; justify-content: center; width: 100%;">

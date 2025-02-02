@@ -35,7 +35,7 @@ internal class DefaultAuthenticationService(IDayPlannerAccountApi api, IPersiste
     {
         try
         {
-            return await api.GetGoogleAuthUrl();
+            return await api.GetGoogleAuthUrl("maui");
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
         {
