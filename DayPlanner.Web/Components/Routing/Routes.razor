@@ -1,15 +1,27 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using DayPlanner.Web.Components.Layout
-
-<CascadingAuthenticationState>
+﻿﻿@using Microsoft.AspNetCore.Components.Authorization
+<Microsoft.AspNetCore.Components.Authorization.CascadingAuthenticationState>
     <Router AppAssembly="@typeof(Program).Assembly">
         <Found Context="routeData">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <h1>Sorry</h1>
+                    <p>You're not authorized to reach this page.</p>
+                    <p>You may need to log in as a different user.</p>
+                </NotAuthorized>
+                <Authorizing>
+                    <h1>Authentication in progress</h1>
+                    <p>Only visible while authentication is in progress.</p>
+                </Authorizing>
+            </AuthorizeRouteView>
         </Found>
         <NotFound>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p>Page not found. <a href="/home">Go back to Home</a></p>
-            </LayoutView>
+            <CascadingAuthenticationState>
+                <LayoutView Layout="@typeof(Layout.MainLayout)">
+                    <h1>Sorry</h1>
+                    <p>Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </CascadingAuthenticationState>
         </NotFound>
     </Router>
-</CascadingAuthenticationState>
+
+</Microsoft.AspNetCore.Components.Authorization.CascadingAuthenticationState>

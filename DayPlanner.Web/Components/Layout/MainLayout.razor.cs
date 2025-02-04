@@ -133,7 +133,7 @@ namespace DayPlanner.Web.Components.Layout
             await ProtectedLocalStore.SetAsync("analyticsCookies", analyticsCookies);
             await ProtectedLocalStore.SetAsync("marketingCookies", marketingCookies);
         }
-        private void Logout() => Routes.Logout();
+        private void Logout() => Navigation.NavigateTo("/account/logout",true);
         void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => TooltipService.Open(elementReference, "Some content", options);
         private string GetDynamicColor()
         {

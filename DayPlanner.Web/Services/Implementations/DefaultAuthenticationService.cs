@@ -1,89 +1,59 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
+using DayPlanner.Web.Extensions;
 using DayPlanner.Web.Models;
 using DayPlanner.Web.Refit;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Newtonsoft.Json;
 using Refit;
 using System.Net;
 using System.Security.Claims;
-using DayPlanner.Web.Extensions;
 
 namespace DayPlanner.Web.Services.Implementations
 {
-    internal class DefaultAuthenticationService(IDayPlannerAccountApi api, ProtectedLocalStorage securedStorage, ILogger<DefaultAuthenticationService> logger) : AuthenticationStateProvider, IAuthenticationService
+    internal class DefaultAuthenticationService(IDayPlannerAccountApi api,
+        ProtectedSessionStorage securedStorage,
+        ILogger<DefaultAuthenticationService> logger) : IAuthenticationService
     {
         private readonly IDayPlannerAccountApi _api = api;
-        private readonly ProtectedLocalStorage _localStorage = securedStorage;
+        private readonly ProtectedSessionStorage _sessionStorage = securedStorage;
         private readonly ILogger<DefaultAuthenticationService> _logger = logger;
         private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
 
-        private const string AuthTokenKey = "authToken";
-        private const string UserKey = "user";
+        private const string UserSessionKey = "userSession";
 
-        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-        {
-            try
-            {
-                var token = await _localStorage.GetAsync<string>(AuthTokenKey);
-
-                var user = await _localStorage.GetAsync<User>(UserKey);
-
-                if (string.IsNullOrWhiteSpace(token.Value) || user.Value == null)
-                {
-                    return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-                }
-
-                try
-                {
-                    _currentUser = new ClaimsPrincipal(user.Value.ToClaimsPrincipial());
-                }
-                catch
-                {
-                    _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-                    await _localStorage.DeleteAsync(AuthTokenKey);
-                    await _localStorage.DeleteAsync(UserKey);
-                }
-
-                return new AuthenticationState(_currentUser);
-            }
-            catch
-            {
-                return new(new());
-            }
-           
-        }
-        public async Task<User?> LoginAsync(UserRequest request)
+        public async Task<UserSession?> LoginAsync(UserRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             TokenResponse tokenData;
+            User user;
             try
             {
                 tokenData = await api.LoginAsync(request);
+                user = await _api.GetCurrentUserAsync(tokenData.Token);
             }
             catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
             {
                 return null;
             }
 
-            var user = await _api.GetCurrentUserAsync(tokenData.Token);
-            await SaveUserAndTokenAsync(user, tokenData.Token);
+            var userSession = new UserSession()
+            {
+                Uid = user.Uid,
+                Token = tokenData.Token,
+                RefreshToken = tokenData.RefreshToken,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                PhotoUrl = user.PhotoUrl,
+                LastSignInTimestamp = user.LastSignInTimestamp,
+                EmailVerified = user.EmailVerified
+            };
 
-            _currentUser = new ClaimsPrincipal(user.ToClaimsPrincipial());
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-
-            return user;
-        }     
-        public async Task LogoutAsync()
-        {
-            await _localStorage.DeleteAsync(AuthTokenKey);
-            await _localStorage.DeleteAsync(UserKey);
-            _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            return userSession;
         }
-        public async Task<(User? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request)
+        public async Task<(UserSession? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
 
@@ -99,17 +69,26 @@ namespace DayPlanner.Web.Services.Implementations
                 ApiErrorModel? errorModel = await ex.GetContentAsAsync<ApiErrorModel>();
                 return (null, errorModel);
             }
+            var userSession = new UserSession()
+            {
+                Uid = user.Uid,
+                Token = tokenData.Token,
+                RefreshToken = tokenData.RefreshToken,
+                DisplayName = user.DisplayName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                PhotoUrl = user.PhotoUrl,
+                LastSignInTimestamp = user.LastSignInTimestamp,
+                EmailVerified = user.EmailVerified
+            };
 
-            await SaveUserAndTokenAsync(user, tokenData.Token);
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-
-            return (user, null);
+            return (userSession, null);
         }
         public async Task<string> GetGoogleAuthUrlAsync()
         {
             return await _api.GetGoogleAuthUrl("web");
         }
-        public async Task<(User? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token)
+        public async Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token)
         {
             try
             {
@@ -118,12 +97,21 @@ namespace DayPlanner.Web.Services.Implementations
                     return (null, new ApiErrorModel { Message = "Invalid Google token" });
 
                 var user = await _api.GetCurrentUserAsync(token);
-                await SaveUserAndTokenAsync(user, token);
+                var userSession = new UserSession()
+                {
+                    Uid = user.Uid,
+                    Token = token,
+                    RefreshToken = token,
+                    DisplayName = user.DisplayName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    PhotoUrl = user.PhotoUrl,
+                    LastSignInTimestamp = user.LastSignInTimestamp,
+                    EmailVerified = user.EmailVerified
+                };
 
-                _currentUser = new ClaimsPrincipal(user.ToClaimsPrincipial());
-                NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
 
-                return (user, null);
+                return (userSession, null);
             }
             catch (ApiException ex)
             {
@@ -131,11 +119,6 @@ namespace DayPlanner.Web.Services.Implementations
             }
         }
 
-        private async Task SaveUserAndTokenAsync(User user, string token)
-        {
-            await _localStorage.SetAsync(AuthTokenKey, token);
-            await _localStorage.SetAsync(UserKey, user);
-        }
-       
+
     }
 }

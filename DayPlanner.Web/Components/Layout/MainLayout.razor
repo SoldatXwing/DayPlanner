@@ -17,7 +17,7 @@
                             @GetUserAvatar()
                         </div>
                         <RadzenLabel Text="@_user?.DisplayName" Style="margin: 0 10px;" />
-                        <RadzenButton Click="@(() => Navigation.NavigateToLogout())"
+                        <RadzenButton Click="Logout"
                                       Icon="logout"
                                       ButtonStyle="ButtonStyle.Light"
                                       MouseEnter="@(args => ShowTooltip(args, new TooltipOptions(){ Position = TooltipPosition.Top }))" />

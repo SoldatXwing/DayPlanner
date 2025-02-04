@@ -1,8 +1,10 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
+using DayPlanner.Web.Middleware;
 using DayPlanner.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Localization;
 using Radzen;
 using Radzen.Blazor;
@@ -28,19 +30,24 @@ public sealed partial class Login : ComponentBase
     private bool _passwordNotVisible = true;
     private UserRequest _model = new UserRequest();
     private bool _loginError = false;
+    protected override void OnInitialized()
+    {
+        if (Navigation.Uri.Contains("?showError=true"))
+        {
+            _loginError = true;
+        }
+    }
     private async Task Form_OnSubmitAsync()
     {
-        if (true)
-        {       
-            User? user = await AuthenticationService.LoginAsync(_model);
-            if (user is not null)
-            {
-                Navigation.NavigateToDashboard();
-            }
-            else
-            {
-                _loginError = true;
-            }
+        try
+        {
+            Guid key = Guid.NewGuid();
+            BlazorCookieLoginMiddleware.Logins[key] = _model;
+            Navigation.NavigateTo($"/account/login?key={key}", true);
+        }
+        catch(Exception ex)
+        {
+
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Web.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,29 @@ internal static class UserExtensions
 
         return new(new ClaimsIdentity(claims, authenticationType: "API"));
     }
+    public static ClaimsPrincipal ToClaimsPrincipial(this UserSession user)
+    {
+        ArgumentNullException.ThrowIfNull(user);
+
+        List<Claim> claims = [
+            new Claim(nameof(UserSession.Uid), user.Uid),
+            new Claim(nameof(UserSession.DisplayName), user.DisplayName ?? string.Empty),
+            new Claim(nameof(UserSession.Email), user.Email ?? string.Empty),
+            new Claim(nameof(UserSession.PhoneNumber), user.PhoneNumber ?? string.Empty),
+            new Claim(nameof(UserSession.PhotoUrl), user.PhotoUrl ?? string.Empty),
+            new Claim(nameof(UserSession.Token), user.Token ?? string.Empty),
+            new Claim(nameof(UserSession.RefreshToken), user.RefreshToken ?? string.Empty),
+        ];
+
+        if (user.EmailVerified is not null)
+            claims.Add(new(nameof(User.EmailVerified), user.EmailVerified.ToString()!));
+
+        if (user.LastSignInTimestamp is not null)
+            claims.Add(new(nameof(User.LastSignInTimestamp), user.LastSignInTimestamp.ToString()!));
+
+        return new(new ClaimsIdentity(claims, authenticationType: "API"));
+    }
+
 
     public static User ToUser(this ClaimsPrincipal claimsPrincipal)
     {

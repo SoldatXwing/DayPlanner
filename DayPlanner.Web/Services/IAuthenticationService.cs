@@ -1,5 +1,6 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
+using DayPlanner.Web.Models;
 
 namespace DayPlanner.Web.Services
 {
@@ -10,13 +11,7 @@ namespace DayPlanner.Web.Services
         /// </summary>
         /// <param name="request">The login request.</param>
         /// <returns>The signed in user. If <c>null</c> the credentials were invalid.</returns>
-        public Task<User?> LoginAsync(UserRequest request);
-
-        /// <summary>
-        /// Tries to logout a currently logged in user.
-        /// </summary>
-        /// <returns>A task to await this operatopn.</returns>
-        public Task LogoutAsync();
+        public Task<UserSession?> LoginAsync(UserRequest request);
 
         /// <summary>
         /// Tries to register a new user.
@@ -26,7 +21,7 @@ namespace DayPlanner.Web.Services
         /// </remarks>
         /// <param name="request">The register request</param>
         /// <returns>If the registration is successful <c>user</c> is not null. If an error occurred while the registration <c>error</c> contains the returned error.</returns>
-        public Task<(User? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request);
+        public Task<(UserSession? user, ApiErrorModel? error)> RegisterAsync(RegisterUserRequest request);
         /// <summary>
         /// Returns the auth url where the user can authenticate himself via google
         /// </summary>
@@ -37,7 +32,7 @@ namespace DayPlanner.Web.Services
         /// </summary>
         /// <param name="token">Token provided from google</param>
         /// <returns>The signed in user. If <c>null</c> the credentials were invalid.</returns>
-        public Task<(User? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token);
+        public Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token);
 
     }
 }

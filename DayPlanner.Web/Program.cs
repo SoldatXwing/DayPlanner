@@ -1,9 +1,13 @@
+using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Web.Components;
 using DayPlanner.Web.Extensions;
-using DayPlanner.Web.Services;
+using DayPlanner.Web.Middleware;
 using DayPlanner.Web.Services.Implementations;
-using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +18,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddRefitClients(builder.Configuration);
 builder.Services.AddRadzenComponents();
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DefaultAuthenticationService>()
-    .AddScoped<IAuthenticationService>(sp => sp.GetRequiredService<DefaultAuthenticationService>())
-    .AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<DefaultAuthenticationService>());
+    .AddScoped<DayPlanner.Web.Services.IAuthenticationService>(sp => sp.GetRequiredService<DefaultAuthenticationService>());
+
 
 builder.Services.AddAuthentication(options =>
 {
@@ -36,6 +40,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddLocalization(options => options.ResourcesPath = "Localization");
 
 builder.Services.AddAuthorizationCore();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,8 +53,18 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapGet("/account/logout", async (HttpContext context) =>
+{
+    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+    context.Response.Redirect("/");
+});
 
 app.UseAntiforgery();
+app.UseAuthentication();
+app.UseAuthorization();
+
+
+app.UseMiddleware<BlazorCookieLoginMiddleware>();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
