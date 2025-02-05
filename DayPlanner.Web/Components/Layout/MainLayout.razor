@@ -8,7 +8,7 @@
                     <!-- Linke Gruppe: Menu und DayPlanner -->
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                         <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
-                        <RadzenLabel Text="DayPlanner" Style="margin-left: 10px;" />
+                        <RadzenLabel Text="DayPlanner" Style="" />
                     </RadzenStack>
 
                     <!-- Rechte Gruppe: Avatar, Benutzername, Logout und Toggler -->
@@ -16,11 +16,10 @@
                         <div style="width:40px; height:40px; border-radius:50%; background-color:var(--rz-secondary, #007bff); color:var(--rz-primary-contrast, white); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;">
                             @GetUserAvatar()
                         </div>
-                        <RadzenLabel Text="@_user?.DisplayName" Style="margin: 0 10px;" />
+                        <RadzenLabel Text="@_user?.DisplayName" Style="" />
                         <RadzenButton Click="Logout"
                                       Icon="logout"
-                                      ButtonStyle="ButtonStyle.Light"
-                                      MouseEnter="@(args => ShowTooltip(args, new TooltipOptions(){ Position = TooltipPosition.Top }))" />
+                                      ButtonStyle="ButtonStyle.Light"/>
                         <RadzenAppearanceToggle />
                     </RadzenStack>
                 </RadzenStack>
@@ -44,8 +43,8 @@
     <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
         <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
             <RadzenPanelMenu>
-                <RadzenPanelMenuItem Text="Home" Icon="home" />
-                <RadzenPanelMenuItem Text="Users" Icon="account_box" />
+                <RadzenPanelMenuItem Text="Home" Icon="home" Click="@(() => Navigation.NavigateToHome())" />
+                <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" Click="@(() => Navigation.NavigateToDashboard())" />
             </RadzenPanelMenu>
             <div class="rz-p-4">
             </div>

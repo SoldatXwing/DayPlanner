@@ -134,19 +134,5 @@ namespace DayPlanner.Web.Components.Layout
             await ProtectedLocalStore.SetAsync("marketingCookies", marketingCookies);
         }
         private void Logout() => Navigation.NavigateTo("/account/logout",true);
-        void ShowTooltip(ElementReference elementReference, TooltipOptions options = null) => TooltipService.Open(elementReference, "Some content", options);
-        private string GetDynamicColor()
-        {
-            if (_user == null || string.IsNullOrWhiteSpace(_user.DisplayName))
-                return "gray"; // Standardfarbe, falls kein Benutzer vorhanden ist.
-
-            // Generiere eine Farbe basierend auf dem Hash des Benutzernamens.
-            int hash = _user.DisplayName.GetHashCode();
-            int r = (hash & 0xFF0000) >> 16;
-            int g = (hash & 0x00FF00) >> 8;
-            int b = hash & 0x0000FF;
-
-            return $"rgb({r % 256}, {g % 256}, {b % 256})";
-        }
     }
 }
