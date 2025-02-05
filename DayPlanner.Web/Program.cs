@@ -1,13 +1,8 @@
-using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Web.Components;
 using DayPlanner.Web.Extensions;
 using DayPlanner.Web.Middleware;
 using DayPlanner.Web.Services.Implementations;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,9 +32,17 @@ builder.Services.AddAuthentication(options =>
     options.SlidingExpiration = true; // Verlängert Cookie bei Aktivität
     options.AccessDeniedPath = "/account/access-denied"; // Zugriff verweigert
 });
-builder.Services.AddLocalization(options => options.ResourcesPath = "Localization");
-
 builder.Services.AddAuthorizationCore();
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Localization");
+builder.Services.AddRequestLocalization(options =>
+{
+    string[] cultures = ["en", "de"];
+    options.SetDefaultCulture(cultures[0])
+        .AddSupportedCultures(cultures)
+        .AddSupportedUICultures(cultures);
+    options.ApplyCurrentCultureToResponseHeaders = true;
+});
 
 var app = builder.Build();
 
@@ -52,17 +55,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.MapGet("/account/logout", async (HttpContext context) =>
-{
-    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
-    context.Response.Redirect("/");
-});
+app.UseRequestLocalization();
 
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.UseMiddleware<BlazorCookieLoginMiddleware>();
 
