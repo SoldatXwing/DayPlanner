@@ -3,7 +3,7 @@
 
 <RadzenText TextStyle="TextStyle.H4" TextAlign="TextAlign.Center">@Localizer["login"]</RadzenText>
 <RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
-    <RadzenTemplateForm TItem="UserRequest" Data=_model Submit="Form_OnSubmitAsync">
+    <RadzenTemplateForm TItem="@UserRequest" Data=_model Submit="@Form_OnSubmit">
 
         <RadzenRow>
             <RadzenFormField Text="@Localizer["form_Email"]" Style="width: 100%;">

@@ -1,53 +1,56 @@
-﻿using DayPlanner.Web.Refit;
-using DayPlanner.Web.Services;
+﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Web.Extensions;
+using DayPlanner.Web.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
-using System.Linq.Dynamic.Core.Tokenizer;
-namespace DayPlanner.Web.Components.Pages.Account
+
+namespace DayPlanner.Web.Components.Pages.Account;
+
+[AllowAnonymous]
+[Route("/account/google/login")]
+public sealed class GoogleLogin : ComponentBase
 {
-    [Route("/account/google/login")]
-    public sealed class GoogleLogin : ComponentBase
+    #region Injections
+    [Inject]
+    private Services.IAuthenticationService AuthenticationService { get; set; } = default!;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+    #endregion
+
+    [SupplyParameterFromQuery(Name = "token")]
+    private string? Token { get; set; }
+
+    [SupplyParameterFromQuery(Name = "refreshToken")]
+    private string? RefreshToken { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        #region Injections
-        [Inject]
-        private IAuthenticationService AuthenticationService { get; set; } = default!;
-
-        [Inject]
-        private NavigationManager NavigationManager { get; set; } = default!;
-        #endregion
-
-        private string? GetQueryParameter(string key)
+        if (HttpContext is null)
         {
-            var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
-            var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
-            return queryParams[key] ?? null;
+            NavigationManager.Refresh(forceReload: true);
+            return;
         }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+        if (string.IsNullOrEmpty(Token) || string.IsNullOrEmpty(RefreshToken))
         {
-            if (firstRender)
-            {
-                string? token = GetQueryParameter("token");
-                string? refreshToken = GetQueryParameter("refreshToken");
-
-                if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(refreshToken))
-                {
-                    NavigationManager.NavigateToHome();
-                    return;
-                }
-                try
-                {
-                    await AuthenticationService.LoginViaGoogleAsync(token);
-                    NavigationManager.NavigateToDashboard();
-                }
-                catch
-                {
-                    NavigationManager.NavigateToHome();
-                }
-
-            }
-
+            NavigationManager.NavigateToLogin();
+            return;
         }
 
+        (UserSession? session, ApiErrorModel? _) = await AuthenticationService.LoginViaGoogleAsync(Token);
+        if (session is null)
+        {
+            NavigationManager.NavigateToLogin();
+        }
+        else
+        {
+            await HttpContext.SignInAsync(session.ToClaimsPrincipial());
+            NavigationManager.NavigateToDashboard();
+        }
     }
 }

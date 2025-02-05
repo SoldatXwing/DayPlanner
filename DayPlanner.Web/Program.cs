@@ -1,6 +1,5 @@
 using DayPlanner.Web.Components;
 using DayPlanner.Web.Extensions;
-using DayPlanner.Web.Middleware;
 using DayPlanner.Web.Services.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Radzen;
@@ -8,6 +7,7 @@ using Radzen;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddMemoryCache();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -17,12 +17,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DefaultAuthenticationService>()
     .AddScoped<DayPlanner.Web.Services.IAuthenticationService>(sp => sp.GetRequiredService<DefaultAuthenticationService>());
 
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
     options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
     options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignOutScheme = IdentityConstants.ApplicationScheme;
 })
 .AddCookie(IdentityConstants.ApplicationScheme, options =>
 {
@@ -31,6 +31,8 @@ builder.Services.AddAuthentication(options =>
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie-Ablaufzeit
     options.SlidingExpiration = true; // Verlängert Cookie bei Aktivität
     options.AccessDeniedPath = "/account/access-denied"; // Zugriff verweigert
+
+    options.ReturnUrlParameter = "returnUrl";
 });
 builder.Services.AddAuthorizationCore();
 
@@ -60,8 +62,6 @@ app.UseRequestLocalization();
 app.UseAntiforgery();
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseMiddleware<BlazorCookieLoginMiddleware>();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

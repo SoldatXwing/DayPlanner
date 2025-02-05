@@ -1,14 +1,12 @@
-﻿using DayPlanner.Abstractions.Models.Backend;
-using DayPlanner.Abstractions.Models.DTO;
-using DayPlanner.Web.Middleware;
+﻿using DayPlanner.Abstractions.Models.DTO;
+using DayPlanner.Web.Extensions;
+using DayPlanner.Web.Models;
 using DayPlanner.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
-using Radzen;
-using Radzen.Blazor;
-using System.ComponentModel.DataAnnotations;
 
 namespace DayPlanner.Web.Components.Pages.Account;
 
@@ -21,41 +19,83 @@ public sealed partial class Login : ComponentBase
     private IStringLocalizer<Login> Localizer { get; set; } = default!;
 
     [Inject]
-    private IAuthenticationService AuthenticationService { get; set; } = default!;
+    private Services.IAuthenticationService AuthenticationService { get; set; } = default!;
+
+    [Inject]
+    private IMemoryCache Cache { get; set; } = default!;
 
     [Inject]
     private NavigationManager Navigation { get; set; } = default!;
     #endregion
 
     private bool _passwordNotVisible = true;
-    private UserRequest _model = new UserRequest();
+
+    private readonly UserRequest _model = new();
+
     private bool _loginError = false;
-    protected override void OnInitialized()
+
+    [SupplyParameterFromQuery(Name = "key")]
+    private string? ModelKey { get; set; }
+
+    [SupplyParameterFromQuery(Name = "showError")]
+    private bool? ShowError { get; set; }
+
+    [SupplyParameterFromQuery(Name = "returnUrl")]
+    private string? ReturnUrl { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
     {
-        if (Navigation.Uri.Contains("?showError=true"))
+        if (ModelKey is not null)
         {
-            _loginError = true;
+            if (HttpContext is null)
+            {
+                Navigation.Refresh(forceReload: true);
+                return;
+            }
+
+            if (Cache.TryGetValue(ModelKey, out UserRequest? request))
+            {
+                Cache.Remove(ModelKey);
+
+                UserSession? session = await AuthenticationService.LoginAsync(request!);
+                if (session is null)
+                {
+                    Navigation.NavigateToLogin(showError: true);
+                }
+                else
+                {
+                    await HttpContext.SignInAsync(session.ToClaimsPrincipial());
+                    Navigation.NavigateTo(ReturnUrl ?? Routes.Dashboard());
+                }
+            }
         }
+
+        _loginError = ShowError ?? false;
     }
-    private async Task Form_OnSubmitAsync()
+    private void Form_OnSubmit()
     {
         try
         {
-            Guid key = Guid.NewGuid();
-            BlazorCookieLoginMiddleware.Logins[key] = _model;
-            Navigation.NavigateTo($"/account/login?key={key}", true);
-        }
-        catch(Exception ex)
-        {
+            string key = Guid.NewGuid().ToString();
 
+            using ICacheEntry _ = Cache.CreateEntry(key)
+                .SetValue(_model)
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
+            Navigation.NavigateToLogin(key: key, forceLoad: true);
+        }
+        catch
+        {
         }
     }
 
     private async Task GoogleLogin_OnClickAsync()
     {
         string url = await AuthenticationService.GetGoogleAuthUrlAsync();
-        Navigation.NavigateTo(url.Trim('"'), true);
+        Navigation.NavigateTo(url.Trim('"'), forceLoad: true);
     }
-    private void ChangeErrorState() => _loginError = false;
 
+    private void ChangeErrorState() => _loginError = false;
 }
