@@ -78,4 +78,29 @@ internal static class UserExtensions
             LastSignInTimestamp = lastSignIn
         };
     }
+    public static UserSession ToUserSession(this ClaimsPrincipal claimsPrincipal)
+    {
+        ArgumentNullException.ThrowIfNull(claimsPrincipal);
+
+        bool? emailVerified = null;
+        if (claimsPrincipal.FindFirst(nameof(User.EmailVerified)) is Claim verifiedClaim)
+            emailVerified = bool.Parse(verifiedClaim.Value);
+
+        DateTime? lastSignIn = null;
+        if (claimsPrincipal.FindFirst(nameof(User.LastSignInTimestamp)) is Claim lastSignInClaim)
+            lastSignIn = DateTime.Parse(lastSignInClaim.Value);
+
+        return new()
+        {
+            Uid = claimsPrincipal.FindFirst(nameof(User.Uid))!.Value,
+            DisplayName = claimsPrincipal.FindFirst(nameof(User.DisplayName))!.Value,
+            Email = claimsPrincipal.FindFirst(nameof(User.Email))!.Value,
+            Token = claimsPrincipal.FindFirst(nameof(UserSession.Token))!.Value,
+            RefreshToken = claimsPrincipal.FindFirst(nameof(UserSession.RefreshToken))!.Value,
+            PhoneNumber = claimsPrincipal.FindFirst(nameof(User.PhoneNumber))!.Value,
+            PhotoUrl = claimsPrincipal.FindFirst(nameof(User.PhotoUrl))!.Value,
+            EmailVerified = emailVerified,
+            LastSignInTimestamp = lastSignIn
+        };
+    }
 }

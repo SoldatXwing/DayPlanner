@@ -10,6 +10,22 @@
     font-weight: bold;
     font-size: 16px;
 }
+.userAvatarImage {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden; /* Wichtig für runde Bilder */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .userAvatarImage img {
+        width: 100%; /* Stellt sicher, dass das Bild die volle Breite des Containers ausfüllt */
+        height: 100%; /* Stellt sicher, dass das Bild die volle Höhe des Containers ausfüllt */
+        object-fit: cover; /* Schneidet das Bild passend zu */
+        border-radius: 50%; /* Damit das Bild wirklich rund bleibt */
+    }
 
 .menuLabel {
     width: 40px;

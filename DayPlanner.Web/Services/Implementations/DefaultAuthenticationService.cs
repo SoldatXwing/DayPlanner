@@ -12,15 +12,9 @@ using System.Security.Claims;
 namespace DayPlanner.Web.Services.Implementations
 {
     internal class DefaultAuthenticationService(IDayPlannerAccountApi api,
-        ProtectedSessionStorage securedStorage,
         ILogger<DefaultAuthenticationService> logger) : IAuthenticationService
     {
         private readonly IDayPlannerAccountApi _api = api;
-        private readonly ProtectedSessionStorage _sessionStorage = securedStorage;
-        private readonly ILogger<DefaultAuthenticationService> _logger = logger;
-        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
-
-        private const string UserSessionKey = "userSession";
 
         public async Task<UserSession?> LoginAsync(UserRequest request)
         {

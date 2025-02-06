@@ -1,5 +1,6 @@
 using DayPlanner.Web.Components;
 using DayPlanner.Web.Extensions;
+using DayPlanner.Web.Services;
 using DayPlanner.Web.Services.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Radzen;
@@ -16,6 +17,8 @@ builder.Services.AddRadzenComponents();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DefaultAuthenticationService>()
     .AddScoped<DayPlanner.Web.Services.IAuthenticationService>(sp => sp.GetRequiredService<DefaultAuthenticationService>());
+
+builder.Services.AddScoped<IAppointmentService, ApiAppointmentService>();
 
 builder.Services.AddAuthentication(options =>
 {

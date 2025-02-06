@@ -70,7 +70,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         var userId = HttpContext.User.GetUserId()!;
         try
         {
-            return Ok(await appointmentService.GetUsersAppointments(userId, start, end));
+            return Ok(await appointmentService.GetUsersAppointments(userId, start.ToUniversalTime(), end.ToUniversalTime()));
         }
         catch (UnauthorizedAccessException)
         {

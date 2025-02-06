@@ -18,9 +18,25 @@
 
                         <!-- Rechte Gruppe: Avatar, Benutzername, Logout und Toggler -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
-                            <div class="userAvatar">
-                                @GetUserAvatar()
-                            </div>
+                            @{
+                                var avatar = GetUserAvatar();
+                                Uri uri;
+                                bool isUrlValid = Uri.TryCreate(avatar, UriKind.Absolute, out uri)
+                                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+                            }
+                            @if (!isUrlValid)
+                            {
+                                <div class="userAvatar">
+                                    @avatar
+                                </div>
+
+                            }
+                            else
+                            {
+                                <div class="userAvatarImage">
+                                    <img src="@avatar" alt="User Avatar" />
+                                </div>                               
+                            }
                             <RadzenLabel Text="@_user?.DisplayName" />
 
                             <RadzenButton Click="Logout" Icon="logout" ButtonStyle="ButtonStyle.Light" />

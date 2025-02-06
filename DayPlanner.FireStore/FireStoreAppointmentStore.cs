@@ -20,8 +20,8 @@ public class FireStoreAppointmentStore(FirestoreDb db, IMapper mapper) : IAppoin
     {
         Query query = _fireStoreDb.Collection(_collectionName)
             .WhereEqualTo("userId", userId)
-            .WhereGreaterThanOrEqualTo("startTime", start)
-            .WhereLessThanOrEqualTo("endTime", end);
+            .WhereGreaterThanOrEqualTo("startDate", start)
+            .WhereLessThanOrEqualTo("endDate", end);
 
         QuerySnapshot snapshot = await query.GetSnapshotAsync();
         IEnumerable<FirestoreAppointment> appointments = snapshot.Documents.Select(doc => doc.ConvertTo<FirestoreAppointment>());

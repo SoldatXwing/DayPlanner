@@ -3,11 +3,15 @@
 @inject TooltipService TooltipService
 
 <div>
-    <RadzenScheduler class="scheduler" TItem="Appointment" Data=@_appointments
-                     StartProperty="@nameof(Appointment.Start)" EndProperty="@nameof(Appointment.End)"
+    <RadzenScheduler class="scheduler" TItem="Appointment"
+                     Data=@_appointments
+                     StartProperty="@nameof(Appointment.Start)"
+                     EndProperty="@nameof(Appointment.End)"
                      TextProperty="Title" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
-                     AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]">
-        <RadzenDayView />
+                     AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
+                     LoadData="@OnLoadData">
+        
+        <RadzenDayView />   
         <RadzenWeekView />
         <RadzenMonthView />
     </RadzenScheduler>

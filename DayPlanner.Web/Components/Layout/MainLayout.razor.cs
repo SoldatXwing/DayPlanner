@@ -86,7 +86,10 @@ namespace DayPlanner.Web.Components.Layout
         {
             if (_user is null || string.IsNullOrWhiteSpace(_user.DisplayName))
                 return "U"; // Standard-Avatar, wenn kein Benutzername vorhanden ist.
-
+            if (!string.IsNullOrEmpty(_user.PhotoUrl))
+            {
+                return _user.PhotoUrl;
+            }
             // Generiere die Initialen aus dem Benutzernamen.
             var parts = _user.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             var initials = string.Concat(parts.Select(part => part[0]).Take(2)); // Nimm die ersten Buchstaben von maximal zwei Wörtern.

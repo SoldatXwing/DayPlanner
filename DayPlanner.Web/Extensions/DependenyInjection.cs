@@ -31,13 +31,12 @@ namespace DayPlanner.Web.Extensions
             // Register IDayPlannerApi (With Authorization)
             services.AddRefitClient<IDayPlannerApi>(settingsAction: sp =>
             {
-                var storage = sp.GetRequiredService<ProtectedLocalStorage>();
+                var user = sp.GetRequiredService<IHttpContextAccessor>().HttpContext.User.ToUserSession();
                 return new RefitSettings
                 {
                     AuthorizationHeaderValueGetter = async (_, _) =>
                     {
-                        var token = await storage.GetAsync<string>("authToken");
-                        return token.Value ?? string.Empty;
+                        return user.Token ?? string.Empty;
                     }
                 };
             })
