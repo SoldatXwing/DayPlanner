@@ -1,69 +1,70 @@
 @using System.ComponentModel.DataAnnotations
 @using DayPlanner.Abstractions.Models.DTO
 
-<RadzenText TextStyle="TextStyle.H4" TextAlign="TextAlign.Center">@Localizer["login"]</RadzenText>
-<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
-    <RadzenTemplateForm TItem="@UserRequest" Data=_model Submit="@Form_OnSubmit">
+<div>
+    <RadzenText TextStyle="TextStyle.H4" TextAlign="TextAlign.Center">@Localizer["login"]</RadzenText>
+    <RadzenCard class="login-card rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12">
+        <RadzenTemplateForm TItem="@UserRequest" Data=_model Submit="@Form_OnSubmit">
 
+            <!-- Email -->
+            <RadzenRow>
+                <RadzenFormField class="rz-w-100" Text="@Localizer["form_Email"]">
+                    <RadzenTextBox class="rz-w-100" @bind-Value="@_model.Email" Name="@nameof(UserRequest.Email)" />
+                </RadzenFormField>
+
+                <RadzenRequiredValidator class="validator" Component="@nameof(UserRequest.Email)"
+                                         Text="@Localizer["form_Required"]" Popup="false" />
+                <RadzenEmailValidator class="validator" Component="@nameof(UserRequest.Email)"
+                                      Text="@Localizer["form_Email_Invalid"]" Popup="false" />
+            </RadzenRow>
+
+            <!-- Password -->
+            <RadzenRow>
+                <RadzenFormField class="rz-w-100" Text="@Localizer["form_Password"]" Variant="@Variant.Outlined">
+                    <ChildContent>
+                        <RadzenPassword @bind-Value="@_model.Password" Name="@nameof(UserRequest.Password)" Visible="@_passwordNotVisible" />
+                    </ChildContent>
+                    <End>
+                        <RadzenButton Icon="@(_passwordNotVisible ? "visibility_off" : "visibility")"
+                                      Click="() => _passwordNotVisible = !_passwordNotVisible"
+                                      Variant="Variant.Text" Size="ButtonSize.Small" />
+                    </End>
+                </RadzenFormField>
+
+                <RadzenRequiredValidator class="validator" Component="@nameof(UserRequest.Password)"
+                                         Text="@Localizer["form_Required"]" Popup="false" />
+            </RadzenRow>
+
+            <!-- Submit -->
+            <RadzenRow>
+                <RadzenButton class="rz-w-100 rz-mt-3" Text="@Localizer["form_LoginBtn"]"
+                              ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" />
+            </RadzenRow>
+        </RadzenTemplateForm>
+        <hr />
+
+        <!-- Google login -->
         <RadzenRow>
-            <RadzenFormField Text="@Localizer["form_Email"]" Style="width: 100%;">
-                <RadzenTextBox Name="Email" @bind-Value="@_model.Email" Style="width: 100%;" />
-            </RadzenFormField>
-            <RadzenRequiredValidator Component="Email"
-                                     Text="@Localizer["form_Required"]"
-                                     Popup="false"
-                                     Style="display: block; margin-top: -14px;" />
-            <RadzenEmailValidator Component="Email"
-                                  Text="@Localizer["form_Email_Invalid"]"
-                                  Popup="false"
-                                  Style="display: block; margin-top: -14px;" />
+            <RadzenButton class="rz-w-100 rz-mt-3" ButtonStyle="ButtonStyle.Warning"
+                          Click=@(async () => await GoogleLogin_OnClickAsync()) ButtonType="ButtonType.Submit">
+                <div class="googleLoginBtn">
+                    <i class="fab fa-google"></i>
+                    <span>@Localizer["form_LoginGoogleBtn"]</span>
+                </div>
+            </RadzenButton>
         </RadzenRow>
-        <RadzenRow>
-            <RadzenFormField Text="@Localizer["form_Password"]" Variant="@Variant.Outlined" Style="width: 100%;">
-                <ChildContent>
-                    <RadzenTextBox @bind-Value="@_model.Password"
-                                   Name="Password"
-                                   type="@(_passwordNotVisible ? "password" : "text")" />
-                </ChildContent>
-                <End>
-                    <RadzenButton Icon="@(_passwordNotVisible ? "visibility_off" : "visibility")"
-                                  Click="() => _passwordNotVisible = !_passwordNotVisible"
-                                  Variant="Variant.Text" Size="ButtonSize.Small" />
-                </End>
-            </RadzenFormField>
-            <RadzenRequiredValidator Component="Password"
-                                     Text="@Localizer["form_Required"]"
-                                     Popup="false"
-                                     Style="display: block; margin-top: -14px;" />
 
-        </RadzenRow>
-        <RadzenRow>
-            <RadzenButton Text="@Localizer["form_LoginBtn"]" ButtonStyle="ButtonStyle.Primary" class="mt-3" ButtonType="ButtonType.Submit" Style="width: 100%;" />
-        </RadzenRow>
-    </RadzenTemplateForm>
-    <hr />
-    <RadzenRow>
-        <RadzenButton ButtonStyle="ButtonStyle.Warning"
-                      class="mt-3"
-                      Click=@(async () => await GoogleLogin_OnClickAsync())
-                      ButtonType="ButtonType.Submit"
-                      Style="width: 100%;">
-            <div style="display: flex; align-items: center; justify-content: center; width: 100%;">
-                <i class="fab fa-google" style="margin-right: 10px;"></i>
-                <span>@Localizer["form_LoginGoogleBtn"]</span>
-            </div>
-        </RadzenButton>
-    </RadzenRow>
-    <RadzenText class="mt-5">
-        @Localizer["noAccount"]
-        <RadzenLink Path="/account/register">@Localizer["noAccount_Register"] </RadzenLink>
-    </RadzenText>
-    @if (_loginError)
-    {
-        <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Close="@ChangeErrorState">
-            @Localizer["form_Invalid"]
-        </RadzenAlert>
-    }
-</RadzenCard>
+        <!-- Register link -->
+        <RadzenText class="rz-mt-5">
+            @Localizer["noAccount"]
+            <RadzenLink Path="@Routes.Register()">@Localizer["noAccount_Register"]</RadzenLink>
+        </RadzenText>
 
-
+        @if (_loginError)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Close="@ChangeErrorState">
+                @Localizer["form_Invalid"]
+            </RadzenAlert>
+        }
+    </RadzenCard>
+</div>

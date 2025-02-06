@@ -1,79 +1,79 @@
-﻿@inherits LayoutComponentBase
-<RadzenComponents @rendermode="InteractiveAuto" />
-<RadzenLayout>
-    <RadzenHeader>
-        <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
-            <Authorized>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="width:100%;">
-                    <!-- Linke Gruppe: Menu und DayPlanner -->
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                        <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
-                        <RadzenLabel Text="DayPlanner" Style="" />
-                    </RadzenStack>
+﻿@using Microsoft.AspNetCore.Components.Authorization
 
-                    <!-- Rechte Gruppe: Avatar, Benutzername, Logout und Toggler -->
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
-                        <div style="width:40px; height:40px; border-radius:50%; background-color:var(--rz-secondary, #007bff); color:var(--rz-primary-contrast, white); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:16px;">
-                            @GetUserAvatar()
-                        </div>
-                        <RadzenLabel Text="@_user?.DisplayName" Style="" />
-                        <RadzenButton Click="Logout"
-                                      Icon="logout"
-                                      ButtonStyle="ButtonStyle.Light"/>
-                        <RadzenAppearanceToggle />
-                    </RadzenStack>
-                </RadzenStack>
-            </Authorized>
-            <NotAuthorized>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Style="width:100%;">
-                    <!-- Linke Gruppe: Menu und DayPlanner -->
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                        <div style="width:40px; height:40px;"></div>
-                        <RadzenLabel Text="DayPlanner" Style="margin-left: 10px;" />
-                    </RadzenStack>
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">                     
-                        <RadzenAppearanceToggle class="mt-1"/>
-                    </RadzenStack>
-                </RadzenStack>
-            </NotAuthorized>
-           
-        </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
-    </RadzenHeader>
+@inherits LayoutComponentBase
 
-    <Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
-        <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
-            <RadzenPanelMenu>
-                <RadzenPanelMenuItem Text="Home" Icon="home" Click="@(() => Navigation.NavigateToHome())" />
-                <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" Click="@(() => Navigation.NavigateToDashboard())" />
-            </RadzenPanelMenu>
-            <div class="rz-p-4">
+<RadzenComponents />
+<div>
+    <RadzenLayout>
+        <RadzenHeader>
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+
+                        <!-- Linke Gruppe: Menu und DayPlanner -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                            <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
+                            <RadzenLabel Text="DayPlanner" />
+                        </RadzenStack>
+
+                        <!-- Rechte Gruppe: Avatar, Benutzername, Logout und Toggler -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                            <div class="userAvatar">
+                                @GetUserAvatar()
+                            </div>
+                            <RadzenLabel Text="@_user?.DisplayName" />
+
+                            <RadzenButton Click="Logout" Icon="logout" ButtonStyle="ButtonStyle.Light" />
+                            <RadzenAppearanceToggle />
+                        </RadzenStack>
+                    </RadzenStack>
+                </Authorized>
+                <NotAuthorized>
+                    <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+
+                        <!-- Linke Gruppe: Menu und DayPlanner -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                            <div class="menuLabel" />
+                            <RadzenLabel class="rz-ml-3" Text="DayPlanner" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                            <RadzenAppearanceToggle class="rz-mt-1 rz-mr-5" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </NotAuthorized>
+            </AuthorizeView>
+        </RadzenHeader>
+
+        <AuthorizeView>
+            <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
+                <RadzenPanelMenu>
+                    <RadzenPanelMenuItem Text="Home" Icon="home" Click="@(() => Navigation.NavigateToHome())" />
+                    <RadzenPanelMenuItem Text="Dashboard" Icon="dashboard" Click="@(() => Navigation.NavigateToDashboard())" />
+                </RadzenPanelMenu>
+                <div class="rz-p-4" />
+            </RadzenSidebar>
+        </AuthorizeView>
+
+        <RadzenBody>
+            <ChildContent>
+                <RadzenContentContainer Name="main">
+                    @Body
+                </RadzenContentContainer>
+            </ChildContent>
+        </RadzenBody>
+
+        <RadzenFooter class="footer">
+            <RadzenRow class="row1" />
+            <div class="row2">
+                <RadzenRow>
+                    <RadzenColumn Size="6">
+                        <div class="copyright rz-text-xs">© @DateTime.Now.Year DayPlanner GmbH</div>
+                    </RadzenColumn>
+                </RadzenRow>
             </div>
-        </RadzenSidebar>
-    </Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
-
-    <RadzenBody>
-        <ChildContent>
-            <RadzenContentContainer Name="main">
-                @Body
-            </RadzenContentContainer>
-        </ChildContent>
-    </RadzenBody>
-    <RadzenFooter Style="background-color: #2c3e50; color: white; border-bottom: 2px solid #3498db; padding: 0;">
-        <RadzenRow Style="padding-top: 0.5rem;">
-        </RadzenRow>
-
-        <div style="background-color: #34495e; padding: 1rem;">
-            <RadzenRow>
-                <RadzenColumn Size="6">
-                    <div class="rz-text-xs" style="color: #bdc3c7;">
-                        © @DateTime.Now.Year DayPlanner GmbH
-                    </div>
-                </RadzenColumn>
-            </RadzenRow>
-        </div>
-    </RadzenFooter>
-
-</RadzenLayout>
+        </RadzenFooter>
+    </RadzenLayout>
+</div>
 
 @* <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.

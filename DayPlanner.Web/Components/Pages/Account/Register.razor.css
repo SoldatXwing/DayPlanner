@@ -1,0 +1,8 @@
+﻿::deep .max-w600 {
+    max-width: 600px;
+}
+
+::deep .validator {
+    display: block;
+    margin-top: -14px;
+}

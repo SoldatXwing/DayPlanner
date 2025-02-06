@@ -1,0 +1,19 @@
+﻿::deep .login-card {
+    max-width: 600px;
+}
+
+::deep .validator {
+    display: block;
+    margin-top: -14px;
+}
+
+.googleLoginBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.googleLoginBtn i.fab {
+    margin-right: 10px;
+}

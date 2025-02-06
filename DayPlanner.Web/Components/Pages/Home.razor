@@ -1,125 +1,90 @@
-﻿<RadzenStack Orientation="Orientation.Vertical" Gap="40px" Style="padding: 2rem; max-width: 1200px; margin: 0 auto;">
+﻿@* This root <div /> is required for CSS isolation to work properly with components *@
+<div>
+    <RadzenStack class="main-stack" Orientation="Orientation.Vertical" Gap="40px">
 
-    <!-- Hero Section -->
-    <RadzenCard Class="hero-card" Style="background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-secondary) 100%); text-align: center;">
-        <RadzenText Class="hero-title gradient-text">
-            @Localizer["WelcomeToDayPlanner"]
-        </RadzenText>
-        <RadzenText Class="hero-description">
-            @Localizer["Introduction"]
-        </RadzenText>
-    </RadzenCard>
-
-    <!-- Features Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-        <!-- Feature 1 -->
-        <RadzenCard Class="hover-scale" Style="text-align: center; padding: 2rem; box-shadow: var(--rz-shadow-5)">
-            <RadzenIcon Icon="event_available" Style="font-size: 3rem; color: var(--rz-primary); margin-bottom: 1rem;" />
-            <RadzenText Style="font-size: 1.5rem; font-weight: 600; display: block;">
-                @Localizer["Feature1"]
-            </RadzenText>
-            <RadzenText Style="color: var(--rz-text-secondary); margin-top: 1rem;">
-                @Localizer["Feature1Description"]
-            </RadzenText>
+        <!-- Hero section -->
+        <RadzenCard class="hero-card">
+            <RadzenText Class="hero-title gradient-text" Text="@Localizer["WelcomeToDayPlanner"]" TextAlign="TextAlign.Center" />
+            <RadzenText Class="hero-description" Text="@Localizer["Introduction"]" TextAlign="TextAlign.Center" />
         </RadzenCard>
 
-        <!-- Feature 2 -->
-        <RadzenCard Class="hover-scale" Style="text-align: center; padding: 2rem; box-shadow: var(--rz-shadow-5)">
-            <RadzenIcon Icon="insights" Style="font-size: 3rem; color: var(--rz-secondary); margin-bottom: 1rem;" />
-            <RadzenText Style="font-size: 1.5rem; font-weight: 600; display: block;">
-                @Localizer["Feature2"]
-            </RadzenText>
-            <RadzenText Style="color: var(--rz-text-secondary); margin-top: 1rem;">
-                @Localizer["Feature2Description"]
-            </RadzenText>
-        </RadzenCard>
+        <!-- Features section -->
+        <div class="section-grid">
 
-        <!-- Feature 3 -->
-        <RadzenCard Class="hover-scale" Style="text-align: center; padding: 2rem; box-shadow: var(--rz-shadow-5)">
-            <RadzenIcon Icon="sync_alt" Style="font-size: 3rem; color: var(--rz-success); margin-bottom: 1rem;" />
-            <RadzenText Style="font-size: 1.5rem; font-weight: 600; display: block;">
-                @Localizer["Feature3"]
-            </RadzenText>
-            <RadzenText Style="color: var(--rz-text-secondary); margin-top: 1rem;">
-                @Localizer["Feature3Description"]
-            </RadzenText>
-        </RadzenCard>
-    </div>
+            <!-- Feature 1 -->
+            <RadzenCard class="hover-scale feature-item">
+                <RadzenIcon class="feature-icon" Icon="event_available" IconColor="@Colors.Primary" />
+                <RadzenText class="feature-title" Text="@Localizer["Feature1"]" />
+                <RadzenText class="feature-desc" Text="@Localizer["Feature1Description"]" />
+            </RadzenCard>
 
-    <!-- AI Section -->
-    <RadzenCard class="ai-card" Style="background: var(--rz-base-100); display: flex; gap: 2rem; align-items: center; padding: 1rem;">
-        <RadzenIcon Icon="psychology" class="ai-icon" Style="font-size: 4rem; color: var(--rz-success);" />
-        <div class="ai-content">
-            <RadzenText Style="font-size: 2rem; font-weight: 600;">
-                @Localizer["AIIntegration"]
-            </RadzenText>
-            <RadzenText Style="color: var(--rz-text-secondary); margin-top: 0.5rem;">
-                @Localizer["AIIntegrationDescription"]
-            </RadzenText>
-            <RadzenButton Text="@Localizer["TryNow"]" Icon="rocket_launch" ButtonStyle="ButtonStyle.Success"
-                          Style="margin-top: 1.5rem; padding: 0.75rem 2rem;" Click="@(() => Navigation.NavigateToLogin())" />
+            <!-- Feature 2 -->
+            <RadzenCard class="hover-scale feature-item">
+                <RadzenIcon class="feature-icon" Icon="insights" IconColor="@Colors.Secondary" />
+                <RadzenText class="feature-title" Text="@Localizer["Feature2"]" />
+                <RadzenText class="feature-desc" Text="@Localizer["Feature2Description"]" />
+            </RadzenCard>
+
+            <!-- Feature 3 -->
+            <RadzenCard class="hover-scale feature-item">
+                <RadzenIcon class="feature-icon" Icon="sync_alt" IconColor="@Colors.Success" />
+                <RadzenText class="feature-title" Text="@Localizer["Feature3"]" />
+                <RadzenText class="feature-desc" Text="@Localizer["Feature3Description"]" />
+            </RadzenCard>
         </div>
-    </RadzenCard>
 
-    <!-- Stats Section -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-        <RadzenCard Class="hover-scale" Style="text-align: center; padding: 2rem; box-shadow: var(--rz-shadow-2)">
-            <RadzenText Style="font-size: 2.5rem; font-weight: 700; color: var(--rz-primary);">
-                3+
-            </RadzenText>
-            <RadzenText Style="font-size: 1.1rem; color: var(--rz-text-secondary);">
-                @Localizer["YearsExperience"]
-            </RadzenText>
-        </RadzenCard>
-        <RadzenCard Class="hover-scale" Style="text-align: center; padding: 2rem; box-shadow: var(--rz-shadow-2)">
-            <RadzenText Style="font-size: 2.5rem; font-weight: 700; color: var(--rz-secondary);">
-                99%
-            </RadzenText>
-            <RadzenText Style="font-size: 1.1rem; color: var(--rz-text-secondary);">
-                @Localizer["SatisfactionRate"]
-            </RadzenText>
-        </RadzenCard>
-        <RadzenCard Class="hover-scale" Style="text-align: center; padding: 2rem; box-shadow: var(--rz-shadow-2)">
-            <RadzenText Style="font-size: 2.5rem; font-weight: 700; color: var(--rz-success);">
-                24/7
-            </RadzenText>
-            <RadzenText Style="font-size: 1.1rem; color: var(--rz-text-secondary);">
-                @Localizer["SupportAvailability"]
-            </RadzenText>
-        </RadzenCard>
-    </div>
+        <!-- AI section -->
+        <RadzenCard class="ai-card">
+            <RadzenIcon class="ai-icon" Icon="psychology" IconColor="@Colors.Success" />
 
-    <!-- CTA Section -->
-        <!-- CTA Section -->
-    <RadzenCard Style="background: linear-gradient(135deg, var(--rz-primary) 0%, var(--rz-secondary) 100%); text-align: center; padding: 3rem 1rem; position: relative; overflow: hidden; border: none;">
-        <!-- Animated Elements -->
-        <div style="position: absolute; top: -50px; left: -50px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
-        <div style="position: absolute; bottom: -30px; right: -30px; width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
-
-        <RadzenStack Orientation="Orientation.Vertical" Gap="1.5rem" Style="position: relative; z-index: 1;">
-            <RadzenText Style="font-size: 2.5rem; font-weight: 800; display: block; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                @Localizer["ReadyToStart"]
-            </RadzenText>
-
-            <RadzenText Style="font-size: 1.25rem; color: rgba(255,255,255,0.9); max-width: 600px; margin: 0 auto;">
-                @Localizer["ReadyToStartDescription"]
-            </RadzenText>
-
-            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                <RadzenButton Text="@Localizer["GetStarted"]" Icon="rocket_launch"
-                              ButtonStyle="ButtonStyle.Light"
-                              Style="padding: 1rem 2.5rem; font-size: 1.1rem; transition: all 0.3s ease; border-radius: 50px;"
-                              Class="hover-scale-rotate">
-                </RadzenButton>
+            <div class="ai-content">
+                <RadzenText class="ai-title" Text="@Localizer["AIIntegration"]" />
+                <RadzenText class="ai-desc" Text="@Localizer["AIIntegrationDescription"]" />
+                <RadzenButton class="ai-btn" Text="@Localizer["TryNow"]" Icon="rocket_launch"
+                              ButtonStyle="ButtonStyle.Success" Click="@(() => Navigation.NavigateToLogin())" />
             </div>
-        </RadzenStack>
-
-        <!-- Animated Sparkles -->
-        <div style="position: absolute; top: 20%; left: 10%; animation: float 3s infinite;">
-            <RadzenIcon Icon="star" Style="font-size: 2rem; color: rgba(255,255,255,0.4);" />
-        </div>
-        <div style="position: absolute; top: 60%; right: 15%; animation: float 3s infinite 0.5s;">
-            <RadzenIcon Icon="star" Style="font-size: 2rem; color: rgba(255,255,255,0.4);" />
-        </div>
         </RadzenCard>
-</RadzenStack>
+
+        <!-- Stats section -->
+        <div class="section-grid">
+            <RadzenCard class="hover-scale stats-item">
+                <RadzenText class="stats-value" Style="color: var(--rz-primary);" Text="3+" />
+                <RadzenText class="stats-title" Style="color: var(--rz-text-secondary);" Text="@Localizer["YearsExperience"]" />
+            </RadzenCard>
+            <RadzenCard class="hover-scale stats-item">
+                <RadzenText class="stats-value" Style="color: var(--rz-secondary);" Text="99%" />
+                <RadzenText class="stats-title" Style="color: var(--rz-text-secondary);" Text="@Localizer["SatisfactionRate"]" />
+            </RadzenCard>
+            <RadzenCard class="hover-scale stats-item">
+                <RadzenText class="stats-value" Style="color: var(--rz-success);" Text="24/7" />
+                <RadzenText class="stats-title" Style="color: var(--rz-text-secondary);" Text="@Localizer["SupportAvailability"]" />
+            </RadzenCard>
+        </div>
+
+        <!-- CTA Section -->
+        <RadzenCard class="cta-card">
+
+            <!-- Animated Elements -->
+            <div class="cta-element1" />
+            <div class="cta-element2" />
+
+            <RadzenStack class="cta-stack" Orientation="Orientation.Vertical" Gap="1.5rem">
+                <RadzenText class="cta-title" Text="@Localizer["ReadyToStart"]" />
+                <RadzenText class="cta-desc" Text="@Localizer["ReadyToStartDescription"]" />
+
+                <div class="cta-outerBtn">
+                    <RadzenButton class="cta-btn" Text="@Localizer["GetStarted"]" Icon="rocket_launch" ButtonStyle="ButtonStyle.Light">
+                    </RadzenButton>
+                </div>
+            </RadzenStack>
+
+            <!-- Animated Sparkles -->
+            <div class="cta-sparkles1">
+                <RadzenIcon class="cta-icon" Icon="star" IconColor="rgba(255,255,255,0.4)" />
+            </div>
+            <div class="cta-sparkles2">
+                <RadzenIcon class="cta-icon" Icon="star" IconColor="rgba(255,255,255,0.4)" />
+            </div>
+        </RadzenCard>
+    </RadzenStack>
+</div>

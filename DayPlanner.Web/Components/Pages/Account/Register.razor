@@ -6,129 +6,98 @@
     @Localizer["register"]
 </RadzenText>
 
-<RadzenCard class="rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12" style="max-width: 600px;">
-    <RadzenTemplateForm TItem="RegisterUserModel" Data=_model Submit="Form_OnSubmitAsync">
-        <RadzenRow>
-            <RadzenFormField Text="@Localizer["form_Name"]" Style="width: 100%;">
-                <RadzenTextBox Name="DisplayName"
-                               @bind-Value="@_model.DisplayName"
-                               Style="width: 100%;" />
-            </RadzenFormField>
-        </RadzenRow>
+<div>
+    <RadzenCard class="max-w600 rz-my-12 rz-mx-auto rz-p-4 rz-p-md-12">
+        <RadzenTemplateForm TItem="RegisterUserModel" Data=_model Submit="Form_OnSubmitAsync">
+            <RadzenRow>
+                <RadzenFormField class="rz-w-100" Text="@Localizer["form_Name"]">
+                    <RadzenTextBox class="rz-w-100" @bind-Value="@_model.DisplayName" Name="@nameof(RegisterUserModel.DisplayName)" />
+                </RadzenFormField>
+            </RadzenRow>
 
-        <!-- Email -->
-        <RadzenRow>
-            <RadzenFormField Text="@Localizer["form_Email"]" Style="width: 100%;">
-                <RadzenTextBox Name="Email"
-                               @bind-Value="@_model.Email"
-                               Style="width: 100%;" />
-            </RadzenFormField>
-            <RadzenRequiredValidator Component="Email"
-                                     Text="@Localizer["form_Required"]"
-                                     Popup="false"
-                                     Style="display: block; margin-top: -14px;" />
-            <RadzenEmailValidator Component="Email"
-                                  Text="@Localizer["form_Email_Invalid"]"
-                                  Popup="false"
-                                  Style="display: block; margin-top: -14px;" />
-            <!--
-            If you'd like to show an "email taken" error, you can conditionally
-            use a RadzenCustomValidator or display a message after
-            checking the email with FormEmail_OnValueChanged
-            -->
-        </RadzenRow>
+            <!-- Email -->
+            <RadzenRow>
+                <RadzenFormField class="rz-w-100" Text="@Localizer["form_Email"]">
+                    <RadzenTextBox class="rz-w-100" @bind-Value="@_model.Email" Name="@nameof(RegisterUserModel.Email)" />
+                </RadzenFormField>
 
-        <!-- Password -->
-        <RadzenRow>
-            <RadzenFormField Text="@Localizer["form_Password"]" Style="width: 100%;">
-                <ChildContent>
-                    <!-- Show as TextBox if NOT hidden, else as Password -->
-                    <RadzenTextBox @bind-Value="@_model.Password"
-                                   Name="Password"
-                                   Visible="@(!_passwordNotVisible)"
-                                   Style="width: 100%;"
-                                   />
+                <RadzenRequiredValidator class="validator" Component="@nameof(RegisterUserModel.Email)"
+                                         Text="@Localizer["form_Required"]" Popup="false"/>
+                <RadzenEmailValidator class="validator" Component="@nameof(RegisterUserModel.Email)"
+                                      Text="@Localizer["form_Email_Invalid"]" Popup="false" />
+                <!--
+                If you'd like to show an "email taken" error, you can conditionally
+                use a RadzenCustomValidator or display a message after
+                checking the email with FormEmail_OnValueChanged
+                -->
+            </RadzenRow>
 
-                    <RadzenPassword @bind-Value="@_model.Password"
-                                    Name="Password"
-                                    Visible="@_passwordNotVisible"
-                                    Style="width: 100%;" />
-                </ChildContent>
-                <End>
-                    <RadzenButton Icon="@(_passwordNotVisible ? "visibility" : "visibility_off")"
-                                  Click="() => _passwordNotVisible = !_passwordNotVisible"
-                                  Variant="Variant.Text"
-                                  Size="ButtonSize.Small" />
-                </End>
-            </RadzenFormField>
-            <RadzenRequiredValidator Component="Password"
-                                     Text="@Localizer["form_Required"]"
-                                     Popup="false"
-                                     Style="display: block; margin-top: -14px;" />
-            <RadzenLengthValidator Component="Password"
-                Min="6"
-                                   Text=@Localizer["form_Password_TooShort"]
-                Popup=false
-                Style="display: block; margin-top: -14px;" />
+            <!-- Password -->
+            <RadzenRow>
+                <RadzenFormField class="rz-w-100" Text="@Localizer["form_Password"]">
+                    <ChildContent>
 
-        </RadzenRow>
+                        <!-- Show as TextBox if NOT hidden, else as Password -->
+                        <RadzenTextBox class="rz-w-100" @bind-Value="@_model.Password" Name="@nameof(RegisterUserModel.Password)"
+                                       Visible="@(!_passwordNotVisible)"/>
+                        <RadzenPassword class="rz-w-100" @bind-Value="@_model.Password" Name="@nameof(RegisterUserModel.Password)"
+                                        Visible="@_passwordNotVisible"/>
+                    </ChildContent>
+                    <End>
+                        <RadzenButton Icon="@(_passwordNotVisible ? "visibility" : "visibility_off")"
+                                      Click="() => _passwordNotVisible = !_passwordNotVisible" Variant="Variant.Text"
+                                      Size="ButtonSize.Small" />
+                    </End>
+                </RadzenFormField>
 
-        <!-- Confirm Password -->
-        <RadzenRow>
-            <RadzenFormField Text="@Localizer["form_ConfirmPassword"]" Style="width: 100%;">
-                <ChildContent>
-                    <RadzenTextBox @bind-Value="@_model.ConfirmPassword"
-                                   Name="ConfirmPassword"
-                                   Visible="@(!_confirmPasswordNotVisible)"
-                                   Style="width: 100%;" />
+                <RadzenRequiredValidator class="validator" Component="Password"
+                                         Text="@Localizer["form_Required"]"
+                                         Popup="false" />
+                <RadzenLengthValidator class="validator" Component="Password" Min="6"
+                                       Text=@Localizer["form_Password_TooShort"] Popup="false" />
+            </RadzenRow>
 
-                    <RadzenPassword @bind-Value="@_model.ConfirmPassword"
-                                    Name="ConfirmPassword"
-                                    Visible="@_confirmPasswordNotVisible"
-                                    Style="width: 100%;" />
-                </ChildContent>
-                <End>
-                    <RadzenButton Icon="@(_confirmPasswordNotVisible ? "visibility" : "visibility_off")"
-                                  Click="() => _confirmPasswordNotVisible = !_confirmPasswordNotVisible"
-                                  Variant="Variant.Text"
-                                  Size="ButtonSize.Small" />
-                </End>
-            </RadzenFormField>
+            <!-- Confirm Password -->
+            <RadzenRow>
+                <RadzenFormField class="rz-w-100" Text="@Localizer["form_ConfirmPassword"]">
+                    <ChildContent>
+                        <RadzenTextBox class="rz-w-100" @bind-Value="@_model.ConfirmPassword" Name="@nameof(RegisterUserModel.ConfirmPassword)"
+                                       Visible="@(!_confirmPasswordNotVisible)" />
+                        <RadzenPassword class="rz-w-100" @bind-Value="@_model.ConfirmPassword" Name="@nameof(RegisterUserModel.ConfirmPassword)"
+                                        Visible="@_confirmPasswordNotVisible" />
+                    </ChildContent>
+                    <End>
+                        <RadzenButton Icon="@(_confirmPasswordNotVisible ? "visibility" : "visibility_off")"
+                                      Click="() => _confirmPasswordNotVisible = !_confirmPasswordNotVisible"
+                                      Variant="Variant.Text" Size="ButtonSize.Small" />
+                    </End>
+                </RadzenFormField>
 
-            <RadzenRequiredValidator Component="ConfirmPassword"
-                                     Text="@Localizer["form_Required"]"
-                                     Popup="false"
-                                     Style="display: block; margin-top: -14px;" />
+                <RadzenRequiredValidator class="validator" Component="@nameof(RegisterUserModel.ConfirmPassword)"
+                                         Text="@Localizer["form_Required"]" Popup="false" />
+                <RadzenCompareValidator class="validator" Component="@nameof(RegisterUserModel.ConfirmPassword)"
+                                        Visible=@(!string.IsNullOrEmpty(_model.ConfirmPassword)) Value=@_model.Password
+                                        Text=@Localizer["form_InvalidPasswordMatch"] Popup="false" />
+            </RadzenRow>
 
-            <RadzenCompareValidator Visible=@(!string.IsNullOrEmpty(_model.ConfirmPassword))
-                                    Value=@_model.Password
-                                    Component="ConfirmPassword"
-                                    Text=@Localizer["form_InvalidPasswordMatch"]
-                                    Popup=false
-                                    Style="margin-top: -14px;" />
+            <!-- Submit -->
+            <RadzenRow>
+                <RadzenButton class="rz-w-100 rz-mt-3" Text="@Localizer["register"]"
+                              ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" />
+            </RadzenRow>
+        </RadzenTemplateForm>
 
+        <!-- Login link -->
+        <RadzenText class="rz-mt-5">
+            @Localizer["hasAccount"]
+            <RadzenLink Path="@Routes.Login()">@Localizer["hasAccount_Login"]</RadzenLink>
+        </RadzenText>
 
-        </RadzenRow>
-
-        <!-- Submit -->
-        <RadzenRow>
-            <RadzenButton Text="@Localizer["register"]"
-                          ButtonStyle="ButtonStyle.Primary"
-                          ButtonType="ButtonType.Submit"
-                          class="mt-3"
-                          Style="width: 100%;" />
-        </RadzenRow>
-
-    </RadzenTemplateForm>
-
-    <RadzenText class="mt-5">
-        @Localizer["hasAccount"]
-        <RadzenLink Path="@Routes.Login()">@Localizer["hasAccount_Login"]</RadzenLink>
-    </RadzenText>
-    @if (_errorMessage is not "")
-    {
-        <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Close="@ChangeErrorState">
-            @_errorMessage
-        </RadzenAlert>
-    }
-</RadzenCard>
+        @if (!string.IsNullOrWhiteSpace(_errorMessage))
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Shade="Shade.Lighter" Close="@ChangeErrorState">
+                @_errorMessage
+            </RadzenAlert>
+        }
+    </RadzenCard>
+</div>
