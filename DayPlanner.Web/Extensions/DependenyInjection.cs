@@ -1,9 +1,5 @@
 ﻿using DayPlanner.Web.Refit;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Refit;
-using System;
 
 namespace DayPlanner.Web.Extensions
 {
@@ -31,12 +27,16 @@ namespace DayPlanner.Web.Extensions
             // Register IDayPlannerApi (With Authorization)
             services.AddRefitClient<IDayPlannerApi>(settingsAction: sp =>
             {
-                var user = sp.GetRequiredService<IHttpContextAccessor>().HttpContext.User.ToUserSession();
                 return new RefitSettings
                 {
-                    AuthorizationHeaderValueGetter = async (_, _) =>
+                    AuthorizationHeaderValueGetter = (_, _) =>
                     {
-                        return user.Token ?? string.Empty;
+                        HttpContext? context = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;
+
+                        string tokenValue = context is not null && (context.User.Identity?.IsAuthenticated ?? false)
+                            ? context.User.ToUserSession().Token
+                            : string.Empty;
+                        return Task.FromResult(tokenValue);
                     }
                 };
             })
