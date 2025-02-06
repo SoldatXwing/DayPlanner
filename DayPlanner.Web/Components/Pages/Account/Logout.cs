@@ -13,17 +13,23 @@ public sealed class Logout : ComponentBase
     private NavigationManager NavigationManager { get; set; } = default!;
 
     [CascadingParameter]
-    private HttpContext? HttpContext { get; set; } = default!;
+    private HttpContext HttpContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        if (HttpContext is null)
-        {
-            NavigationManager.Refresh(forceReload: true);
-            return;
-        }
-
         await HttpContext.SignOutAsync();
+
+#if DEBUG
+        try
+        {
+            NavigationManager.NavigateToHome();
+        }
+        catch (NavigationException)
+        {
+            throw;     // This prevents the debugger from breaking at this point.
+        }
+#else
         NavigationManager.NavigateToHome();
+#endif
     }
 }
