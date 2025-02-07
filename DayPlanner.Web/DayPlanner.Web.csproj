@@ -27,4 +27,10 @@
     <Folder Include="Localization\Components\Layouts\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\Components\Pages\Account\Login.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

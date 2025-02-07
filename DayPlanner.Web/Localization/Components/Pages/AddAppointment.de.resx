@@ -117,10 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddAppointment" xml:space="preserve">
-    <value>Add appointment</value>
+  <data name="Title" xml:space="preserve">
+    <value>Titel</value>
   </data>
-  <data name="Today_Button" xml:space="preserve">
-    <value>Today</value>
+  <data name="TitleRequired" xml:space="preserve">
+    <value>Titel erforderlich</value>
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="StartRequired" xml:space="preserve">
+    <value>Start Datum ist erforderlich</value>
+  </data>
+  <data name="End" xml:space="preserve">
+    <value>Ende</value>
+  </data>
+  <data name="LocationPlaceholder" xml:space="preserve">
+    <value>Ort eingeben...</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Ort</value>
+  </data>
+  <data name="EndRequired" xml:space="preserve">
+    <value>End Datum ist erforderlich</value>
   </data>
 </root>

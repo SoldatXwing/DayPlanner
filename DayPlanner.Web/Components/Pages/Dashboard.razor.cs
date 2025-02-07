@@ -1,4 +1,5 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -16,10 +17,12 @@ public partial class Dashboard : ComponentBase
     private IStringLocalizer<Dashboard> Localizer { get; set; } = default!;
     [Inject]
     private IAppointmentService AppointmentService { get; set; } = default!;
+    [Inject]
+    private DialogService DialogService { get; set; } = default!;
 
     private List<Appointment> _appointments = [];
     private (DateTime Start, DateTime End)? _loadedRange;
-    private async Task OnLoadData(SchedulerLoadDataEventArgs args)
+    private async Task OnLoadDataAsync(SchedulerLoadDataEventArgs args)
     {
         if (_loadedRange is null)
         {
@@ -51,6 +54,21 @@ public partial class Dashboard : ComponentBase
             _loadedRange = (new DateTime(Math.Min(args.Start.Ticks, loadedFrom.Ticks)),
                             new DateTime(Math.Max(args.End.Ticks, loadedTo.Ticks)));
             StateHasChanged();
+        }
+    }
+    private async Task OnSlotSelectAsync(SchedulerSlotSelectEventArgs args)
+    {
+        if (args.View.Text != "Year")
+        {
+            AppointmentRequest data = await DialogService.OpenAsync<AddAppointment>(Localizer["AddAppointment"],
+                new Dictionary<string, object> { { "Start", args.Start }, { "End", args.End } });
+
+            if (data != null)
+            {
+                Appointment appointment = await AppointmentService.CreateAppointment(data);
+                _appointments = [.. _appointments, .. new[] { appointment }];
+                StateHasChanged();
+            }
         }
     }
     private void OnAppointmentMouseLeave(SchedulerAppointmentMouseEventArgs<Appointment> args)

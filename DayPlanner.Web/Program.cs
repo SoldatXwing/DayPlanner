@@ -13,6 +13,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddRefitClients(builder.Configuration);
+builder.Services.AddHttpClient("GeoApifyClient", c =>
+{
+    c.BaseAddress = new Uri(builder.Configuration["GeoApifyApi:HttpClient:BaseAddress"] ?? throw new NotImplementedException("GeoApfiy api key isnt set. Config path: GeoApifyApi:HttpClient:BaseAddress"));
+});
 builder.Services.AddRadzenComponents();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DefaultAuthenticationService>()

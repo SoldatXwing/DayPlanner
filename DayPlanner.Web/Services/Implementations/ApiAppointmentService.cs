@@ -1,10 +1,17 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Web.Refit;
 
 namespace DayPlanner.Web.Services.Implementations
 {
     internal class ApiAppointmentService(IDayPlannerApi api) : IAppointmentService
     {
+        public async Task<Appointment> CreateAppointment(AppointmentRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await api.CreateAppointmentAsync(request);
+        }
+
         public async Task<List<Appointment>> GetAllAppointmentsInRangeAsync(DateTime start, DateTime end)
         {
             if(start > end)

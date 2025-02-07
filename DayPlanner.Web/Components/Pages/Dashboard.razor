@@ -9,7 +9,7 @@
                      EndProperty="@nameof(Appointment.End)"
                      TextProperty="Title" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
                      AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
-                     LoadData="@OnLoadData">
+                     LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync">
         
         <RadzenDayView />   
         <RadzenWeekView />
@@ -41,6 +41,6 @@
                 @args.Data.End.ToString("hh:mm ⋅ dddd, MMMM d")
             </RadzenText>
         </RadzenStack>
-    </RadzenStack>, new TooltipOptions { Position = TooltipPosition.Right, Duration = null });
+    </RadzenStack>, new TooltipOptions { Position = TooltipPosition.Top, Duration = null });
     }
 }

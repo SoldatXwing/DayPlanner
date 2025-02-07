@@ -1,4 +1,5 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Models.DTO;
 
 namespace DayPlanner.Web.Services
 {
@@ -15,5 +16,11 @@ namespace DayPlanner.Web.Services
         /// <param name="end">End date</param>
         /// <returns>List of appointments</returns>
         public Task<List<Appointment>> GetAllAppointmentsInRangeAsync(DateTime start, DateTime end);
+        /// <summary>
+        /// Create a new appointment
+        /// </summary>
+        /// <param name="request">Request dto</param>
+        /// <returns>The created appointment</returns>
+        public Task<Appointment> CreateAppointment(AppointmentRequest request);
     }
 }

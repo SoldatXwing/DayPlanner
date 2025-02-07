@@ -171,12 +171,8 @@
   <data name="SupportAvailability" xml:space="preserve">
     <value>Support available</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="TryNow" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
-  <data name="WelcomeToDayPlanner" xml:space="preserve">
-    <value>Welcome to DayPlanner</value>
+  <data name="TryNow" xml:space="preserve">
+    <value>Try now</value>
   </data>
   <data name="WhatIsDayPlanner" xml:space="preserve">
     <value>What is DayPlanner?</value>

@@ -117,10 +117,70 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddAppointment" xml:space="preserve">
-    <value>Add appointment</value>
+  <data name="AIIntegration" xml:space="preserve">
+    <value />
   </data>
-  <data name="Today_Button" xml:space="preserve">
-    <value>Today</value>
+  <data name="AIIntegrationDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DayPlannerDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Feature1" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Feature1Description" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Feature2" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Feature2Description" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Feature3" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Feature3Description" xml:space="preserve">
+    <value />
+  </data>
+  <data name="GetStarted" xml:space="preserve">
+    <value />
+  </data>
+  <data name="GetStartedDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Introduction" xml:space="preserve">
+    <value />
+  </data>
+  <data name="KeyFeatures" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReadyToStart" xml:space="preserve">
+    <value />
+  </data>
+  <data name="ReadyToStartDescription" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SatisfactionRate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="StartPlanning" xml:space="preserve">
+    <value />
+  </data>
+  <data name="SupportAvailability" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TryNow" xml:space="preserve">
+    <value />
+  </data>
+  <data name="WelcomeToDayPlanner" xml:space="preserve">
+    <value />
+  </data>
+  <data name="WhatIsDayPlanner" xml:space="preserve">
+    <value />
+  </data>
+  <data name="YearsExperience" xml:space="preserve">
+    <value />
   </data>
 </root>

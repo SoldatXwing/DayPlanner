@@ -1,0 +1,57 @@
+﻿@using DayPlanner.Abstractions.Models.Backend
+@using DayPlanner.Abstractions.Models.DTO
+
+
+<RadzenTemplateForm TItem="AppointmentRequest" Data="@model" Submit=@OnSubmit>
+    <RadzenStack Gap="1.3rem" Style="max-width: 800px; margin: 0 auto;">
+        <!-- Title & Summary -->
+        <div>
+            <!-- Title -->
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="@Localizer["Title"]" />
+                <RadzenTextBox @bind-Value="@model.Title" Name="Title" Style="width: 100%;" />
+                <RadzenRequiredValidator Component="Title" Text="@Localizer["TitleRequired"]" Style="margin-top: 0.25rem;" />
+            </RadzenStack>
+
+            <!-- Summary -->
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="@Localizer["Summary"]" />
+                <RadzenTextBox @bind-Value="@model.Summary" Name="Summary" Style="width: 100%;"/>
+            </RadzenStack>
+        </div>
+
+        <!-- Date & Time -->
+        <div>
+            <!-- Start -->
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="@Localizer["Start"]" />
+                <RadzenDatePicker @bind-Value="@model.Start" Name="Start" ShowTime="true" Style="width: 100%;" />
+                <RadzenRequiredValidator Component="Start" Text="@Localizer["StartRequired"]" Style="margin-top: 0.25rem;" />
+            </RadzenStack>
+
+            <!-- End -->
+            <RadzenStack Gap="0.5rem">
+                <RadzenLabel Text="@Localizer["End"]" />
+                <RadzenDatePicker Name="End" @bind-Value="@model.End" ShowTime="true" Style="width: 100%;" />
+                <RadzenRequiredValidator Component="End" Text="@Localizer["EndRequired"]" Style="margin-top: 0.25rem;" />
+            </RadzenStack>
+        </div>
+
+        <!-- Location -->
+        <RadzenStack Gap="0.5rem" Style="margin-bottom: 1.5rem;">
+            <RadzenLabel Text="@Localizer["Location"]" />
+            <RadzenAutoComplete Style="width: 100%;"
+                              Placeholder="@Localizer["LocationPlaceholder"]"
+                              @bind-Value="@model.Location"
+                              Data="@_suggestions"
+                              MinLength="4"
+                              FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                              @oninput="(async (args) => await OnLocationChanged(args))"/>
+        </RadzenStack>
+
+        <!-- Submit Button -->
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="@Localizer["Save"]" Style="min-width: 120px;" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
