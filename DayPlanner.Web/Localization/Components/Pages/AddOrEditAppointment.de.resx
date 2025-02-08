@@ -147,4 +147,7 @@
   <data name="EndRequired" xml:space="preserve">
     <value>End Datum ist erforderlich</value>
   </data>
+  <data name="DeleteAppointment" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
 </root>

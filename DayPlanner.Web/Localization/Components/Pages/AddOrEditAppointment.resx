@@ -117,19 +117,40 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddAppointment" xml:space="preserve">
-    <value>Add appointment</value>
+  <data name="Title" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TitleRequired" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Summary" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Start" xml:space="preserve">
+    <value />
+  </data>
+  <data name="StartRequired" xml:space="preserve">
+    <value />
+  </data>
+  <data name="End" xml:space="preserve">
+    <value />
+  </data>
+  <data name="LocationPlaceholder" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value />
+  </data>
+  <data name="EndRequired" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DeleteAppointment" xml:space="preserve">
+    <value />
   </data>
   <data name="DeleteAppointmentSuccess" xml:space="preserve">
-    <value>Appointment was successfully deleted</value>
-  </data>
-  <data name="EditAppointment" xml:space="preserve">
-    <value>Edit appointment</value>
-  </data>
-  <data name="EditAppointmentSuccess" xml:space="preserve">
-    <value>Appointment was successfully changed and saved</value>
-  </data>
-  <data name="Today_Button" xml:space="preserve">
-    <value>Today</value>
+    <value />
   </data>
 </root>

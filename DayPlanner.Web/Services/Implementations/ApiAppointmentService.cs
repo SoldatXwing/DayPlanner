@@ -6,10 +6,16 @@ namespace DayPlanner.Web.Services.Implementations
 {
     internal class ApiAppointmentService(IDayPlannerApi api) : IAppointmentService
     {
-        public async Task<Appointment> CreateAppointment(AppointmentRequest request)
+        public async Task<Appointment> CreateAppointmentAsync(AppointmentRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
             return await api.CreateAppointmentAsync(request);
+        }
+
+        public async Task DeleteAppointmentAsync(string appointmentId)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(appointmentId);
+            await api.DeleteAppointmentAsync(appointmentId);
         }
 
         public async Task<List<Appointment>> GetAllAppointmentsInRangeAsync(DateTime start, DateTime end)
@@ -20,6 +26,13 @@ namespace DayPlanner.Web.Services.Implementations
                 throw new ArgumentException("End date must be after start date");
             var appointments = await api.GetAppointmentsByDateAsync(start, end);
             return appointments.ToList();
+        }
+
+        public async Task<Appointment> UpdateAppointmentAsync(string appointmentId, AppointmentRequest request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentException.ThrowIfNullOrEmpty(appointmentId);
+            return await api.UpdateAppointmentAsync(appointmentId,request);
         }
     }
 }

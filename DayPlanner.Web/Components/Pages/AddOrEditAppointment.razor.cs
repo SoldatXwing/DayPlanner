@@ -11,7 +11,7 @@ using Radzen;
 
 namespace DayPlanner.Web.Components.Pages
 {
-    public sealed partial class AddAppointment : ComponentBase
+    public sealed partial class AddOrEditAppointment : ComponentBase
     {
         [Inject]
         private DialogService DialogService { get; set; } = default!;
@@ -20,14 +20,14 @@ namespace DayPlanner.Web.Components.Pages
         [Inject]
         private IConfiguration Configuration { get; set; } = default!;
         [Inject]
-        private IStringLocalizer<AddAppointment> Localizer { get; set; } = default!;
+        private IStringLocalizer<AddOrEditAppointment> Localizer { get; set; } = default!;
 
         [Parameter]
-        public DateTime Start { get; set; }
+        public AppointmentRequest? AppointmentRequest { get; set; } = default!;
         [Parameter]
-        public DateTime End { get; set; }
+        public bool IsEditMode { get; set; }
 
-        private AppointmentRequest model = new();
+        private AppointmentRequest? _model = new();
         private HttpClient _httpClient = default!;
         private string _apiKey = string.Empty;
         private List<string?> _suggestions = new();
@@ -40,8 +40,11 @@ namespace DayPlanner.Web.Components.Pages
 
         protected override void OnParametersSet()
         {
-            model.Start = Start;
-            model.End = End;
+            _model = AppointmentRequest!;           
+        }
+        private void DeleteAppointment()
+        {
+            DialogService.Close(false);
         }
 
         private void OnSubmit(AppointmentRequest model)

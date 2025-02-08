@@ -120,6 +120,15 @@
   <data name="AddAppointment" xml:space="preserve">
     <value>Termin hinzufügen</value>
   </data>
+  <data name="DeleteAppointmentSuccess" xml:space="preserve">
+    <value>Der Termin wurde erfolgreich gelöscht</value>
+  </data>
+  <data name="EditAppointment" xml:space="preserve">
+    <value>Termin bearbeiten</value>
+  </data>
+  <data name="EditAppointmentSuccess" xml:space="preserve">
+    <value>Der Termin wurde erfolgreich geändert, und gespeichert</value>
+  </data>
   <data name="Today_Button" xml:space="preserve">
     <value>Heute</value>
   </data>

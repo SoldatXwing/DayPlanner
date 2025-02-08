@@ -21,6 +21,18 @@ namespace DayPlanner.Web.Services
         /// </summary>
         /// <param name="request">Request dto</param>
         /// <returns>The created appointment</returns>
-        public Task<Appointment> CreateAppointment(AppointmentRequest request);
+        public Task<Appointment> CreateAppointmentAsync(AppointmentRequest request);
+        /// <summary>
+        /// Update an existing appointment
+        /// </summary>
+        /// <param name="request">Request dto</param>
+        /// <returns>The updated appointment</returns>
+        public Task<Appointment> UpdateAppointmentAsync(string appointmentId,AppointmentRequest request);
+        /// <summary>
+        /// Delete an appointment
+        /// </summary>
+        /// <param name="appointmentId">Id of the appointment</param>
+        /// <returns></returns>
+        public Task DeleteAppointmentAsync(string appointmentId);
     }
 }

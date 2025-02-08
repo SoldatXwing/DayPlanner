@@ -9,7 +9,7 @@
                      EndProperty="@nameof(Appointment.End)"
                      TextProperty="Title" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
                      AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
-                     LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync">
+                     LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync" AppointmentSelect="OnAppointmentSelectedAsync">
         
         <RadzenDayView />   
         <RadzenWeekView />

@@ -19,6 +19,8 @@ public partial class Dashboard : ComponentBase
     private IAppointmentService AppointmentService { get; set; } = default!;
     [Inject]
     private DialogService DialogService { get; set; } = default!;
+    [Inject]
+    private NotificationService NotificationService { get; set; } = default!;
 
     private List<Appointment> _appointments = [];
     private (DateTime Start, DateTime End)? _loadedRange;
@@ -60,12 +62,13 @@ public partial class Dashboard : ComponentBase
     {
         if (args.View.Text != "Year")
         {
-            AppointmentRequest data = await DialogService.OpenAsync<AddAppointment>(Localizer["AddAppointment"],
-                new Dictionary<string, object> { { "Start", args.Start }, { "End", args.End } });
+            AppointmentRequest data = await DialogService.OpenAsync<AddOrEditAppointment>(Localizer["AddAppointment"],
+                new Dictionary<string, object> { { "AppointmentRequest", new AppointmentRequest { Start = args.Start, End = args.End } },
+            { "IsEditMode", false } });
 
             if (data != null)
             {
-                Appointment appointment = await AppointmentService.CreateAppointment(data);
+                Appointment appointment = await AppointmentService.CreateAppointmentAsync(data);
                 _appointments = [.. _appointments, .. new[] { appointment }];
                 StateHasChanged();
             }
@@ -74,5 +77,42 @@ public partial class Dashboard : ComponentBase
     private void OnAppointmentMouseLeave(SchedulerAppointmentMouseEventArgs<Appointment> args)
     {
         TooltipService.Close();
+    }
+    private async Task OnAppointmentSelectedAsync(SchedulerAppointmentSelectEventArgs<Appointment> args)
+    {
+        var result = await DialogService.OpenAsync<AddOrEditAppointment>(Localizer["EditAppointment"],
+               new Dictionary<string, object> { { "AppointmentRequest", new AppointmentRequest(args.Data.Origin) {
+                   Start = args.Data.Start,
+                   End = args.Data.End,
+                   Location = args.Data.Location,
+                   Summary = args.Data.Summary,
+                   Title = args.Data.Title } },
+            { "IsEditMode", true } });
+        if (result is bool deleteRequested && deleteRequested == false)
+        {
+            await AppointmentService.DeleteAppointmentAsync(args.Data.Id);
+            _appointments = _appointments.Where(a => a.Id != args.Data.Id).ToList();
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Duration = 40000,
+                Summary = Localizer["DeleteAppointmentSuccess"]
+            });
+        }
+        if (result is AppointmentRequest data)
+        {
+            Appointment updatedAppointment = await AppointmentService.UpdateAppointmentAsync(args.Data.Id, data);
+            _appointments = _appointments
+                .Where(a => a.Id != args.Data.Id)
+                .Concat([updatedAppointment])
+                .ToList();
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Duration = 40000,
+                Summary = Localizer["EditAppointmentSuccess"]
+            });          
+        }
+        StateHasChanged();
     }
 }
