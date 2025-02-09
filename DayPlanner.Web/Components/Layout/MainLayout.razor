@@ -10,19 +10,21 @@
                 <Authorized>
                     <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 
-                        <!-- Linke Gruppe: Menu und DayPlanner -->
+                        <!-- Left group: Menu and DayPlanner -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                             <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
                             <RadzenLabel Text="DayPlanner" />
                         </RadzenStack>
 
-                        <!-- Rechte Gruppe: Avatar, Benutzername, Logout und Toggler -->
-                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
+                        <!-- Right group: Avatar, username, Logout and Toggler -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="rz-mr-2">
                             @{
                                 var avatar = GetUserAvatar();
-                                Uri uri;
-                                bool isUrlValid = Uri.TryCreate(avatar, UriKind.Absolute, out uri)
-                                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+                                Uri? uri;
+                                bool isUrlValid = Uri.TryCreate(avatar, UriKind.Absolute, out uri) &&
+                                    uri is not null &&
+                                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
                             }
                             @if (!isUrlValid)
                             {
@@ -46,13 +48,15 @@
                 <NotAuthorized>
                     <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
 
-                        <!-- Linke Gruppe: Menu und DayPlanner -->
+                        <!-- Left Group: dummy sidebar for spacing -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
-                            <div class="menuLabel" />
-                            <RadzenLabel class="rz-ml-3" Text="DayPlanner" />
+                            <RadzenSidebarToggle Style="visibility: hidden;" /> <!-- Invisible but keeps spacing -->
+                            <RadzenLabel Text="DayPlanner" />
                         </RadzenStack>
-                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px">
-                            <RadzenAppearanceToggle class="rz-mt-1 rz-mr-5" />
+
+                        <!-- Right Group: Appearance Toggler -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="rz-mr-2">
+                            <RadzenAppearanceToggle />
                         </RadzenStack>
                     </RadzenStack>
                 </NotAuthorized>
@@ -79,13 +83,16 @@
 
         <RadzenFooter class="footer">
             <RadzenRow class="row1" />
-            <div class="row2">
                 <RadzenRow>
                     <RadzenColumn Size="6">
-                        <div class="copyright rz-text-xs">© @DateTime.Now.Year DayPlanner GmbH</div>
+                        <div class="rz-text-xs">© @DateTime.Now.Year DayPlanner</div>
+                    </RadzenColumn>
+                    <RadzenColumn Size="6">
+                    <div class="rz-text-xs" style="text-align: right;">
+                        Made in  <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" alt="German flag" width="20" style="vertical-align: unset;"> with ❤️
+                    </div>
                     </RadzenColumn>
                 </RadzenRow>
-            </div>
         </RadzenFooter>
     </RadzenLayout>
 </div>
