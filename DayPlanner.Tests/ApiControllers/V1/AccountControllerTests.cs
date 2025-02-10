@@ -83,7 +83,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
             string refreshToken = "mock-refresh-token";
             _jwtProviderMock!
                 .Setup(p => p.GetForCredentialsAsync(request.Email, request.Password))
-                .ReturnsAsync((token, refreshToken));
+                .ReturnsAsync(new Abstractions.Models.Backend.TokenResponse() { Token = token, RefreshToken = refreshToken});
 
             var result = await _controller!.LoginAsync(request, _jwtProviderMock.Object);
 

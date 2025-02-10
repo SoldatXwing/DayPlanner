@@ -19,21 +19,25 @@
             </RadzenRow>
 
             <!-- Password -->
-            <RadzenRow>
-                <RadzenFormField class="rz-w-100" Text="@Localizer["form_Password"]" Variant="@Variant.Outlined">
-                    <ChildContent>
-                        <RadzenPassword @bind-Value="@_model.Password" Name="@nameof(UserRequest.Password)" Visible="@_passwordNotVisible" />
-                    </ChildContent>
-                    <End>
-                        <RadzenButton Icon="@(_passwordNotVisible ? "visibility_off" : "visibility")"
-                                      Click="() => _passwordNotVisible = !_passwordNotVisible"
-                                      Variant="Variant.Text" Size="ButtonSize.Small" />
-                    </End>
-                </RadzenFormField>
+             <RadzenRow>
+            <RadzenFormField Text="@Localizer["form_Password"]" Variant="@Variant.Outlined" Style="width: 100%;">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="@_model.Password"
+                                   Name="Password"
+                                   type="@(_passwordNotVisible ? "password" : "text")" />
+                </ChildContent>
+                <End>
+                    <RadzenButton Icon="@(_passwordNotVisible ? "visibility_off" : "visibility")"
+                                  Click="() => _passwordNotVisible = !_passwordNotVisible"
+                                  Variant="Variant.Text" Size="ButtonSize.Small" />
+                </End>
+            </RadzenFormField>
+            <RadzenRequiredValidator Component="Password"
+                                     Text="@Localizer["form_Required"]"
+                                     Popup="false"
+                                     class="validator" />
 
-                <RadzenRequiredValidator class="validator" Component="@nameof(UserRequest.Password)"
-                                         Text="@Localizer["form_Required"]" Popup="false" />
-            </RadzenRow>
+        </RadzenRow>
 
             <!-- Submit -->
             <RadzenRow>

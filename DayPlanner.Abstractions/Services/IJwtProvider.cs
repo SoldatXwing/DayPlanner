@@ -1,7 +1,9 @@
-﻿namespace DayPlanner.Abstractions.Services;
+﻿using DayPlanner.Abstractions.Models.Backend;
+
+namespace DayPlanner.Abstractions.Services;
 
 public interface IJwtProvider
 {
-    Task<(string token, string refreshToken)> GetForCredentialsAsync(string email, string password);
+    Task<TokenResponse> GetForCredentialsAsync(string email, string password);
     Task<string> RefreshIdTokenAsync(string refreshToken);
 }

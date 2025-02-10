@@ -90,7 +90,11 @@ public sealed partial class Login : ComponentBase
         {
         }
     }
-
+    private void TogglePasswordVisibility()
+    {
+        _passwordNotVisible = !_passwordNotVisible;
+        StateHasChanged();
+    }
     private async Task GoogleLogin_OnClickAsync()
     {
         string url = await AuthenticationService.GetGoogleAuthUrlAsync();

@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace DayPlanner.Web.Models;
+namespace DayPlanner.Abstractions.Models.Backend;
 
-internal class TokenResponse
+public class TokenResponse
 {
     [JsonProperty("token")]
     public string Token { get; set; } = default!;

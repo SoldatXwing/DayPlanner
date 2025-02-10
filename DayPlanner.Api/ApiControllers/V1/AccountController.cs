@@ -93,8 +93,8 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         try
         {
-            var (token, refreshToken) = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
-            return Ok(new { token, refreshToken });
+            var tokenResponse = await jwtProvider.GetForCredentialsAsync(request.Email, request.Password);
+            return Ok(tokenResponse);
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException) || ex.GetType() == typeof(InvalidEmailException))
         {

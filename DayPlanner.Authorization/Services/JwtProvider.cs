@@ -27,7 +27,7 @@ namespace DayPlanner.Authorization.Services
         /// <exception cref="BadCredentialsException">Throws if invalid login credentials are passed</exception>
         /// <exception cref="InvalidEmailException">Throws if no account with passed email exists</exception>
         /// <exception cref="Exception">Standart exception</exception>
-        public async Task<(string token, string refreshToken)> GetForCredentialsAsync(string email, string password)
+        public async Task<TokenResponse> GetForCredentialsAsync(string email, string password)
         {
             var request = new
             {
@@ -61,7 +61,7 @@ namespace DayPlanner.Authorization.Services
                 }
             }
             var authToken = await response.Content.ReadFromJsonAsync<AuthToken>();
-            return (authToken!.IdToken, authToken.RefreshToken);
+            return new() { Token = authToken!.IdToken, RefreshToken = authToken.RefreshToken};
         }
         /// <summary>
         /// Refreshes the current login token.
