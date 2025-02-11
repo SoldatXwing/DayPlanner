@@ -80,7 +80,7 @@ public partial class Dashboard : ComponentBase
     }
     private async Task OnAppointmentSelectedAsync(SchedulerAppointmentSelectEventArgs<Appointment> args)
     {
-        var result = await DialogService.OpenAsync<AddOrEditAppointment>(Localizer["EditAppointment"],
+        dynamic result = await DialogService.OpenAsync<AddOrEditAppointment>(Localizer["EditAppointment"],
                new Dictionary<string, object> { { "AppointmentRequest", new AppointmentRequest(args.Data.Origin) {
                    Start = args.Data.Start,
                    End = args.Data.End,
@@ -88,6 +88,7 @@ public partial class Dashboard : ComponentBase
                    Summary = args.Data.Summary,
                    Title = args.Data.Title } },
             { "IsEditMode", true } });
+
         if (result is bool deleteRequested && deleteRequested == false)
         {
             await AppointmentService.DeleteAppointmentAsync(args.Data.Id);
@@ -95,7 +96,7 @@ public partial class Dashboard : ComponentBase
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Success,
-                Duration = 40000,
+                Duration = 5000,
                 Summary = Localizer["DeleteAppointmentSuccess"]
             });
         }
@@ -109,9 +110,9 @@ public partial class Dashboard : ComponentBase
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Success,
-                Duration = 40000,
+                Duration = 5000,
                 Summary = Localizer["EditAppointmentSuccess"]
-            });          
+            });
         }
         StateHasChanged();
     }

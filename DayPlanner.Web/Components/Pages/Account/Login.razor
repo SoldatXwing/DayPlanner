@@ -12,9 +12,12 @@
                     <RadzenTextBox class="rz-w-100" @bind-Value="@_model.Email" Name="@nameof(UserRequest.Email)" />
                 </RadzenFormField>
 
-                <RadzenRequiredValidator class="validator" Component="@nameof(UserRequest.Email)"
+                <RadzenRequiredValidator Style="display: block; margin-top: -14px;"
+                                         Component="@nameof(UserRequest.Email)"
                                          Text="@Localizer["form_Required"]" Popup="false" />
-                <RadzenEmailValidator class="validator" Component="@nameof(UserRequest.Email)"
+
+                <RadzenEmailValidator Style="display: block; margin-top: -14px;"
+                                      Component="@nameof(UserRequest.Email)"
                                       Text="@Localizer["form_Email_Invalid"]" Popup="false" />
             </RadzenRow>
 
@@ -35,7 +38,7 @@
             <RadzenRequiredValidator Component="Password"
                                      Text="@Localizer["form_Required"]"
                                      Popup="false"
-                                     class="validator" />
+                                     Style="display: block; margin-top: -14px;" />
 
         </RadzenRow>
 

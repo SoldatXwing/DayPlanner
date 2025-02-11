@@ -40,14 +40,18 @@ namespace DayPlanner.Web.Components.Layout
                 ? _user = state.User.ToUser()
                 : null;
         }
+        protected override void OnInitialized()
+        {
+            StateProvider.AuthenticationStateChanged += OnUpdateAuthenticationState;
+            OnUpdateAuthenticationState(StateProvider.GetAuthenticationStateAsync());
+        }
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
                 try
                 {
-                    StateProvider.AuthenticationStateChanged += OnUpdateAuthenticationState;
-                    OnUpdateAuthenticationState(StateProvider.GetAuthenticationStateAsync());
+
 
                     var consentResult = await ProtectedLocalStore.GetAsync<bool>("cookieConsent");
                     cookieConsent = consentResult.Success && consentResult.Value;
@@ -113,20 +117,6 @@ namespace DayPlanner.Web.Components.Layout
             finally
             {
                 StateHasChanged();
-            }
-        }
-
-        private async Task HandleSavePreferences()
-        {
-            try
-            {
-                cookieConsent = necessaryCookies || analyticsCookies || marketingCookies;
-                await SavePreferences();
-                showSettings = false;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving preferences: {ex.Message}");
             }
         }
 
