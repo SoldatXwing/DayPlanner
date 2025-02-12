@@ -17,3 +17,7 @@
 .googleLoginBtn i.fab {
     margin-right: 10px;
 }
+.validator {
+    display: block;
+    margin-top: -14px;
+}

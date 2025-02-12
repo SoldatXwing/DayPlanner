@@ -24,11 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Localization\Components\Layouts\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <EmbeddedResource Update="Localization\Components\Layouts\MainLayout.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Update="Localization\Components\Pages\Account\Login.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Components\Pages\Settings.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

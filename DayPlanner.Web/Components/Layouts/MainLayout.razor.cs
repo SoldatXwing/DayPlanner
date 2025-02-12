@@ -8,7 +8,7 @@ using Radzen;
 using Radzen.Blazor;
 using System.Security.Cryptography;
 
-namespace DayPlanner.Web.Components.Layout
+namespace DayPlanner.Web.Components.Layouts
 {
     public partial class MainLayout
     {
@@ -19,8 +19,6 @@ namespace DayPlanner.Web.Components.Layout
         private AuthenticationStateProvider StateProvider { get; set; } = default!;
         [Inject]
         private IStringLocalizer<MainLayout> Localizer { get; set; } = default!;
-        [Inject]
-        private TooltipService TooltipService { get; set; } = default!;
         [Inject]
         private NavigationManager Navigation { get; set; } = default!;
         #endregion
