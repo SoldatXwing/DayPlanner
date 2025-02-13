@@ -22,4 +22,12 @@ public class UserService(IUserStore userRepository) : IUserService
     /// <param name="args">The registration request containing user details.</param>
     /// <returns>The created user.</returns>
     public async Task<User> CreateUserAsync(RegisterUserRequest args) => await userRepository.CreateAsync(args);
+    /// <summary>
+    /// Updates an existing user with the specified details.
+    /// </summary>
+    /// <param name="uid">Id of the user</param>
+    /// <param name="args">Request model</param>
+    /// <returns>The updated user</returns>
+
+    public async Task<User> UpdateUserAsync(UpdateUserRequest args) => await userRepository.UpdateAsync(args);
 }

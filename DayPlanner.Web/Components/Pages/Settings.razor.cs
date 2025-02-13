@@ -29,9 +29,8 @@ namespace DayPlanner.Web.Components.Pages
         private void CancelEdit()
         {
             editMode = false;
-            UserRequest!.PhotoUrl = User!.PhotoUrl;
-            UserRequest!.Email = User!.Email;
-            UserRequest!.DisplayName = User!.DisplayName;
+            UserRequest!.Email = User!.Email!;
+            UserRequest!.DisplayName = User!.DisplayName!;
         }
         protected override async Task OnInitializedAsync()
         {
@@ -42,9 +41,8 @@ namespace DayPlanner.Web.Components.Pages
 
             UserRequest = new()
             {
-                PhotoUrl = User!.PhotoUrl,
-                Email = User!.Email,
-                DisplayName = User!.DisplayName
+                Email = User!.Email!,
+                DisplayName = User!.DisplayName!
             };
         }
 

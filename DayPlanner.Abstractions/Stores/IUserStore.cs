@@ -21,4 +21,10 @@ public interface IUserStore
     /// <param name="uid">The unique identifier of the user to retrieve.</param>
     /// <returns>The <see cref="User"/> object associated with the specified UID.</returns>
     Task<User> GetByIdAsync(string uid);
+    /// <summary>
+    /// Updates an existing user record asynchronously.
+    /// </summary>
+    /// <param name="args">Request model</param>
+    /// <returns>The updated user</returns>
+    Task<User> UpdateAsync(UpdateUserRequest args);
 }

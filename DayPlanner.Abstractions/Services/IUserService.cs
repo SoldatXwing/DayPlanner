@@ -8,4 +8,5 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(string uid);
 
     Task<User> CreateUserAsync(RegisterUserRequest args);
+    Task<User> UpdateUserAsync(UpdateUserRequest args);
 }

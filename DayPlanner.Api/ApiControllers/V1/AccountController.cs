@@ -46,6 +46,49 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         return Ok(user);
     }
     /// <summary>
+    /// Updates the user's account information. If a paramter is null or empty, it will not be updated.
+    /// </summary>
+    /// <param name="request">The request model</param>
+    /// <param name="userService">User service</param>
+    /// <returns></returns>
+    [HttpPut]
+    [ProducesResponseType<User>(200)]
+    [ProducesResponseType<ApiErrorModel>(404)]
+    public async Task<IActionResult> UpdateAccount([FromBody] UpdateUserRequest request,
+        [FromServices] IUserService userService)
+    {
+        string userId = HttpContext.User.GetUserId()!;
+        if (!string.IsNullOrEmpty(request.Email) && !ValidEmail().Match(request.Email!).Success)
+        {
+            _Logger.LogWarning("Invalid email provided: {Email}", request.Email);
+            return BadRequest(new ApiErrorModel { Message = "Invalid email", Error = "Invalid email provided." });
+        }
+        request.Uid = userId;
+        try
+        {
+            User? updatedUser = await userService.UpdateUserAsync(request);
+            return Ok(updatedUser);
+        }
+        catch (InvalidOperationException ex)
+            when (ex.Message == "Password must be at least 6 characters long.")
+        {
+            _Logger.LogWarning("Failed to update user with uid {UserId}: {Message}", userId, ex.Message);
+            return BadRequest(new ApiErrorModel { Message = "Invalid password", Error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+           when (ex.Message == "Email already in use")
+        {
+            _Logger.LogWarning("Email {Email} is already in use.", request.Email);
+            return BadRequest(new ApiErrorModel { Message = "Invalid Email", Error = "Email is already in use" });
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Failed to update user with uid {UserId}", userId);
+            return BadRequest();
+        }
+
+    }
+    /// <summary>
     /// Refreshes the current login token.
     /// </summary>
     /// <param name="refreshToken">The refresh token</param>
@@ -126,7 +169,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("login/google/callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string state, 
+    public async Task<IActionResult> GoogleCallback([FromQuery] string state,
         [FromQuery] string code,
         [FromServices] GoogleOAuthService googleOAuthService,
         [FromServices] IConfiguration configuration)
@@ -153,6 +196,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
             string queryParams = $"?token={Uri.EscapeDataString(idpToken!["idToken"]!.ToString())}&refreshToken={Uri.EscapeDataString(idpToken!["refreshToken"]!.ToString())}";
             if (state == "maui")
                 redirectUri = configuration["FrontEnd:Maui:GoogleCallBackUrl"] + queryParams;
+
             else if (state == "web")
                 redirectUri = configuration["FrontEnd:Web:GoogleCallBackUrl"] + queryParams;
             else

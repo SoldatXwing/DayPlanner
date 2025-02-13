@@ -18,9 +18,9 @@
                     <!-- Avatar -->
                     <RadzenRow JustifyContent="JustifyContent.Center">
                         <div class="avatar-container">
-                            @if (!string.IsNullOrEmpty(UserRequest?.PhotoUrl))
+                            @if (!string.IsNullOrEmpty(User?.PhotoUrl))
                             {
-                                <img src="@UserRequest.PhotoUrl" class="profile-image" />
+                                <img src="@User.PhotoUrl" class="profile-image" />
                             }
                             else
                             {
