@@ -1,6 +1,7 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.Api.ApiControllers.V1;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,16 +14,16 @@ namespace DayPlanner.Tests.ApiControllers.V1
     [TestFixture]
     internal class AppointmentControllerTests
     {
-        private Mock<IAppointmentsService>? _appointmentServiceMock;
+        private Mock<IAppointmentStore>? _appointmentStoreMock;
         private Mock<ILogger<AppointmentController>>? _loggerMock;
         private AppointmentController? _controller;
 
         [SetUp]
         public void SetUp()
         {
-            _appointmentServiceMock = new Mock<IAppointmentsService>();
+            _appointmentStoreMock = new Mock<IAppointmentStore>();
             _loggerMock = new Mock<ILogger<AppointmentController>>();
-            _controller = new AppointmentController(_appointmentServiceMock.Object, _loggerMock.Object);
+            _controller = new AppointmentController(_appointmentStoreMock.Object, _loggerMock.Object);
         }
 
 
@@ -31,8 +32,8 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var userId = "test-user-id";
             var appointments = new List<Appointment> { new Appointment { Title = "Test Appointment", UserId = userId } };
-            _appointmentServiceMock!.Setup(s => s.GetAppointmentsCount(userId)).ReturnsAsync(1);
-            _appointmentServiceMock.Setup(s => s.GetUsersAppointments(userId, 1, 10)).ReturnsAsync(appointments);
+            _appointmentStoreMock!.Setup(s => s.GetAppointmentsCount(userId)).ReturnsAsync(1);
+            _appointmentStoreMock.Setup(s => s.GetUsersAppointments(userId, 1, 10)).ReturnsAsync(appointments);
 
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
@@ -51,7 +52,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         public async Task GetAllAppointmentsAsync_UnauthorizedUser_ReturnsUnauthorized()
         {
             var userId = "test-user-id";
-            _appointmentServiceMock!
+            _appointmentStoreMock!
                 .Setup(s => s.GetUsersAppointments(userId, 1, 10))
                 .ThrowsAsync(new UnauthorizedAccessException());
 
@@ -70,7 +71,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
             var request = new AppointmentRequest { Title = "Test Appointment", Start = DateTime.UtcNow, End = DateTime.UtcNow.AddHours(1) };
             var appointment = new Appointment { Title = "Test Appointment", UserId = userId };
 
-            _appointmentServiceMock!.Setup(s => s.CreateAppointment(userId, request)).ReturnsAsync(appointment);
+            _appointmentStoreMock!.Setup(s => s.CreateAppointment(userId, request)).ReturnsAsync(appointment);
 
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
@@ -121,7 +122,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
 
-            _appointmentServiceMock!.Setup(s => s.DeleteUsersAppointment(userId, appointmentId)).Returns(Task.CompletedTask);
+            _appointmentStoreMock!.Setup(s => s.DeleteAppointment(userId, appointmentId)).Returns(Task.CompletedTask);
 
             var result = await _controller.DeleteAppointmentAsync(appointmentId);
 
@@ -136,8 +137,8 @@ namespace DayPlanner.Tests.ApiControllers.V1
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
 
-            _appointmentServiceMock!
-                .Setup(s => s.DeleteUsersAppointment(userId, appointmentId))
+            _appointmentStoreMock!
+                .Setup(s => s.DeleteAppointment(userId, appointmentId))
                 .ThrowsAsync(new UnauthorizedAccessException());
 
             var result = await _controller.DeleteAppointmentAsync(appointmentId);
@@ -153,8 +154,8 @@ namespace DayPlanner.Tests.ApiControllers.V1
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
 
-            _appointmentServiceMock!
-                .Setup(s => s.DeleteUsersAppointment(userId, appointmentId))
+            _appointmentStoreMock!
+                .Setup(s => s.DeleteAppointment(userId, appointmentId))
                 .ThrowsAsync(new InvalidOperationException("Appointment not found"));
 
             var result = await _controller.DeleteAppointmentAsync(appointmentId);
@@ -197,7 +198,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
 
-            _appointmentServiceMock!.Setup(s => s.UpdateAppointment(appointmentId, userId, request)).ReturnsAsync(updatedAppointment);
+            _appointmentStoreMock!.Setup(s => s.UpdateAppointment(appointmentId, userId, request)).ReturnsAsync(updatedAppointment);
 
             var result = await _controller.UpdateAppointmentAsync(appointmentId, request);
 
@@ -247,7 +248,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
 
             var updateRequest = new AppointmentRequest { Title = "Valid appointment", Start = DateTime.UtcNow, End = DateTime.UtcNow.AddHours(1) };
 
-            _appointmentServiceMock!
+            _appointmentStoreMock!
                 .Setup(s => s.UpdateAppointment(appointmentId, userId, updateRequest))
                 .ThrowsAsync(new UnauthorizedAccessException());
 

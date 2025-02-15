@@ -7,16 +7,14 @@ using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore;
 
-public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, IUserService userService) : IGoogleRefreshTokenStore
+public class FireStoreGoogeRefreshTokenStore(FirestoreDb fireStoreDb, IUserStore userStore) : IGoogleRefreshTokenStore
 {
 
-    private readonly FirestoreDb _fireStoreDb = db;
-    private readonly IUserService userService = userService;
     private const string _collectionName = "googleRefreshTokens";
 
     public async Task<GoogleRefreshToken?> Get(string userId)
     {
-        var docRef = _fireStoreDb.Collection(_collectionName).Document(userId);
+        var docRef = fireStoreDb.Collection(_collectionName).Document(userId);
         var snapshot = await docRef.GetSnapshotAsync();
 
         if (snapshot.Exists)
@@ -35,7 +33,7 @@ public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, IUserService userSe
 
         try
         {
-            _ = await userService.GetUserByIdAsync(userId) ?? throw new ArgumentException($"Unable to find user with id '{userId}'.");
+            _ = await userStore.GetByIdAsync(userId) ?? throw new ArgumentException($"Unable to find user with id '{userId}'.");
         }
         catch (FirebaseAuthException ex)
         {
@@ -46,7 +44,7 @@ public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, IUserService userSe
 
         }
 
-        DocumentReference refreshTokenRef = _fireStoreDb.Collection(_collectionName).Document(userId);
+        DocumentReference refreshTokenRef = fireStoreDb.Collection(_collectionName).Document(userId);
         FirestoreGoogleRefreshToken refreshToken = new() { UserId = userId, RefreshToken = token };
         await refreshTokenRef.SetAsync(refreshToken);
 
@@ -57,7 +55,7 @@ public class FireStoreGoogeRefreshTokenStore(FirestoreDb db, IUserService userSe
     {
         ArgumentException.ThrowIfNullOrEmpty(userId);
 
-        var docRef = _fireStoreDb.Collection(_collectionName).Document(userId);
+        var docRef = fireStoreDb.Collection(_collectionName).Document(userId);
         await docRef.DeleteAsync();
     }
 }

@@ -2,6 +2,7 @@
 using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.Api.Extensions;
 using DayPlanner.Authorization.Services;
 using DayPlanner.ThirdPartyImports.Google_Calendar;
@@ -41,7 +42,7 @@ namespace DayPlanner.Api.ApiControllers.V1
          /// <param name="code">The authorization code received from Google.</param>
          /// <param name="state">The user ID of the user who initiated the login.</param>
          /// <param name="googleOAuthService">Service to interact with google OAuth</param>
-         /// <param name="googleRefreshTokenService">The service used to store the refresh token for the user.</param>
+         /// <param name="googleRefreshTokenStore">The service used to store the refresh token for the user.</param>
          /// <returns>The access token if successful, or an error message if unsuccessful.</returns>
         [HttpGet("callback")]
         [ProducesResponseType<ApiErrorModel>(400)]
@@ -50,7 +51,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         public async Task<IActionResult> Callback([FromQuery] string code,
             [FromQuery] string state, //state is the user id
             [FromServices] GoogleOAuthService googleOAuthService,
-            [FromServices] IGoogleTokenService googleRefreshTokenService)
+            [FromServices] IGoogleRefreshTokenStore googleRefreshTokenStore)
         {
             if (string.IsNullOrEmpty(code))
             {
@@ -69,7 +70,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                         _Logger.LogWarning("State (userId) is null or empty");
                         ArgumentException.ThrowIfNullOrEmpty(state);
                     }
-                    await googleRefreshTokenService.CreateRefreshToken(state, refreshToken.ToString());
+                    await googleRefreshTokenStore.Create(state, refreshToken.ToString());
                 }
 
                 return NoContent();
@@ -114,7 +115,7 @@ namespace DayPlanner.Api.ApiControllers.V1
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(403)]
-        public async Task<IActionResult> SyncAppointments([FromServices] GoogleCalendarService googleCalendarService, [FromServices] IGoogleTokenService tokenService)
+        public async Task<IActionResult> SyncAppointments([FromServices] GoogleCalendarService googleCalendarService)
         {
             var userId = HttpContext.User.GetUserId()!;
             try

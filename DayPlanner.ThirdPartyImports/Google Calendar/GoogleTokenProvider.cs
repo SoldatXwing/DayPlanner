@@ -1,5 +1,6 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 
@@ -8,15 +9,16 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
     /// <summary>
     /// Provider for retrieving and refreshing tokens from Google.
     /// </summary>
-    /// <param name="googleRefreshTokenService">The service used to retrieve stored refresh tokens for users.</param>
+    /// <param name="googleRefreshTokenStore">The service used to retrieve stored refresh tokens for users.</param>
     /// <param name="client">The <see cref="HttpClient"/> instance used to make HTTP requests to Google's token endpoint.</param>
     /// <param name="clientId">The client ID used for authenticating with Google's API.</param>
     /// <param name="clientSecret">The client secret used for authenticating with Google's API.</param>
-    public class GoogleTokenProvider(IGoogleTokenService googleRefreshTokenService, HttpClient client,
+    public class GoogleTokenProvider(
+        IGoogleRefreshTokenStore googleRefreshTokenStore,
+        HttpClient client,
         string clientId,
         string clientSecret) : IGoogleTokenProvider
     {
-        private readonly HttpClient _httpClient = client;
         /// <summary>
         /// Retrieves a new access token from Google, valid for 1 hour, for the specified user.
         /// </summary>
@@ -32,7 +34,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
         public async Task<GoogleTokenResponse?> GetOrRefresh(string userId)
         {
             ArgumentException.ThrowIfNullOrEmpty(userId);
-            var refreshToken = await googleRefreshTokenService.GetRefreshToken(userId) ?? throw new InvalidOperationException($"Error recieving refresh token with userid: {userId}");
+            var refreshToken = await googleRefreshTokenStore.Get(userId) ?? throw new InvalidOperationException($"Error recieving refresh token with userid: {userId}");
 
             var request = new
             {
@@ -42,7 +44,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                 client_secret = clientSecret
             };
 
-            var response = await _httpClient.PostAsJsonAsync("/token", request);
+            var response = await client.PostAsJsonAsync("/token", request);
             if (!response.IsSuccessStatusCode)
                 throw new InvalidOperationException($"Error fetching refresh token for user with id: {userId}");
 
@@ -69,7 +71,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                     grant_type = "authorization_code",
                     access_token = token.AccessToken,
                 };
-                var response = await _httpClient.PostAsJsonAsync("", request);
+                var response = await client.PostAsJsonAsync("", request);
 
                 if (response.IsSuccessStatusCode)
                     return true; // Token is valid
@@ -92,7 +94,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
         {
             ArgumentException.ThrowIfNullOrEmpty(accessToken, nameof(accessToken));
 
-            var response = await _httpClient.PostAsync($"/revoke?token={accessToken}", null);
+            var response = await client.PostAsync($"/revoke?token={accessToken}", null);
             if (!response.IsSuccessStatusCode)
             {
                 throw new InvalidOperationException("Error revoking token");

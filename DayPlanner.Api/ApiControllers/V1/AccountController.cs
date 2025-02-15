@@ -3,6 +3,7 @@ using DayPlanner.Abstractions.Exceptions;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.Api.Extensions;
 using DayPlanner.Authorization.Exceptions;
 using DayPlanner.Authorization.Services;
@@ -33,10 +34,10 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     [HttpGet]
     [ProducesResponseType<User>(200)]
     [ProducesResponseType<ApiErrorModel>(404)]
-    public async Task<IActionResult> GetAccountInformationAsync([FromServices] IUserService userService)
+    public async Task<IActionResult> GetAccountInformationAsync([FromServices] IUserStore userStore)
     {
         string userId = HttpContext.User.GetUserId()!;
-        User? user = await userService.GetUserByIdAsync(userId);
+        User? user = await userStore.GetByIdAsync(userId);
         if (user is null)
         {
             _Logger.LogWarning("User with uid {UserId} not found.", userId);
@@ -49,13 +50,13 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// Updates the user's account information. If a paramter is null or empty, it will not be updated.
     /// </summary>
     /// <param name="request">The request model</param>
-    /// <param name="userService">User service</param>
+    /// <param name="userStore">User service</param>
     /// <returns></returns>
     [HttpPut]
     [ProducesResponseType<User>(200)]
     [ProducesResponseType<ApiErrorModel>(404)]
     public async Task<IActionResult> UpdateAccount([FromBody] UpdateUserRequest request,
-        [FromServices] IUserService userService)
+        [FromServices] IUserStore userStore)
     {
         string userId = HttpContext.User.GetUserId()!;
         if (!string.IsNullOrEmpty(request.Email) && !ValidEmail().Match(request.Email!).Success)
@@ -66,7 +67,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         request.Uid = userId;
         try
         {
-            User? updatedUser = await userService.UpdateUserAsync(request);
+            User? updatedUser = await userStore.UpdateAsync(request);
             return Ok(updatedUser);
         }
         catch (InvalidOperationException ex)
@@ -241,14 +242,14 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// Registers a new user.
     /// </summary>
     /// <param name="request">Provided data for the new user.</param>
-    /// <param name="userService"></param>
+    /// <param name="userStore"></param>
     /// <response code="200">Success - Returns the created user</response>
     /// <response code="400">Bad request - Invalid data were provided</response>
     [AllowAnonymous]
     [HttpPost("register")]
     [ProducesResponseType<User>(200)]
     [ProducesResponseType<ApiErrorModel>(400)]
-    public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserRequest request, [FromServices] IUserService userService)
+    public async Task<IActionResult> RegisterUserAsync([FromBody] RegisterUserRequest request, [FromServices] IUserStore userStore)
     {
         if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
@@ -272,7 +273,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         try
         {
-            User userRecord = await userService.CreateUserAsync(request);
+            User userRecord = await userStore.CreateAsync(request);
             return Ok(userRecord);
         }
         catch (InvalidOperationException ex)

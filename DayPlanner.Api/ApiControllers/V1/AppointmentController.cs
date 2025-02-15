@@ -2,6 +2,7 @@
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.Api.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,9 @@ namespace DayPlanner.Api.ApiControllers.V1;
 [ApiController]
 [ApiVersion(1)]
 [Route("v{version:apiVersion}/appointments")]
-public sealed class AppointmentController(IAppointmentsService appointmentService, ILogger<AppointmentController> logger) : ControllerBase
+public sealed class AppointmentController(
+    IAppointmentStore appointmentStore,
+    ILogger<AppointmentController> logger) : ControllerBase
 {
     private ILogger<AppointmentController> _Logger { get; } = logger;
 
@@ -35,8 +38,8 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         string userId = HttpContext.User.GetUserId()!;
         try
         {
-            long? totalItems = await appointmentService.GetAppointmentsCount(userId);
-            IEnumerable<Appointment> appointments = await appointmentService.GetUsersAppointments(userId, page, pageSize);
+            long? totalItems = await appointmentStore.GetAppointmentsCount(userId);
+            IEnumerable<Appointment> appointments = await appointmentStore.GetUsersAppointments(userId, page, pageSize);
 
             return Ok(new PaginatedResponse<Appointment>(appointments, totalItems, page, pageSize));
         }
@@ -70,7 +73,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         var userId = HttpContext.User.GetUserId()!;
         try
         {
-            return Ok(await appointmentService.GetUsersAppointments(userId, start.ToUniversalTime(), end.ToUniversalTime()));
+            return Ok(await appointmentStore.GetUsersAppointments(userId, start.ToUniversalTime(), end.ToUniversalTime()));
         }
         catch (UnauthorizedAccessException)
         {
@@ -96,7 +99,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
             return BadRequest(new ApiErrorModel { Message = "Invalid request attributes", Error = "At least one attribute is not valid." });
         }
         var userId = HttpContext.User.GetUserId()!;
-        Appointment appointment = await appointmentService.CreateAppointment(userId, request);
+        Appointment appointment = await appointmentStore.CreateAppointment(userId, request);
         _Logger.LogInformation("Appointment with id {AppointmentId} created for user with uid {UserId}", appointment.Id, userId);
         return Created($"/v1/appointments/{appointment.Id}", appointment);
     }
@@ -113,7 +116,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
     public async Task<IActionResult> GetAppointmentAsync([FromRoute] string appointmentId)
     {
         var userId = HttpContext.User.GetUserId()!;
-        Appointment? appointment = await appointmentService.GetAppointmentById(userId, appointmentId);
+        Appointment? appointment = await appointmentStore.GetAppointmentById(userId, appointmentId);
         if (appointment is null)
         {
             _Logger.LogWarning("Appointment with id {AppointmentId} not found for user with uid {UserId}", appointmentId, userId);
@@ -146,7 +149,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         var userId = HttpContext.User.GetUserId()!;
         try
         {
-            Appointment appointment = await appointmentService.UpdateAppointment(appointmentId, userId, request);
+            Appointment appointment = await appointmentStore.UpdateAppointment(appointmentId, userId, request);
             _Logger.LogInformation("Appointment with id {AppointmentId} updated for user with uid {UserId}", appointmentId, userId);
             return Ok(appointment);
         }
@@ -171,7 +174,7 @@ public sealed class AppointmentController(IAppointmentsService appointmentServic
         var userId = HttpContext.User.GetUserId()!;
         try
         {
-            await appointmentService.DeleteUsersAppointment(userId, appointmentId);
+            await appointmentStore.DeleteAppointment(userId, appointmentId);
             _Logger.LogInformation("Appointment with id {AppointmentId} deleted for user with uid {UserId}", appointmentId, userId);
             return NoContent();
         }

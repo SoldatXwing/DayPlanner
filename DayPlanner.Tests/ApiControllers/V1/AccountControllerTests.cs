@@ -2,6 +2,7 @@
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Abstractions.Services;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.Api.ApiControllers.V1;
 using Google.Apis.Auth.OAuth2.Responses;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +17,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
     internal class AccountControllerTests
     {
         private Mock<ILogger<AccountController>>? _loggerMock;
-        private Mock<IUserService>? _userServiceMock;
+        private Mock<IUserStore>? _userStoreMock;
         private Mock<IJwtProvider>? _jwtProviderMock;
         private Mock<IAuthService>? _authServiceMock;
         private AccountController? _controller;
@@ -25,7 +26,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         public void SetUp()
         {
             _loggerMock = new Mock<ILogger<AccountController>>();
-            _userServiceMock = new Mock<IUserService>();
+            _userStoreMock = new Mock<IUserStore>();
             _jwtProviderMock = new Mock<IJwtProvider>();
             _authServiceMock = new Mock<IAuthService>();
             _controller = new AccountController(_loggerMock.Object);
@@ -37,12 +38,12 @@ namespace DayPlanner.Tests.ApiControllers.V1
             string userId = "test-user-id";
             var user = new User { Uid = userId, Email = "test@example.com" };
 
-            _userServiceMock!.Setup(s => s.GetUserByIdAsync(userId)).ReturnsAsync(user);
+            _userStoreMock!.Setup(s => s.GetByIdAsync(userId)).ReturnsAsync(user);
 
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
 
-            var result = await _controller.GetAccountInformationAsync(_userServiceMock.Object);
+            var result = await _controller.GetAccountInformationAsync(_userStoreMock.Object);
 
             Assert.Multiple(() =>
             {
@@ -56,15 +57,15 @@ namespace DayPlanner.Tests.ApiControllers.V1
         public async Task GetAccountInformationAsync_UserNotFound_ReturnsNotFound()
         {
             string userId = "nonexistent-user-id";
-            _userServiceMock!
-                .Setup(s => s.GetUserByIdAsync(userId))
+            _userStoreMock!
+                .Setup(s => s.GetByIdAsync(userId))!
                 .ReturnsAsync((User?)null);
 
 
             var claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity([new Claim("user_id", userId)]));
             _controller!.ControllerContext.HttpContext = new DefaultHttpContext { User = claimsPrincipal };
 
-            var result = await _controller.GetAccountInformationAsync(_userServiceMock.Object);
+            var result = await _controller.GetAccountInformationAsync(_userStoreMock.Object);
 
             Assert.Multiple(() =>
             {
@@ -156,9 +157,9 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new RegisterUserRequest { Email = "test@example.com", Password = "password123" };
             var user = new User { Uid = "new-user-id", Email = request.Email };
-            _userServiceMock!.Setup(s => s.CreateUserAsync(request)).ReturnsAsync(user);
+            _userStoreMock!.Setup(s => s.CreateAsync(request)).ReturnsAsync(user);
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock.Object);
 
             Assert.Multiple(() =>
             {
@@ -173,7 +174,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new RegisterUserRequest { Email = "", Password = "" };
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock!.Object);
 
             Assert.Multiple(() =>
             {
@@ -191,7 +192,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new RegisterUserRequest { Email = "test@example.com", Password = "123" };
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock!.Object);
 
             Assert.Multiple(() =>
             {
@@ -208,7 +209,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new RegisterUserRequest { Email = "invalid-email", Password = "test123456" };
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock!.Object);
 
             Assert.Multiple(() =>
             {
@@ -225,7 +226,7 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new RegisterUserRequest { Email = "test@example.com", Password = "test123456", PhoneNumber = "12345" };
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock!.Object);
 
             Assert.Multiple(() =>
             {
@@ -243,10 +244,10 @@ namespace DayPlanner.Tests.ApiControllers.V1
         {
             var request = new RegisterUserRequest { Email = "existing@email.com", Password = "test123456" };
 
-            _userServiceMock!.Setup(s => s.CreateUserAsync(request))
+            _userStoreMock!.Setup(s => s.CreateAsync(request))
                 .ThrowsAsync(new InvalidOperationException("Email already in use"));
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock!.Object);
 
             Assert.Multiple(() =>
             {
@@ -269,10 +270,10 @@ namespace DayPlanner.Tests.ApiControllers.V1
                 PhoneNumber = "+4918334984823"
             };
 
-            _userServiceMock!.Setup(s => s.CreateUserAsync(request))
+            _userStoreMock!.Setup(s => s.CreateAsync(request))
                 .ThrowsAsync(new InvalidOperationException("Phone number already in use"));
 
-            var result = await _controller!.RegisterUserAsync(request, _userServiceMock!.Object);
+            var result = await _controller!.RegisterUserAsync(request, _userStoreMock!.Object);
 
             Assert.Multiple(() =>
             {
