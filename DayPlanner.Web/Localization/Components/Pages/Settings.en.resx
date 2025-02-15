@@ -153,6 +153,12 @@
   <data name="ImportSettings" xml:space="preserve">
     <value>Extern imports</value>
   </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Please enter a valid email address</value>
+  </data>
+  <data name="NoChangesAreMadeMessage" xml:space="preserve">
+    <value>There are no changes made</value>
+  </data>
   <data name="NotConnected" xml:space="preserve">
     <value>Not connected</value>
   </data>
@@ -162,6 +168,9 @@
   <data name="RemoveConnection" xml:space="preserve">
     <value>Remove connection</value>
   </data>
+  <data name="RequiredInput" xml:space="preserve">
+    <value>This field cant be empty</value>
+  </data>
   <data name="SaveChanges" xml:space="preserve">
     <value>Save changes</value>
   </data>
@@ -170,5 +179,8 @@
   </data>
   <data name="SyncRate" xml:space="preserve">
     <value>Synchronize rate</value>
+  </data>
+  <data name="UpdateUserSuccess" xml:space="preserve">
+    <value>Account information got updated successfully</value>
   </data>
 </root>

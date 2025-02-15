@@ -23,6 +23,7 @@ builder.Services.AddScoped<DefaultAuthenticationService>()
     .AddScoped<DayPlanner.Web.Services.IAuthenticationService>(sp => sp.GetRequiredService<DefaultAuthenticationService>());
 
 builder.Services.AddScoped<IAppointmentService, ApiAppointmentService>();
+builder.Services.AddScoped<IUserService, ApiUserService>();
 
 builder.Services.AddAuthentication(options =>
 {

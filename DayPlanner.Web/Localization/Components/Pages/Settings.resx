@@ -153,6 +153,12 @@
   <data name="ImportSettings" xml:space="preserve">
     <value />
   </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NoChangesAreMadeMessage" xml:space="preserve">
+    <value />
+  </data>
   <data name="NotConnected" xml:space="preserve">
     <value />
   </data>
@@ -162,6 +168,9 @@
   <data name="RemoveConnection" xml:space="preserve">
     <value />
   </data>
+  <data name="RequiredInput" xml:space="preserve">
+    <value />
+  </data>
   <data name="SaveChanges" xml:space="preserve">
     <value />
   </data>
@@ -169,6 +178,9 @@
     <value />
   </data>
   <data name="SyncRate" xml:space="preserve">
+    <value />
+  </data>
+  <data name="UpdateUserSuccess" xml:space="preserve">
     <value />
   </data>
 </root>

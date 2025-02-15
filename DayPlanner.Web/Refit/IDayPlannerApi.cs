@@ -75,4 +75,15 @@ internal interface IDayPlannerApi
     [Get("/googlecalendar/sync")]
     Task GoogleSyncAppointmentsAsync();
     #endregion
+
+    #region User
+    /// <summary>
+    /// Updates the currently signed in user.
+    /// </summary>
+    /// <param name="userRequest">The request model</param>
+    /// <returns>The updated user</returns>
+
+    [Put("/account")]
+    Task<User> UpdateCurrentUserAsync([Body] UpdateUserRequest userRequest);
+    #endregion
 }

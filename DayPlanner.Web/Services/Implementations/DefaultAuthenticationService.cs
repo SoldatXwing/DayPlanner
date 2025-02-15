@@ -1,5 +1,6 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Models.DTO;
+using DayPlanner.Web.Components;
 using DayPlanner.Web.Extensions;
 using DayPlanner.Web.Models;
 using DayPlanner.Web.Refit;
@@ -14,8 +15,6 @@ namespace DayPlanner.Web.Services.Implementations
     internal class DefaultAuthenticationService(IDayPlannerAccountApi api,
         ILogger<DefaultAuthenticationService> logger) : IAuthenticationService
     {
-        private readonly IDayPlannerAccountApi _api = api;
-
         public async Task<UserSession?> LoginAsync(UserRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -25,7 +24,7 @@ namespace DayPlanner.Web.Services.Implementations
             try
             {
                 tokenData = await api.LoginAsync(request);
-                user = await _api.GetCurrentUserAsync(tokenData.Token);
+                user = await api.GetCurrentUserAsync(tokenData.Token);
             }
             catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -78,19 +77,16 @@ namespace DayPlanner.Web.Services.Implementations
 
             return (userSession, null);
         }
-        public async Task<string> GetGoogleAuthUrlAsync()
-        {
-            return await _api.GetGoogleAuthUrl("web");
-        }
+        public async Task<string> GetGoogleAuthUrlAsync() => await api.GetGoogleAuthUrl("web");
         public async Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token)
         {
             try
             {
-                var userId = await _api.ValidateTokenAsync(token);
+                var userId = await api.ValidateTokenAsync(token);
                 if (string.IsNullOrEmpty(userId))
                     return (null, new ApiErrorModel { Message = "Invalid Google token" });
 
-                var user = await _api.GetCurrentUserAsync(token);
+                var user = await api.GetCurrentUserAsync(token);
                 var userSession = new UserSession()
                 {
                     Uid = user.Uid,
