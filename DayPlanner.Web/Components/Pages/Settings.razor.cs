@@ -2,6 +2,7 @@
 using DayPlanner.Abstractions.Models.DTO;
 using DayPlanner.Web.Extensions;
 using DayPlanner.Web.Models;
+using DayPlanner.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -27,6 +28,10 @@ namespace DayPlanner.Web.Components.Pages
         private IMemoryCache Cache { get; set; } = default!;
         [Inject]
         private NavigationManager Navigation { get; set; } = default!;
+        [Inject]
+        private IGoogleCalendarService GoogleCalendarService { get; set; } = default!;
+        [Inject]
+        private DialogService DialogService { get; set; } = default!;
         #endregion
 
         [SupplyParameterFromQuery(Name = "key")]
@@ -91,6 +96,8 @@ namespace DayPlanner.Web.Components.Pages
                 DisplayName = UserSession!.DisplayName!
             };
 
+            isGoogleConnected = await GoogleCalendarService.IsConnected();
+
             if (Success is not null && Success.Value)
             {
                 NotificationService.Notify(new NotificationMessage
@@ -150,12 +157,14 @@ namespace DayPlanner.Web.Components.Pages
 
         private async Task ConnectGoogleCalendar()
         {
-
+            var url = await GoogleCalendarService.GetAuthUrlAsync();
+            Navigation.NavigateTo(url.Trim('"'), true);
         }
 
-        private async Task DisconnectGoogle()
+        private async Task DisconnectGoogleCalendar(bool deleteImportedAppointments)
         {
-
+            await GoogleCalendarService.DisconnectAsync(deleteImportedAppointments);
+            Navigation.Refresh(forceReload:true);
         }
     }
 }

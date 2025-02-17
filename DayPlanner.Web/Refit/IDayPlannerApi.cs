@@ -71,9 +71,12 @@ internal interface IDayPlannerApi
     /// <returns>The url where the UI </returns>
     [Get("/googlecalendar/login")]
     Task<string> GoogleLoginAsync();
-
     [Get("/googlecalendar/sync")]
     Task GoogleSyncAppointmentsAsync();
+    [Get("/googlecalendar/isConnected")]
+    Task<bool> IsConnectedWithGoogleCalendarAsync();
+    [Post("/googlecalendar/disconnect")]
+    Task DisconnectGoogleCalendarAsync([Query] bool deleteImportedAppointments);
     #endregion
 
     #region User

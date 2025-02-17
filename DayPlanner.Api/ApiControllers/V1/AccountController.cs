@@ -167,14 +167,27 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     /// <param name="googleOAuthService">Service to interact with google auth</param>
     /// <param name="configuration">Config</param>
     /// <param name="state">The OS of for the redirect</param>
+    /// <param name="error">A error</param>
     /// <returns></returns>
     [AllowAnonymous]
     [HttpGet("login/google/callback")]
-    public async Task<IActionResult> GoogleCallback([FromQuery] string state,
-        [FromQuery] string code,
+    public async Task<IActionResult> GoogleCallback(
+        [FromQuery] string state,
         [FromServices] GoogleOAuthService googleOAuthService,
-        [FromServices] IConfiguration configuration)
+        [FromServices] IConfiguration configuration,
+        [FromQuery] string code = "",
+        [FromQuery] string error = "")
     {
+        if (error == "access_denied")
+        {
+            _Logger.LogWarning("User with id: {userId} canceled the google login OAuth flow.", state);
+            if (state == "maui")
+                return Redirect(configuration["FrontEnd:Maui:DefaultCallbackUrl"]!);
+
+            else if (state == "web")
+                return Redirect(configuration["FrontEnd:Web:DefaultCallbackUrl"]!);
+            return BadRequest(new ApiErrorModel { Message = "Invalid OS", Error = "Invalid OS provided" });
+        }
         if (string.IsNullOrEmpty(code))
         {
             _Logger.LogWarning("Error recieving callback: Code is null or empty");

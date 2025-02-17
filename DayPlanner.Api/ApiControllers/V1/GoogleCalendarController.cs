@@ -43,16 +43,26 @@ namespace DayPlanner.Api.ApiControllers.V1
          /// <param name="state">The user ID of the user who initiated the login.</param>
          /// <param name="googleOAuthService">Service to interact with google OAuth</param>
          /// <param name="googleRefreshTokenStore">The service used to store the refresh token for the user.</param>
+         /// <param name="error">A error</param>
+         /// <param name="config">The configuration object.</param>
          /// <returns>The access token if successful, or an error message if unsuccessful.</returns>
         [HttpGet("callback")]
         [ProducesResponseType<ApiErrorModel>(400)]
         [ProducesResponseType<ApiErrorModel>(404)]
         [AllowAnonymous] // Reason: Google sends the request to this endpoint, not the user
-        public async Task<IActionResult> Callback([FromQuery] string code,
-            [FromQuery] string state, //state is the user id
+        public async Task<IActionResult> Callback(
+            [FromQuery] string state,//state is the user id
             [FromServices] GoogleOAuthService googleOAuthService,
-            [FromServices] IGoogleRefreshTokenStore googleRefreshTokenStore)
+            [FromServices] IGoogleRefreshTokenStore googleRefreshTokenStore,
+            [FromServices] IConfiguration config,
+            [FromQuery] string code = "",
+            [FromQuery] string error = "")
         {
+            if(error == "access_denied")
+            {
+                _Logger.LogWarning("User with id: {userId} canceled the google calendar OAuth flow.", state);
+                return Redirect(config["FrontEnd:Web:GoogleCalendarRedirectUrl"]!);
+            }
             if (string.IsNullOrEmpty(code))
             {
                 _Logger.LogWarning("Error recieving callback: Code is null or empty");
@@ -73,7 +83,7 @@ namespace DayPlanner.Api.ApiControllers.V1
                     await googleRefreshTokenStore.Create(state, refreshToken.ToString());
                 }
 
-                return NoContent();
+                return Redirect(config["FrontEnd:Web:GoogleCalendarRedirectUrl"]!);
             }
 
             catch (InvalidOperationException ex)
@@ -168,6 +178,21 @@ namespace DayPlanner.Api.ApiControllers.V1
                 _Logger.LogError(ex, "Error disconnecting Google account for user with ID {UserId}.", userId);
                 return Forbid();
             }
+        }
+        /// <summary>
+        /// Indicates if the user is connected with the google Calendar
+        /// </summary>
+        /// <param name="refreshTokenStore">Token Store</param>
+        /// <returns></returns>
+        [HttpGet("isConnected")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> IsAccountConnected([FromServices] IGoogleRefreshTokenStore refreshTokenStore)
+        {
+            var userId = HttpContext.User.GetUserId()!;
+            GoogleRefreshToken? refreshToken = await refreshTokenStore.Get(userId);
+
+            return Ok(refreshToken is not null);
         }
     }
 }

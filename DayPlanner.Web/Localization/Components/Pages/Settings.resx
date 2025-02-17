@@ -129,7 +129,13 @@
   <data name="Cancel" xml:space="preserve">
     <value />
   </data>
+  <data name="ConfirmDisconnect" xml:space="preserve">
+    <value />
+  </data>
   <data name="Connected" xml:space="preserve">
+    <value />
+  </data>
+  <data name="DeleteImportedAppointments" xml:space="preserve">
     <value />
   </data>
   <data name="DisplayName" xml:space="preserve">

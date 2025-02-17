@@ -127,7 +127,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
                 ?? throw new UnauthorizedAccessException($"Error receiving token for user with id: {userId}");
             await _tokenProvider.RevokeToken(accessToken);
             if (deleteImportedAppointments)
-                await appointmentStore.DeleteAppointmentsByCalendarOrigin(userId, Abstractions.Enums.CalendarOrigin.GoogleCalendar);
+                await appointmentStore.DeleteAppointmentsByCalendarOrigin(userId, CalendarOrigin.GoogleCalendar);
 
             if (googleSyncTokenStore.Get(userId) is not null)
                 await googleSyncTokenStore.Delete(userId);

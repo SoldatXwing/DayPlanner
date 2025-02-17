@@ -20,3 +20,17 @@
 .googleIcon {
     margin-right: 10px;
 }
+@media (max-width: 768px) {
+    .responsive-row {
+        flex-direction: column;
+    }
+
+    .profile-image, .profile-icon {
+        width: 100px !important;
+        height: 100px !important;
+    }
+
+    .avatar-container {
+        margin-bottom: 1rem;
+    }
+}

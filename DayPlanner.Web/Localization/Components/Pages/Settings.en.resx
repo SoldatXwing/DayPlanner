@@ -129,8 +129,14 @@
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
+  <data name="ConfirmDisconnect" xml:space="preserve">
+    <value>Disconnect Googlecalendar?</value>
+  </data>
   <data name="Connected" xml:space="preserve">
     <value>Connected</value>
+  </data>
+  <data name="DeleteImportedAppointments" xml:space="preserve">
+    <value>Delete imported appointments</value>
   </data>
   <data name="DisplayName" xml:space="preserve">
     <value>Displayname</value>

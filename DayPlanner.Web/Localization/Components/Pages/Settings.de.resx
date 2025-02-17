@@ -129,8 +129,14 @@
   <data name="Cancel" xml:space="preserve">
     <value>Abbrechen</value>
   </data>
+  <data name="ConfirmDisconnect" xml:space="preserve">
+    <value>Verbindung löschen?</value>
+  </data>
   <data name="Connected" xml:space="preserve">
     <value>Verbunden</value>
+  </data>
+  <data name="DeleteImportedAppointments" xml:space="preserve">
+    <value>Importierte Termine löschen</value>
   </data>
   <data name="DisplayName" xml:space="preserve">
     <value>Anzeigename</value>
