@@ -7,13 +7,28 @@
                      Data=@_appointments
                      StartProperty="@nameof(Appointment.Start)"
                      EndProperty="@nameof(Appointment.End)"
-                     TextProperty="Title" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
+                     TextProperty="@nameof(Appointment.Title)" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
                      AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
-                     LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync" AppointmentSelect="OnAppointmentSelectedAsync">
-        
-        <RadzenDayView />   
-        <RadzenWeekView />
-        <RadzenMonthView />
+                     LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync" AppointmentSelect="OnAppointmentSelectedAsync" AppointmentRender="OnAppointmentRender">
+
+        <Template Context="data">
+            @if (data.Origin == Abstractions.Enums.CalendarOrigin.GoogleCalendar)
+            {
+                <i class="fab fa-google" style="margin-right:3px;"></i>
+                <span>@data.Title</span>
+            }
+            else
+            {
+                <span>@data.Title</span>
+            }
+
+        </Template>
+        <ChildContent>
+            <RadzenDayView />
+            <RadzenWeekView />
+            <RadzenMonthView />
+        </ChildContent>
+
     </RadzenScheduler>
 </div>
 
@@ -41,6 +56,17 @@
                 @args.Data.End.ToString("hh:mm ⋅ dddd, MMMM d")
             </RadzenText>
         </RadzenStack>
-    </RadzenStack>, new TooltipOptions { Position = TooltipPosition.Top, Duration = null });
+    </RadzenStack>
+    , new TooltipOptions { Position = TooltipPosition.Top, Duration = null });
     }
+    private void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<Appointment> args)
+    {
+        if (args.Data.Origin is Abstractions.Enums.CalendarOrigin.GoogleCalendar)
+        {
+            args.Attributes["class"] = "rz-event-content rz-background-color-warning-light";
+
+        }
+    }
+
+
 }

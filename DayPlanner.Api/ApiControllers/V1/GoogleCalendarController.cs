@@ -45,6 +45,7 @@ namespace DayPlanner.Api.ApiControllers.V1
          /// <param name="googleRefreshTokenStore">The service used to store the refresh token for the user.</param>
          /// <param name="error">A error</param>
          /// <param name="config">The configuration object.</param>
+         /// <param name="googleCalendarService">Service to interact with google calendar</param>
          /// <returns>The access token if successful, or an error message if unsuccessful.</returns>
         [HttpGet("callback")]
         [ProducesResponseType<ApiErrorModel>(400)]
@@ -54,6 +55,7 @@ namespace DayPlanner.Api.ApiControllers.V1
             [FromQuery] string state,//state is the user id
             [FromServices] GoogleOAuthService googleOAuthService,
             [FromServices] IGoogleRefreshTokenStore googleRefreshTokenStore,
+            [FromServices] GoogleCalendarService googleCalendarService,
             [FromServices] IConfiguration config,
             [FromQuery] string code = "",
             [FromQuery] string error = "")
@@ -71,6 +73,7 @@ namespace DayPlanner.Api.ApiControllers.V1
             try
             {
                 var tokenResponse = await googleOAuthService.AuthenticateCalendar(code);
+
                 //First time login
                 if (tokenResponse!.TryGetValue("refresh_token", out var refreshToken) &&
                     !string.IsNullOrEmpty(refreshToken?.ToString()))
@@ -82,7 +85,8 @@ namespace DayPlanner.Api.ApiControllers.V1
                     }
                     await googleRefreshTokenStore.Create(state, refreshToken.ToString());
                 }
-
+                //Intially sync appointments once the user is connected
+                await googleCalendarService.SyncAppointments(state);
                 return Redirect(config["FrontEnd:Web:GoogleCalendarRedirectUrl"]!);
             }
 
@@ -109,7 +113,6 @@ namespace DayPlanner.Api.ApiControllers.V1
         /// <param name="googleCalendarService">
         /// The service that interacts with the Google Calendar API to sync appointments.
         /// </param>
-        /// <param name="tokenService">The google token service to use.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains an HTTP response:
         /// - 200 OK with the next sync token if the sync was successful.
