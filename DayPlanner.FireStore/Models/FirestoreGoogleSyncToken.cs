@@ -3,7 +3,7 @@
 namespace DayPlanner.FireStore.Models;
 
 [FirestoreData]
-internal class FirestoreGoogleSyncToken
+public class FirestoreGoogleSyncToken
 {
     [FirestoreProperty("userId")]
     public required string UserId { get; set; }

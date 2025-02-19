@@ -1,6 +1,6 @@
 ﻿using Google.Cloud.Firestore;
 
-namespace DayPlanner.Abstractions.Models.Backend
+namespace DayPlanner.FireStore.Models
 {
     [FirestoreData]
     public class FirestoreGoogleRefreshToken

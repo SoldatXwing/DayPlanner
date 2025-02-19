@@ -1,13 +1,15 @@
-﻿using DayPlanner.Abstractions.Stores;
-using FirebaseAdmin.Auth;
-using FirebaseAdmin;
-using Google.Cloud.Firestore;
+﻿using AutoMapper;
+using DayPlanner.Abstractions.Models.Backend;
+using DayPlanner.Abstractions.Stores;
 using DayPlanner.FireStore.Models;
-using DayPlanner.Abstractions.Services;
+using FirebaseAdmin.Auth;
+using Google.Cloud.Firestore;
 
 namespace DayPlanner.FireStore;
 
-public class FireStoreGoogleSyncTokenStore(FirestoreDb fireStoreDb, IUserStore userStore) : IGoogleSyncTokenStore
+public class FireStoreGoogleSyncTokenStore(FirestoreDb fireStoreDb,
+    IUserStore userStore,
+    IMapper mapper) : IGoogleSyncTokenStore
 {
     private const string _collectionName = "googleSyncTokens";
 
@@ -55,4 +57,22 @@ public class FireStoreGoogleSyncTokenStore(FirestoreDb fireStoreDb, IUserStore u
         var docRef = fireStoreDb.Collection(_collectionName).Document(userId);
         await docRef.DeleteAsync();
     }
+
+    public async Task<IEnumerable<GoogleSyncToken>> GetAll()
+    {
+        var docRefs = fireStoreDb.Collection(_collectionName).ListDocumentsAsync();
+        var syncTokens = new List<GoogleSyncToken>();
+
+        await foreach (var docRef in docRefs)
+        {
+            var snapshot = await docRef.GetSnapshotAsync();
+            if (snapshot.Exists)
+            {
+                syncTokens.Add(mapper.Map<GoogleSyncToken>(snapshot.ConvertTo<FirestoreGoogleSyncToken>()));
+            }
+        }
+
+        return syncTokens;
+    }
+
 }

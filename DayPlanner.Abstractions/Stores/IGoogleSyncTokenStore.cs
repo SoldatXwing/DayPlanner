@@ -28,4 +28,10 @@ public interface IGoogleSyncTokenStore
     /// <param name="userId">The user to remove the token from.</param>
     /// <returns>Awaits the async operation</returns>
     Task Delete(string userId);
+    /// <summary>
+    /// Gets all sync tokens in the database. (Mostly used in background jobs)
+    /// </summary>
+    /// <returns>All sync tokens</returns>
+    Task<IEnumerable<GoogleSyncToken>> GetAll();
+
 }

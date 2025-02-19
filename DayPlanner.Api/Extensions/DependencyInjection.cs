@@ -37,12 +37,7 @@ namespace DayPlanner.Api.Extensions
             if (!File.Exists(filePath))
                 throw new FileNotFoundException($"Service account key file not found: {filePath}");
 
-
-            var serviceAccountKeyjson = File.ReadAllText(filePath);
-            string projectId = builder.Configuration["FireBase:ProjectId"] ?? throw new InvalidOperationException("The firebase project id id required. Config path: 'FireBase:ProjectId'.");
-
-            var firebaseApp = InitializeFirebaseApp(serviceAccountKeyjson, projectId);
-            var firestoreDb = InitializeFirestoreDb(filePath, projectId);
+            var (firebaseApp, firestoreDb) = InitializeFirebase(builder.Configuration);
 
             AddAuthenticationServices(builder);
             AddCustomServices(builder.Services, firebaseApp, firestoreDb);
@@ -124,7 +119,7 @@ namespace DayPlanner.Api.Extensions
             });
 
             services.AddScoped<GoogleCalendarService>();
-            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db,provider.GetRequiredService<IUserStore>()));
+            services.AddScoped<IGoogleRefreshTokenStore>(provider => new FireStoreGoogeRefreshTokenStore(db, provider.GetRequiredService<IUserStore>()));
 
             // Firebase-related services
             services.AddScoped<IAuthService>(provider => new AuthService(app));
@@ -138,29 +133,40 @@ namespace DayPlanner.Api.Extensions
                 var mapper = provider.GetRequiredService<IMapper>();
                 return new FireStoreAppointmentStore(db, mapper);
             });
-            services.AddScoped<IGoogleSyncTokenStore>(provider => new FireStoreGoogleSyncTokenStore(db, provider.GetRequiredService<IUserStore>()));
+            services.AddScoped<IGoogleSyncTokenStore>(provider =>
+            {
+                var mapper = provider.GetRequiredService<IMapper>();
+                var userStore = provider.GetRequiredService<IUserStore>();
+                return new FireStoreGoogleSyncTokenStore(db, userStore, mapper);
+            });
 
         }
 
-        private static FirebaseApp InitializeFirebaseApp(string serviceAccountKeyJson, string projectId)
+        /// <summary>
+        /// Initializes Firebase and Firestore.
+        /// </summary>
+        private static (FirebaseApp, FirestoreDb) InitializeFirebase(IConfiguration config)
         {
-            if (string.IsNullOrEmpty(projectId))
-            {
-                throw new InvalidOperationException("Project ID in service account key file is missing.");
-            }
+            string authFile = config["FireBase:AuthFile"] ?? throw new InvalidOperationException("Firebase AuthFile is required.");
+            string basePath = AppContext.BaseDirectory;
+            string filePath = Path.Combine(basePath, authFile);
 
-            var app = FirebaseApp.Create(new AppOptions
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Firebase service account key file not found: {filePath}");
+
+            var serviceAccountKeyJson = File.ReadAllText(filePath);
+            string projectId = config["FireBase:ProjectId"] ?? throw new InvalidOperationException("Firebase ProjectId is required.");
+
+            var firebaseApp = FirebaseApp.Create(new AppOptions
             {
                 Credential = GoogleCredential.FromJson(serviceAccountKeyJson),
                 ProjectId = projectId
             });
 
-            return app;
-        }
-        private static FirestoreDb InitializeFirestoreDb(string serviceAccountKeyPath, string projectId)
-        {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", serviceAccountKeyPath);
-            return FirestoreDb.Create(projectId);
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", filePath);
+            var fireStoreDb = FirestoreDb.Create(projectId);
+
+            return (firebaseApp, fireStoreDb);
         }
 
     }

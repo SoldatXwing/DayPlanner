@@ -1,6 +1,7 @@
 ﻿using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Abstractions.Stores;
+using DayPlanner.FireStore.Models;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Cloud.Firestore;

@@ -30,7 +30,7 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
         /// <exception cref="InvalidOperationException">
         /// Thrown if a token cannot be retrieved for the specified <paramref name="userId"/>.
         /// </exception>
-        public async Task<string> SyncAppointments(string userId)
+        public async Task SyncAppointments(string userId)
         {
             ArgumentException.ThrowIfNullOrEmpty(userId, nameof(userId));
 
@@ -63,8 +63,6 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
 
                 DateTime endDateTime = @event.End?.DateTimeDateTimeOffset?.DateTime ??
                     DateTime.ParseExact(@event.End?.Date ?? string.Empty, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-
-
 
                 appointments.Add(new Appointment
                 {
@@ -109,9 +107,6 @@ namespace DayPlanner.ThirdPartyImports.Google_Calendar
             }
             if (!string.IsNullOrEmpty(events.NextSyncToken) && (syncToken is null || !syncToken.Equals(events.NextSyncToken)))
                 await googleSyncTokenStore.Save(userId, events.NextSyncToken);
-
-            return events.NextSyncToken;
-
         }
         /// <summary>
         /// Unsyncs the user from Google Calendar.
