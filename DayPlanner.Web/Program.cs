@@ -39,8 +39,6 @@ builder.Services.AddAuthentication(options =>
     options.LogoutPath = "/account/logout"; // Logout-Seite
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie-Ablaufzeit
     options.SlidingExpiration = true; // Verlängert Cookie bei Aktivität
-    options.AccessDeniedPath = "/account/access-denied"; // Zugriff verweigert
-
     options.ReturnUrlParameter = "returnUrl";
 });
 builder.Services.AddAuthorizationCore();

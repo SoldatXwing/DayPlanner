@@ -66,9 +66,9 @@
         <AuthorizeView>
             <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
                 <RadzenPanelMenu>
-                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Home"] Icon="home" Click="@(() => Navigation.NavigateToHome())" />
-                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Dashboard"] Icon="dashboard" Click="@(() => Navigation.NavigateToDashboard())" />
-                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Settings"] Icon="settings" Click="@(() => Navigation.NavigateToSettings())" />
+                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Home"] Icon="home" Click="@(() => {Navigation.NavigateToHome(); sidebar1Expanded = false;})" />
+                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Dashboard"] Icon="dashboard" Click="@(() => {Navigation.NavigateToDashboard(); sidebar1Expanded = false;})" />
+                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Settings"] Icon="settings" Click="@(() => {Navigation.NavigateToSettings(); sidebar1Expanded = false;})" />
                 </RadzenPanelMenu>
                 <div class="rz-p-4" />
             </RadzenSidebar>

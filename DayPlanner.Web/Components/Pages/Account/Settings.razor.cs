@@ -10,9 +10,9 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
 using Radzen;
 
-namespace DayPlanner.Web.Components.Pages
+namespace DayPlanner.Web.Components.Pages.Account
 {
-    [Route("/settings")]
+    [Route("/account/settings")]
     public partial class Settings : ComponentBase
     {
         #region Injections
@@ -21,7 +21,7 @@ namespace DayPlanner.Web.Components.Pages
         [Inject]
         private IStringLocalizer<Settings> Localizer { get; set; } = default!;
         [Inject]
-        private DayPlanner.Web.Services.IUserService UserService { get; set; } = default!;
+        private IUserService UserService { get; set; } = default!;
         [Inject]
         private NotificationService NotificationService { get; set; } = default!;
         [Inject]

@@ -30,7 +30,7 @@
     <EmbeddedResource Update="Localization\Components\Pages\Account\Login.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="Localization\Components\Pages\Settings.de.resx">
+    <EmbeddedResource Update="Localization\Components\Pages\Account\Settings.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Localization;
 using Radzen;
 using Radzen.Blazor;
 
-namespace DayPlanner.Web.Components.Pages;
+namespace DayPlanner.Web.Components.Pages.Account;
 
 [Authorize]
 [Route("/dashboard")]
