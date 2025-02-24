@@ -163,5 +163,17 @@ namespace DayPlanner.Web.Components.Pages.Account
             await GoogleCalendarService.DisconnectAsync(deleteImportedAppointments);
             Navigation.Refresh(forceReload: true);
         }
+        private string GetUserAvatar()
+        {
+            if (UserSession is null || string.IsNullOrWhiteSpace(UserSession.DisplayName))
+                return "U"; // Standard-Avatar, wenn kein Benutzername vorhanden ist.
+            if (!string.IsNullOrEmpty(UserSession.PhotoUrl))
+            {
+                return UserSession.PhotoUrl;
+            }
+            var parts = UserSession.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var initials = string.Concat(parts.Select(part => part[0]).Take(2)); 
+            return initials.ToUpper(); 
+        }
     }
 }

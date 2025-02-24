@@ -1,7 +1,7 @@
 ﻿.avatar-container {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
 }
 
 .profile-image {
@@ -19,6 +19,18 @@
 
 .googleIcon {
     margin-right: 10px;
+}
+.userAvatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background-color: var(--rz-secondary, #007bff);
+    color: var(--rz-primary-contrast, white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 60px;
 }
 @media (max-width: 768px) {
     .responsive-row {

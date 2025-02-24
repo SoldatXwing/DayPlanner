@@ -92,10 +92,9 @@ namespace DayPlanner.Web.Components.Layouts
             {
                 return _user.PhotoUrl;
             }
-            // Generiere die Initialen aus dem Benutzernamen.
             var parts = _user.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var initials = string.Concat(parts.Select(part => part[0]).Take(2)); // Nimm die ersten Buchstaben von maximal zwei Wörtern.
-            return initials.ToUpper(); // Stelle sicher, dass die Initialen großgeschrieben sind.
+            var initials = string.Concat(parts.Select(part => part[0]).Take(2)); 
+            return initials.ToUpper(); 
         }
         private async Task HandleAcceptCookies(bool acceptAll = false)
         {

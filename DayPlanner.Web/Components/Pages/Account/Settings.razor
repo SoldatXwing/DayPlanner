@@ -20,13 +20,25 @@
                         <!-- Avatar -->
                         <RadzenRow JustifyContent="JustifyContent.Center">
                             <div class="avatar-container">
-                                @if (!string.IsNullOrEmpty(UserSession?.PhotoUrl))
+                                @{
+                                    var avatar = GetUserAvatar();
+                                    Uri? uri;
+                                    bool isUrlValid = Uri.TryCreate(avatar, UriKind.Absolute, out uri) &&
+                                    uri is not null &&
+                                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+                                }
+                                @if (!isUrlValid)
                                 {
-                                    <img src="@UserSession.PhotoUrl" class="profile-image" />
+                                    <div class="userAvatar">
+                                        @avatar
+                                    </div>
                                 }
                                 else
                                 {
-                                    <RadzenIcon Icon="account_circle" class="profile-icon" />
+                                    <div class="avatar-container">
+                                        <img src="@avatar" alt="User Avatar" class="profile-image" />
+                                    </div>
                                 }
                             </div>
                         </RadzenRow>
