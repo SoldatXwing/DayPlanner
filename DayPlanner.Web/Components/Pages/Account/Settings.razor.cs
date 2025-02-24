@@ -17,8 +17,6 @@ namespace DayPlanner.Web.Components.Pages.Account
     {
         #region Injections
         [Inject]
-        private AuthenticationStateProvider StateProvider { get; set; } = default!;
-        [Inject]
         private IStringLocalizer<Settings> Localizer { get; set; } = default!;
         [Inject]
         private IUserService UserService { get; set; } = default!;
@@ -33,26 +31,30 @@ namespace DayPlanner.Web.Components.Pages.Account
         [Inject]
         private DialogService DialogService { get; set; } = default!;
         #endregion
-
+        #region Parameters
         [SupplyParameterFromQuery(Name = "key")]
         private string? ModelKey { get; set; }
         [SupplyParameterFromQuery(Name = "success")]
         private bool? Success { get; set; }
+        #endregion
+        #region Cascading Parameters
+
+        [CascadingParameter]
+        private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
         [CascadingParameter]
         private HttpContext? HttpContext { get; set; } = default!;
+        #endregion
+        #region Google properties
+        private bool isGoogleConnected = false;
+        private string googleConnectionStatus = string.Empty;
+        #endregion
 
         private UserSession? UserSession;
         private UpdateUserRequest? UserRequest;
 
         private Guid formKey = Guid.NewGuid(); //This key is needed, for reloading the validations error, if the user cancels the form
 
-        #region Google properties
-        private bool isGoogleConnected = false;
-        private string googleConnectionStatus = string.Empty;
-        #endregion
-
         private bool editMode = false;
-
         private void CancelEdit()
         {
             editMode = false;
@@ -85,7 +87,7 @@ namespace DayPlanner.Web.Components.Pages.Account
                 }
             }
 
-            var authState = await StateProvider.GetAuthenticationStateAsync();
+            AuthenticationState authState = await AuthenticationState;
             UserSession = authState.User.Identity?.IsAuthenticated == true
                 ? authState.User.ToUserSession()
                 : null;
@@ -108,8 +110,6 @@ namespace DayPlanner.Web.Components.Pages.Account
                 });
             }
         }
-
-
         private async Task SaveUserSettings()
         {
             if (UserRequest is null)
@@ -153,18 +153,15 @@ namespace DayPlanner.Web.Components.Pages.Account
             Navigation.NavigateToSettings(key: key, forceLoad: true);
 
         }
-
-
         private async Task ConnectGoogleCalendar()
         {
             var url = await GoogleCalendarService.GetAuthUrlAsync();
             Navigation.NavigateTo(url.Trim('"'), true);
         }
-
         private async Task DisconnectGoogleCalendar(bool deleteImportedAppointments)
         {
             await GoogleCalendarService.DisconnectAsync(deleteImportedAppointments);
-            Navigation.Refresh(forceReload:true);
+            Navigation.Refresh(forceReload: true);
         }
     }
 }

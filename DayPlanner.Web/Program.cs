@@ -7,6 +7,8 @@ using Radzen;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 // Add services to the container.
 builder.Services.AddMemoryCache();
 builder.Services.AddRazorComponents()
@@ -38,7 +40,7 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/account/login"; // Login-Seite
     options.LogoutPath = "/account/logout"; // Logout-Seite
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Cookie-Ablaufzeit
-    options.SlidingExpiration = true; // Verlängert Cookie bei Aktivität
+    options.SlidingExpiration = true; // VerlÃ¤ngert Cookie bei AktivitÃ¤t
     options.ReturnUrlParameter = "returnUrl";
 });
 builder.Services.AddAuthorizationCore();
@@ -54,6 +56,8 @@ builder.Services.AddRequestLocalization(options =>
 });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

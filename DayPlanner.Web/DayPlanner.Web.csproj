@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
+    <ProjectReference Include="..\DayPlanner.ServiceDefaults\DayPlanner.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>

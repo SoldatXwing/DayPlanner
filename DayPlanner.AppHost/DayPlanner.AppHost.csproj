@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>a1ad53f4-5a2d-42c0-812c-1b4318177142</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DayPlanner.Api\DayPlanner.Api.csproj" />
+    <ProjectReference Include="..\DayPlanner.BackgroundServices\DayPlanner.BackgroundServices.csproj" />
+    <ProjectReference Include="..\DayPlanner.Web\DayPlanner.Web.csproj" />
+  </ItemGroup>
+
+</Project>

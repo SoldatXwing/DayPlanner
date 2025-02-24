@@ -42,9 +42,12 @@ try
             builder.Services.AddTransient<IConfigureOptions<SwaggerUIOptions>, ConfigureSwaggerUi>();
         }
     }
+    builder.AddServiceDefaults();
+
 
     var app = builder.Build();
 
+    app.MapDefaultEndpoints();
     // Use TraceId middleware
     app.UseMiddleware<TraceIdMiddleware>();
 
@@ -80,3 +83,4 @@ finally
 {
     LogManager.Shutdown(); // Ensure that NLog releases resources
 }
+

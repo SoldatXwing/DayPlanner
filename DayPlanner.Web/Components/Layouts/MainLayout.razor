@@ -40,7 +40,7 @@
                             }
                             <RadzenLabel Text="@_user?.DisplayName" />
 
-                            <RadzenButton Click="Logout" Icon="logout" ButtonStyle="ButtonStyle.Light" />
+                            <RadzenButton Click="@(() => Navigation.NavigateToLogout())" Icon="logout" ButtonStyle="ButtonStyle.Light" />
                             <RadzenAppearanceToggle />
                         </RadzenStack>
                     </RadzenStack>

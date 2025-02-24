@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DayPlanner.Abstractions\DayPlanner.Abstractions.csproj" />
     <ProjectReference Include="..\DayPlanner.FireStore\DayPlanner.FireStore.csproj" />
+    <ProjectReference Include="..\DayPlanner.ServiceDefaults\DayPlanner.ServiceDefaults.csproj" />
     <ProjectReference Include="..\DayPlanner.ThirdPartyImports\DayPlanner.ThirdPartyImports.csproj" />
   </ItemGroup>
 
