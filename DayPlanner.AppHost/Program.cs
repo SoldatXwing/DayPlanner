@@ -1,6 +1,15 @@
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var api = builder.AddProject<Projects.DayPlanner_Api>("dayplanner-api");
+var ollama = builder.AddOllama("ollama")
+    .WithGPUSupport()
+    .WithDataVolume();
+
+var chat = ollama.AddModel("chat", "deepseek-r1:8b");
+
+var api = builder.AddProject<Projects.DayPlanner_Api>("dayplanner-api")
+    .WithReference(chat)
+    .WaitFor(chat);
 
 builder.AddProject<Projects.DayPlanner_BackgroundServices>("dayplanner-backgroundservices");
     

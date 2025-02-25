@@ -25,7 +25,7 @@ namespace DayPlanner.Web.Services.Implementations
             if(end < start)
                 throw new ArgumentException("End date must be after start date");
             var appointments = await api.GetAppointmentsByDateAsync(start, end);
-            return appointments.ToList();
+            return [.. appointments];
         }
 
         public async Task<Appointment> UpdateAppointmentAsync(string appointmentId, AppointmentRequest request)

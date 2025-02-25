@@ -18,8 +18,6 @@ public sealed class AppointmentController(
     IAppointmentStore appointmentStore,
     ILogger<AppointmentController> logger) : ControllerBase
 {
-    private ILogger<AppointmentController> _Logger { get; } = logger;
-
     /// <summary>
     /// Get all appointments of the signed in user.
     /// </summary>
@@ -32,7 +30,7 @@ public sealed class AppointmentController(
     {
         if (page < 0 || pageSize < 1)
         {
-            _Logger.LogWarning("Invalid pagination parameters: Page {Page} and PageSize {PageSize} are invalid.", page, pageSize);
+            logger.LogWarning("Invalid pagination parameters: Page {Page} and PageSize {PageSize} are invalid.", page, pageSize);
             return BadRequest(new ApiErrorModel { Message = "Invalid pagination parameters", Error = "Page has to satrt with 0, and PageSize must be greater than 1." });
         }
         string userId = HttpContext.User.GetUserId()!;
@@ -45,7 +43,7 @@ public sealed class AppointmentController(
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+            logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Unauthorized();
         }
 
@@ -67,7 +65,7 @@ public sealed class AppointmentController(
     {
         if (start > end)
         {
-            _Logger.LogWarning("Invalid date range: Start date {StartDate} cannot be greater than end date {EndDate}", start, end);
+            logger.LogWarning("Invalid date range: Start date {StartDate} cannot be greater than end date {EndDate}", start, end);
             return BadRequest(new ApiErrorModel { Message = "Invalid date times", Error = "Start date cant be greater than end date." });
         }
         var userId = HttpContext.User.GetUserId()!;
@@ -77,7 +75,7 @@ public sealed class AppointmentController(
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+            logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Forbid();
         }
     }
@@ -95,12 +93,12 @@ public sealed class AppointmentController(
                 request.Start == default ||
                 request.End == default)
         {
-            _Logger.LogWarning("Invalid request attributes: At least one attribute is not valid.");
+            logger.LogWarning("Invalid request attributes: At least one attribute is not valid.");
             return BadRequest(new ApiErrorModel { Message = "Invalid request attributes", Error = "At least one attribute is not valid." });
         }
         var userId = HttpContext.User.GetUserId()!;
         Appointment appointment = await appointmentStore.CreateAppointment(userId, request);
-        _Logger.LogInformation("Appointment with id {AppointmentId} created for user with uid {UserId}", appointment.Id, userId);
+        logger.LogInformation("Appointment with id {AppointmentId} created for user with uid {UserId}", appointment.Id, userId);
         return Created($"/v1/appointments/{appointment.Id}", appointment);
     }
 
@@ -119,7 +117,7 @@ public sealed class AppointmentController(
         Appointment? appointment = await appointmentStore.GetAppointmentById(userId, appointmentId);
         if (appointment is null)
         {
-            _Logger.LogWarning("Appointment with id {AppointmentId} not found for user with uid {UserId}", appointmentId, userId);
+            logger.LogWarning("Appointment with id {AppointmentId} not found for user with uid {UserId}", appointmentId, userId);
             return AppointmentNotFound(appointmentId);
         }
         return Ok(appointment);
@@ -143,19 +141,19 @@ public sealed class AppointmentController(
                request.Start == default ||
                request.End == default)
         {
-            _Logger.LogWarning("Invalid request attributes: At least one attribute is not valid.");
+            logger.LogWarning("Invalid request attributes: At least one attribute is not valid.");
             return BadRequest(new ApiErrorModel { Message = "Invalid request attributes", Error = "At least one attribute is not valid." });
         }
         var userId = HttpContext.User.GetUserId()!;
         try
         {
             Appointment appointment = await appointmentStore.UpdateAppointment(appointmentId, userId, request);
-            _Logger.LogInformation("Appointment with id {AppointmentId} updated for user with uid {UserId}", appointmentId, userId);
+            logger.LogInformation("Appointment with id {AppointmentId} updated for user with uid {UserId}", appointmentId, userId);
             return Ok(appointment);
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+            logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Forbid();
         }
     }
@@ -175,17 +173,17 @@ public sealed class AppointmentController(
         try
         {
             await appointmentStore.DeleteAppointment(userId, appointmentId);
-            _Logger.LogInformation("Appointment with id {AppointmentId} deleted for user with uid {UserId}", appointmentId, userId);
+            logger.LogInformation("Appointment with id {AppointmentId} deleted for user with uid {UserId}", appointmentId, userId);
             return NoContent();
         }
         catch (UnauthorizedAccessException)
         {
-            _Logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
+            logger.LogWarning("Unauthorized access attempt by user with uid {UserId}", userId);
             return Forbid();
         }
         catch (InvalidOperationException ex)
         {
-            _Logger.LogWarning(ex, "Failed to delete appointment with id {AppointmentId} for user with uid {UserId}", appointmentId, userId);
+            logger.LogWarning(ex, "Failed to delete appointment with id {AppointmentId} for user with uid {UserId}", appointmentId, userId);
             return NotFound(new ApiErrorModel { Message = "Appointment not found", Error = ex.Message });
         }
     }

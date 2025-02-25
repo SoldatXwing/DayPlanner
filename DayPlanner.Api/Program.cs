@@ -1,6 +1,7 @@
 using DayPlanner.Api.Extensions;
 using DayPlanner.Api.Middleware;
 using DayPlanner.Api.Swagger;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using NLog;
 using NLog.Extensions.Logging;
@@ -43,7 +44,7 @@ try
         }
     }
     builder.AddServiceDefaults();
-
+    builder.AddOllamaSharpChatClient("chat");
 
     var app = builder.Build();
 

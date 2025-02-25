@@ -22,11 +22,6 @@ namespace DayPlanner.Api.ApiControllers.V1;
 public sealed partial class AccountController(ILogger<AccountController> logger) : ControllerBase
 {
     /// <summary>
-    /// Gets the logger instance for this controller
-    /// </summary>
-    private ILogger<AccountController> _Logger { get; } = logger;
-
-    /// <summary>
     /// Gets the login provider data associated with the user of the current session.
     /// </summary>
     /// <response code="200">Success - Returns the user</response>
@@ -40,7 +35,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         User? user = await userStore.GetByIdAsync(userId);
         if (user is null)
         {
-            _Logger.LogWarning("User with uid {UserId} not found.", userId);
+            logger.LogWarning("User with uid {UserId} not found.", userId);
             return NotFound(new ApiErrorModel { Error = $"User with uid {userId} not found.", Message = "User not found" });
         }
 
@@ -61,7 +56,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         string userId = HttpContext.User.GetUserId()!;
         if (!string.IsNullOrEmpty(request.Email) && !ValidEmail().Match(request.Email!).Success)
         {
-            _Logger.LogWarning("Invalid email provided: {Email}", request.Email);
+            logger.LogWarning("Invalid email provided: {Email}", request.Email);
             return BadRequest(new ApiErrorModel { Message = "Invalid email", Error = "Invalid email provided." });
         }
         request.Uid = userId;
@@ -73,18 +68,18 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         catch (InvalidOperationException ex)
             when (ex.Message == "Password must be at least 6 characters long.")
         {
-            _Logger.LogWarning("Failed to update user with uid {UserId}: {Message}", userId, ex.Message);
+            logger.LogWarning("Failed to update user with uid {UserId}: {Message}", userId, ex.Message);
             return BadRequest(new ApiErrorModel { Message = "Invalid password", Error = ex.Message });
         }
         catch (InvalidOperationException ex)
            when (ex.Message == "Email already in use")
         {
-            _Logger.LogWarning("Email {Email} is already in use.", request.Email);
+            logger.LogWarning("Email {Email} is already in use.", request.Email);
             return BadRequest(new ApiErrorModel { Message = "Invalid Email", Error = "Email is already in use" });
         }
         catch (Exception ex)
         {
-            _Logger.LogError(ex, "Failed to update user with uid {UserId}", userId);
+            logger.LogError(ex, "Failed to update user with uid {UserId}", userId);
             return BadRequest();
         }
 
@@ -104,7 +99,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     {
         if (string.IsNullOrEmpty(refreshToken))
         {
-            _Logger.LogWarning("No refresh token provided.");
+            logger.LogWarning("No refresh token provided.");
             return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Refresh token is required." });
         }
         try
@@ -114,7 +109,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException))
         {
-            _Logger.LogWarning("Invalid refresh token provided.");
+            logger.LogWarning("Invalid refresh token provided.");
             return BadRequest(new ApiErrorModel { Error = "Error", Message = "Invalid refresh token." });
         }
     }
@@ -132,7 +127,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     {
         if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
-            _Logger.LogWarning("Invalid data. Email and password are required.");
+            logger.LogWarning("Invalid data. Email and password are required.");
             return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
         }
         try
@@ -142,7 +137,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         catch (Exception ex) when (ex.GetType() == typeof(BadCredentialsException) || ex.GetType() == typeof(InvalidEmailException))
         {
-            _Logger.LogWarning("Invalid email or password provided for login attempt. Email: {Email}", request.Email);
+            logger.LogWarning("Invalid email or password provided for login attempt. Email: {Email}", request.Email);
             return BadRequest(new ApiErrorModel { Error = ex.Message, Message = "Invalid email or password." });
         }
     }
@@ -180,7 +175,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     {
         if (error == "access_denied")
         {
-            _Logger.LogWarning("User with id: {userId} canceled the google login OAuth flow.", state);
+            logger.LogWarning("User with id: {userId} canceled the google login OAuth flow.", state);
             if (state == "maui")
                 return Redirect(configuration["FrontEnd:Maui:DefaultCallbackUrl"]!);
 
@@ -190,7 +185,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         if (string.IsNullOrEmpty(code))
         {
-            _Logger.LogWarning("Error recieving callback: Code is null or empty");
+            logger.LogWarning("Error recieving callback: Code is null or empty");
             return BadRequest(new ApiErrorModel { Message = "Error recieving callback", Error = "Code is null or empty" });
         }
         try
@@ -198,7 +193,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
             var tokenResponse = await googleOAuthService.AuthenticateAccount(code);
             if (tokenResponse is null)
             {
-                _Logger.LogWarning("Invalid Google callback code provided");
+                logger.LogWarning("Invalid Google callback code provided");
                 return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = "Invalid Google callback code provided" });
             }
             var request = HttpContext.Request;
@@ -219,7 +214,7 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         }
         catch (InvalidOperationException ex)
         {
-            _Logger.LogWarning(ex, "Invalid Google callback code provided");
+            logger.LogWarning(ex, "Invalid Google callback code provided");
             return BadRequest(new ApiErrorModel { Message = "Invalid code", Error = ex.Message });
         }
     }
@@ -236,13 +231,13 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     {
         if (string.IsNullOrEmpty(authorization))
         {
-            _Logger.LogWarning("No authorization header provided.");
+            logger.LogWarning("No authorization header provided.");
             return Unauthorized();
         }
         string? token = authorization?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
         {
-            _Logger.LogWarning("No token provided.");
+            logger.LogWarning("No token provided.");
             return Unauthorized();
         }
         string? userId = await authService.VerifyTokenAsync(token);
@@ -266,22 +261,22 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     {
         if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))
         {
-            _Logger.LogWarning("Invalid data. Email and password are required.");
+            logger.LogWarning("Invalid data. Email and password are required.");
             return BadRequest(new ApiErrorModel { Error = "Invalid data", Message = "Email and password are required." });
         }
         if (request.Password.Length < 6)
         {
-            _Logger.LogWarning("Password is less than 6 characters long.");
+            logger.LogWarning("Password is less than 6 characters long.");
             return BadRequest(new ApiErrorModel { Message = "Invalid password", Error = "Password must be at least 6 characters long." });
         }
         if (!ValidEmail().Match(request.Email).Success)
         {
-            _Logger.LogWarning("Invalid email provided: {Email}", request.Email);
+            logger.LogWarning("Invalid email provided: {Email}", request.Email);
             return BadRequest(new ApiErrorModel { Message = "Invalid email", Error = "Invalid email provided." });
         }
         if (request.PhoneNumber is not null && !ValidPhoneNumber().Match(request.PhoneNumber).Success)
         {
-            _Logger.LogWarning("Invalid phone number provided: {PhoneNumber}", request.PhoneNumber);
+            logger.LogWarning("Invalid phone number provided: {PhoneNumber}", request.PhoneNumber);
             return BadRequest(new ApiErrorModel { Message = "Invalid phone number", Error = "Invalid phone number provided." });
         }
         try
@@ -292,13 +287,13 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
         catch (InvalidOperationException ex)
             when (ex.Message == "Email already in use")
         {
-            _Logger.LogWarning("Email {Email} is already in use.", request.Email);
+            logger.LogWarning("Email {Email} is already in use.", request.Email);
             return BadRequest(new ApiErrorModel { Message = "Invalid Email", Error = "Email is already in use" });
         }
         catch (InvalidOperationException ex)
             when (ex.Message == "Phone number already in use")
         {
-            _Logger.LogWarning("Phone number {PhoneNumber} is already in use.", request.PhoneNumber);
+            logger.LogWarning("Phone number {PhoneNumber} is already in use.", request.PhoneNumber);
             return BadRequest(new ApiErrorModel { Message = "Invalid Phone Number", Error = "Phone number is already in use" });
         }
     }
