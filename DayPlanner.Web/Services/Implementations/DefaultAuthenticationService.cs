@@ -12,8 +12,7 @@ using System.Security.Claims;
 
 namespace DayPlanner.Web.Services.Implementations
 {
-    internal class DefaultAuthenticationService(IDayPlannerAccountApi api,
-        ILogger<DefaultAuthenticationService> logger) : IAuthenticationService
+    internal class DefaultAuthenticationService(IDayPlannerAccountApi api) : IAuthenticationService
     {
         public async Task<UserSession?> LoginAsync(UserRequest request)
         {

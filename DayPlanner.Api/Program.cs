@@ -18,6 +18,8 @@ try
     var builder = WebApplication.CreateBuilder(args);
 
     builder.AddInfrastructure();
+    builder.ConfigureAiSupport();
+
 
     //Logging
     builder.Logging.ClearProviders();
@@ -44,7 +46,6 @@ try
         }
     }
     builder.AddServiceDefaults();
-    builder.AddOllamaSharpChatClient("chat");
 
     var app = builder.Build();
 

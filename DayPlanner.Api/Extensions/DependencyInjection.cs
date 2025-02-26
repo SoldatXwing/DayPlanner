@@ -1,13 +1,17 @@
 ﻿using AutoMapper;
 using DayPlanner.Abstractions.Services;
 using DayPlanner.Abstractions.Stores;
+using DayPlanner.Api.ApiControllers.V1;
 using DayPlanner.Authorization.Services;
 using DayPlanner.FireStore;
 using DayPlanner.ThirdPartyImports.Google_Calendar;
 using FirebaseAdmin;
+using Google.Api;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.AI;
 
 namespace DayPlanner.Api.Extensions
 {
@@ -44,8 +48,39 @@ namespace DayPlanner.Api.Extensions
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
         }
+        /// <summary>
+        /// Configures the AI support for the application.
+        /// </summary>
+        /// <param name="builder">Webapplication builder</param>
+        public static void ConfigureAiSupport(this WebApplicationBuilder builder)
+        {
+            var isAiEnabled = builder.Configuration.GetValue<bool>("AiSettings:IsEnabled");
 
-        private static void ValidateConfiguration(IConfiguration configuration, string[] requiredKeys)
+            if (!isAiEnabled)
+            {
+                builder.Services.Configure<MvcOptions>(options =>
+                {
+                    var aiControllerType = typeof(AiController);
+                    options.Conventions.Add(new DisableControllerConvention(aiControllerType));
+                });
+            }
+            else
+            {
+                builder.AddOllamaSharpChatClient("chat");
+                try
+                {
+                    _ = builder.Services.BuildServiceProvider().GetRequiredService<IChatClient>();
+                }
+                catch
+                {
+                    throw new NotImplementedException("Ollama chat client is not set via DI. Ensure (if used) aspire AiSupport is enabled, and needed containers are running.");
+                }
+
+            }
+
+        }
+
+        private static void ValidateConfiguration(ConfigurationManager configuration, string[] requiredKeys)
         {
             ArgumentNullException.ThrowIfNull(configuration);
 
@@ -170,4 +205,6 @@ namespace DayPlanner.Api.Extensions
         }
 
     }
+
+
 }
