@@ -43,3 +43,44 @@ By using a JSON configuration to enable both swagger in general in the UI you ca
 ```
 
 If the key `Enabled` is set to `false`, `UiEnabled` will be ignored.
+
+## AI Support
+
+This solution includes support for a locally hosted AI model, enabled by default. The AI feature is configured via the `appsettings.json` file in the `DayPlanner.AppHost` project. 
+
+### Configuration
+AI settings are defined in the following files:
+
+- **AppHost Configuration** ([`DayPlanner.AppHost/appsettings.json`](https://github.com/SoldatXwing/DayPlanner/blob/master/DayPlanner.AppHost/appsettings.json)):
+  ```json
+  ...
+  "AiSettings": {
+    "IsEnabled": true,
+    "Model": "phi3.5"
+  }
+  ```
+  - `IsEnabled`: Set to `true` to activate AI support (default).
+  - `Model`: Specifies the local LLM model (e.g., `"phi3.5"`).
+
+- **API Configuration** ([`DayPlanner.Api/appsettings.json`](https://github.com/SoldatXwing/DayPlanner/blob/master/DayPlanner.Api/appsettings.json)):
+  ```json
+  ...
+  "AiSettings": {
+    "IsEnabled": false
+  }
+  ```
+  - Override the `IsEnabled` setting here to disable AI support if needed.
+
+### Disabling AI Support
+If the host machine lacks the capability to run a local Large Language Model (LLM), you can disable AI support by setting `"IsEnabled": false` in either configuration file. The API-level setting takes precedence if it differs from the AppHost setting.
+
+### Requirements
+When `"IsEnabled": true`:
+- Ensure **Docker** is installed and running on the host machine, as the local LLM depends on it.
+- Verify that the specified `Model` (e.g., `"phi3.5"`) is compatible and available in your Docker environment.
+
+### Tested models
+- phi3.5
+- deepseek-r1:8b
+
+Based on the tested models, i personally think ```phi3.5``` is the better perfomance/output model.
