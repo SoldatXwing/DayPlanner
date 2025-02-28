@@ -13,7 +13,7 @@
                         <!-- Left group: Menu and DayPlanner -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                             <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
-                            <RadzenLabel Text="DayPlanner" />
+                            <RadzenLink Text="DayPlanner" Path="@Routes.Home()" Style="text-decoration: none;" />
                         </RadzenStack>
 
                         <!-- Right group: Avatar, username, Logout and Toggler -->
@@ -51,7 +51,7 @@
                         <!-- Left Group: dummy sidebar for spacing -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
                             <RadzenSidebarToggle Style="visibility: hidden;" /> <!-- Invisible but keeps spacing -->
-                            <RadzenLabel Text="DayPlanner" />
+                            <RadzenLink Text="DayPlanner" Path="@Routes.Home()" Style="text-decoration: none;" />
                         </RadzenStack>
 
                         <!-- Right Group: Appearance Toggler -->
@@ -82,18 +82,27 @@
             </ChildContent>
         </RadzenBody>
 
-        <RadzenFooter class="footer">
-            <RadzenRow class="row1" />
-                <RadzenRow>
-                    <RadzenColumn Size="6">
-                        <div class="rz-text-xs">© @DateTime.Now.Year DayPlanner</div>
-                    </RadzenColumn>
-                    <RadzenColumn Size="6">
-                    <div class="rz-text-xs" style="text-align: right;">
-                        Made in  <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" alt="German flag" width="20" style="vertical-align: unset;"> with ❤️
+        <RadzenFooter>
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <div class="footer-left">
+                        <span>© @DateTime.Now.Year DayPlanner</span>
+                        <span class="separator">|</span>
+                        <RadzenLink Text="@Localizer["PrivacyAgreement"]" Path="@Routes.PrivacyAgreement()" />
+                        <span class="separator">|</span>
+                        <RadzenLink Text="@Localizer["LegalNotice"]" Path="@Routes.PrivacyAgreement()" />
+                        <span class="separator">|</span>
+                        <RadzenLink Text="@Localizer["TermsAndContidions"]" Path="@Routes.PrivacyAgreement()" />
                     </div>
-                    </RadzenColumn>
-                </RadzenRow>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <div class="footer-right">
+                        Made in
+                        <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" alt="German flag" width="20" class="flag-icon" />
+                        with ❤️
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
         </RadzenFooter>
-    </RadzenLayout>
+        </RadzenLayout>
 </div>
