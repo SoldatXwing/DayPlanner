@@ -30,6 +30,45 @@
         </ChildContent>
 
     </RadzenScheduler>
+    <div class="ai-suggestion-container">
+        <RadzenStack Orientation="Orientation.Vertical" Gap="15px">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px">
+                <div class="ai-icon-container">
+                    <i class="fas fa-robot ai-icon"></i>
+                </div>
+                <RadzenLabel Text="@Localizer["AIScheduleAssistant"]"
+                             Style="font-size: 1.25rem; font-weight: 600;" />
+            </RadzenStack>
+            <RadzenTemplateForm TItem="string" Data="@_userAiInput" Submit="@Form_OnSubmitAsync">
+                <RadzenStack Orientation="Orientation.Vertical" Gap="10px">
+                    <RadzenTextBox @bind-Value="@_userAiInput"
+                                   Placeholder="@Localizer["AiInputPlaceholder"]"
+                                   Class="ai-input"
+                                   Style="width: 100%; border-radius: 24px; padding: 8px 20px;"
+                                   Name="AiInput" />
+
+                    <RadzenLengthValidator Component="AiInput" Min="7" Text="@Localizer["AiInputMinCharError"]" />
+                    <RadzenLengthValidator Component="AiInput" Max="80" Text="@Localizer["AiInputMaxCharError"]" />
+
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" JustifyContent="JustifyContent.End">
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                      Size="ButtonSize.Medium"
+                                      Icon="auto_awesome"
+                                      Text="@Localizer["AiButtonText"]"
+                                      Style="border-radius: 24px; padding: 6px 20px; transition: all 0.3s ease;"
+                                      Class="ai-button"
+                                      ButtonType="ButtonType.Submit" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenTemplateForm>
+           
+
+            <div class="ai-helper-text">
+                <i class="fas fa-info-circle" style="margin-right: 6px; color: #6c757d;"></i>
+                <span>@Localizer["AiHelperText"]</span>
+            </div>
+        </RadzenStack>
+    </div>
 </div>
 
 @code {

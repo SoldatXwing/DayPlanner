@@ -120,6 +120,24 @@
   <data name="AddAppointment" xml:space="preserve">
     <value>Add appointment</value>
   </data>
+  <data name="AiButtonText" xml:space="preserve">
+    <value>Generate Suggestion</value>
+  </data>
+  <data name="AiHelperText" xml:space="preserve">
+    <value>AI can analyze existing appointments and suggest optimal time slots</value>
+  </data>
+  <data name="AiInputMaxCharError" xml:space="preserve">
+    <value>Input should be at most 70 characters</value>
+  </data>
+  <data name="AiInputMinCharError" xml:space="preserve">
+    <value>Input should be at least 7 characters</value>
+  </data>
+  <data name="AiInputPlaceholder" xml:space="preserve">
+    <value>e.g. 'Team meeting tomorrow morning'</value>
+  </data>
+  <data name="AIScheduleAssistant" xml:space="preserve">
+    <value>AI Schedule Assistant</value>
+  </data>
   <data name="DeleteAppointmentSuccess" xml:space="preserve">
     <value>Appointment was successfully deleted</value>
   </data>

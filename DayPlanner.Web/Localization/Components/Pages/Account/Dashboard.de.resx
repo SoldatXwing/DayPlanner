@@ -120,6 +120,24 @@
   <data name="AddAppointment" xml:space="preserve">
     <value>Termin hinzufügen</value>
   </data>
+  <data name="AiButtonText" xml:space="preserve">
+    <value>Vorschlag generieren</value>
+  </data>
+  <data name="AiHelperText" xml:space="preserve">
+    <value>KI kann bestehende Termine analysieren und optimale Zeitfenster vorschlagen.</value>
+  </data>
+  <data name="AiInputMaxCharError" xml:space="preserve">
+    <value>Die Eingabe darf maximal 70 Zeichen lang sein</value>
+  </data>
+  <data name="AiInputMinCharError" xml:space="preserve">
+    <value>Die Eingabe muss mindestens 7 Zeichen lang sein</value>
+  </data>
+  <data name="AiInputPlaceholder" xml:space="preserve">
+    <value>z.B. "Team meeting morgen früh"</value>
+  </data>
+  <data name="AIScheduleAssistant" xml:space="preserve">
+    <value>Ki Hilfsassistent</value>
+  </data>
   <data name="DeleteAppointmentSuccess" xml:space="preserve">
     <value>Der Termin wurde erfolgreich gelöscht</value>
   </data>

@@ -18,7 +18,7 @@ namespace DayPlanner.Api.ApiControllers.V1
     [ApiController]
     [ApiVersion(1)]
     [Route("v{version:apiVersion}/ai")]
-    public sealed class AiController(ILogger<AppointmentController> logger) : ControllerBase
+    public sealed partial class AiController(ILogger<AppointmentController> logger) : ControllerBase
     {
         /// <summary>
         /// Get the AI response for a given input
@@ -48,8 +48,10 @@ namespace DayPlanner.Api.ApiControllers.V1
                 return BadRequest(new ApiErrorModel { Message = "Invalid input", Error = "Input cannot be empty." });
             }
             var userId = HttpContext.User.GetUserId()!;
-            var existingAppointments = await appointmentStore.GetUsersAppointments(userId, start, end);
+
+            var existingAppointments = await appointmentStore.GetUsersAppointments(userId, start.ToUniversalTime(), end.ToUniversalTime());
             string existingAppointmentsJson = JsonSerializer.Serialize(existingAppointments);
+
             var prompt = $@"
     Current date range: from {start} to {end}
 
@@ -130,24 +132,16 @@ namespace DayPlanner.Api.ApiControllers.V1
             {
                 var aiResponse = await chatClient.CompleteAsync(prompt);
 
-                string jsonPattern = @"```json\s*(.*?)\s*```";
-                var match = Regex.Match(aiResponse.Message.Text!, jsonPattern, RegexOptions.Singleline);
-                if (!match.Success)
-                {
-                    logger.LogWarning("AI response did not contain a valid JSON block: {Response}", aiResponse);
-                    return BadRequest(new ApiErrorModel { Message = "Invalid AI response", Error = "AI response is invalid." });
-                }
+                AppointmentSuggestion? suggestion = TryDeserializeDirectly(aiResponse.Message.Text!);
 
-                string jsonBlock = match.Groups[1].Value;
-
-                // Deserialize the JSON into AppointmentSuggestion
-                var suggestion = JsonSerializer.Deserialize<AppointmentSuggestion>(jsonBlock);
+                suggestion ??= TryDeserializeFromJsonBlock(aiResponse.Message.Text!);
 
                 if (suggestion == null)
                 {
                     logger.LogWarning("AI returned an invalid or empty response for input: {Input}", input);
                     return BadRequest(new ApiErrorModel { Message = "Invalid AI response", Error = "AI response is empty or invalid." });
                 }
+
                 return Ok(suggestion);
             }
             catch (JsonException ex)
@@ -161,5 +155,40 @@ namespace DayPlanner.Api.ApiControllers.V1
                 return BadRequest(new ApiErrorModel { Message = "Invalid AI response", Error = "AI response is empty or invalid." });
             }
         }
+        private AppointmentSuggestion? TryDeserializeDirectly(string responseText)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<AppointmentSuggestion>(responseText);
+            }
+            catch (JsonException)
+            {
+                return null; 
+            }
+        }
+
+        private AppointmentSuggestion? TryDeserializeFromJsonBlock(string responseText)
+        {
+            var match = AiJsonFormat().Match(responseText);
+
+            if (!match.Success)
+            {
+                logger.LogWarning("AI response did not contain a valid JSON block: {Response}", responseText);
+                return null;
+            }
+            try
+            {
+                string jsonBlock = match.Groups[1].Value;
+                return JsonSerializer.Deserialize<AppointmentSuggestion>(jsonBlock);
+            }
+            catch (JsonException ex)
+            {
+                logger.LogError(ex, "Failed to deserialize JSON block from AI response");
+                return null;
+            }
+        }
+
+        [GeneratedRegex(@"```json\s*(.*?)\s*```", RegexOptions.Singleline)]
+        private static partial Regex AiJsonFormat();
     }
 }

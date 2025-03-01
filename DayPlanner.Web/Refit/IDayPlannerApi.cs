@@ -89,4 +89,17 @@ internal interface IDayPlannerApi
     [Put("/account")]
     Task<User> UpdateCurrentUserAsync([Body] UpdateUserRequest userRequest);
     #endregion
+    #region Ai
+    /// <summary>
+    /// Get the AI response for a given input
+    /// </summary>
+    /// <param name="input">Users input</param>
+    /// <param name="startContext">Start context date in which range the suggestion should be</param>
+    /// <param name="endContext">End context date in which range the suggestion should be</param>
+    /// <param name="timeZone">Users timezone</param>
+    /// <param name="cultureCode">Users culture code (needed for response language from ai)</param>
+    /// <returns>The suggestion</returns>
+    [Get("/ai/suggestion")]
+    Task<AppointmentSuggestion?> GetAiSuggestionAsync([Query] string input, [Query] DateTime startContext, [Query] DateTime endContext, [Query] string timeZone, [Query] string cultureCode);
+    #endregion
 }

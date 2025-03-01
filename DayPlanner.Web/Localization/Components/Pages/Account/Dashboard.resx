@@ -120,6 +120,24 @@
   <data name="AddAppointment" xml:space="preserve">
     <value />
   </data>
+  <data name="AiButtonText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AiHelperText" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AiInputMaxCharError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AiInputMinCharError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AiInputPlaceholder" xml:space="preserve">
+    <value />
+  </data>
+  <data name="AIScheduleAssistant" xml:space="preserve">
+    <value />
+  </data>
   <data name="DeleteAppointmentSuccess" xml:space="preserve">
     <value />
   </data>

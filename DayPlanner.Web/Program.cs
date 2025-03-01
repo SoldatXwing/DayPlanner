@@ -28,6 +28,7 @@ builder.Services.AddScoped<DefaultAuthenticationService>()
 builder.Services.AddScoped<IAppointmentService, ApiAppointmentService>();
 builder.Services.AddScoped<IUserService, ApiUserService>();
 builder.Services.AddScoped<IGoogleCalendarService, ApiGoogleCalendarService>();
+builder.Services.AddScoped<IAiService, ApiAiService>();
 
 builder.Services.AddAuthentication(options =>
 {

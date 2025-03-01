@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using Radzen;
 using Radzen.Blazor;
+using System.Globalization;
 
 namespace DayPlanner.Web.Components.Pages.Account;
 
@@ -13,6 +14,7 @@ namespace DayPlanner.Web.Components.Pages.Account;
 [Route("/dashboard")]
 public partial class Dashboard : ComponentBase
 {
+    #region Injections
     [Inject]
     private IStringLocalizer<Dashboard> Localizer { get; set; } = default!;
     [Inject]
@@ -21,11 +23,18 @@ public partial class Dashboard : ComponentBase
     private DialogService DialogService { get; set; } = default!;
     [Inject]
     private NotificationService NotificationService { get; set; } = default!;
+    [Inject]
+    private IAiService AiService { get; set; } = default!;
+    #endregion
 
+    private string _userAiInput = string.Empty;
     private List<Appointment> _appointments = [];
     private (DateTime Start, DateTime End)? _loadedRange;
+    private (DateTime Start, DateTime End)? _currentRange;
+
     private async Task OnLoadDataAsync(SchedulerLoadDataEventArgs args)
     {
+        _currentRange = (args.Start, args.End);
         if (_loadedRange is null)
         {
             _appointments = await AppointmentService.GetAllAppointmentsInRangeAsync(args.Start, args.End);
@@ -115,5 +124,15 @@ public partial class Dashboard : ComponentBase
             });
         }
         StateHasChanged();
+    }
+    private async Task Form_OnSubmitAsync()
+    {
+        if(string.IsNullOrWhiteSpace(_userAiInput))
+            return;
+
+        var utcOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+        var utcOffsetFormatted = $"UTC: {(utcOffset >= TimeSpan.Zero ? "+" : "-")}{utcOffset.Hours:D2}:{utcOffset.Minutes:D2}";
+
+        var result = await AiService.GetAppointmentSuggestionAsync(_userAiInput, _currentRange!.Value.Start, _currentRange!.Value.End, utcOffsetFormatted, CultureInfo.CurrentUICulture.Name);
     }
 }

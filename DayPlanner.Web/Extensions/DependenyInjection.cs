@@ -16,7 +16,11 @@ internal static class DependencyInjection
 
         // Register IDayPlannerAccountApi (No Authorization)
         services.AddRefitClient<IDayPlannerAccountApi>()
-            .ConfigureHttpClient(client => client.BaseAddress = new("https+http://dayplanner-api/v1"));
+            .ConfigureHttpClient(client =>
+            {
+                client.BaseAddress = new("https+http://dayplanner-api/v1");
+                client.Timeout = TimeSpan.FromSeconds(60); //Increase Timeout for AI response
+            });
 
         // Register IDayPlannerApi (With Authorization)
         services.AddRefitClient<IDayPlannerApi>(settingsAction: sp =>
