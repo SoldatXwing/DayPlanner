@@ -5,5 +5,7 @@
         Unspecified,
         GoogleCalendar,
         WindowsCalendar,
+        AiSuggestion,
+        Ai
     }
 }

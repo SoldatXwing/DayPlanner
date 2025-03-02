@@ -4,12 +4,12 @@
 
 <div>
     <RadzenScheduler class="scheduler" TItem="Appointment"
-                     Data=@_appointments
-                     StartProperty="@nameof(Appointment.Start)"
-                     EndProperty="@nameof(Appointment.End)"
-                     TextProperty="@nameof(Appointment.Title)" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
-                     AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
-                     LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync" AppointmentSelect="OnAppointmentSelectedAsync" AppointmentRender="OnAppointmentRender">
+    Data=@_appointments
+    StartProperty="@nameof(Appointment.Start)"
+    EndProperty="@nameof(Appointment.End)"
+    TextProperty="@nameof(Appointment.Title)" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
+    AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
+    LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync" AppointmentSelect="OnAppointmentSelectedAsync" AppointmentRender="OnAppointmentRender">
 
         <Template Context="data">
             @if (data.Origin == Abstractions.Enums.CalendarOrigin.GoogleCalendar)
@@ -37,31 +37,42 @@
                     <i class="fas fa-robot ai-icon"></i>
                 </div>
                 <RadzenLabel Text="@Localizer["AIScheduleAssistant"]"
-                             Style="font-size: 1.25rem; font-weight: 600;" />
+                Style="font-size: 1.25rem; font-weight: 600;" />
             </RadzenStack>
             <RadzenTemplateForm TItem="string" Data="@_userAiInput" Submit="@Form_OnSubmitAsync">
                 <RadzenStack Orientation="Orientation.Vertical" Gap="10px">
                     <RadzenTextBox @bind-Value="@_userAiInput"
-                                   Placeholder="@Localizer["AiInputPlaceholder"]"
-                                   Class="ai-input"
-                                   Style="width: 100%; border-radius: 24px; padding: 8px 20px;"
-                                   Name="AiInput" />
+                    Placeholder="@Localizer["AiInputPlaceholder"]"
+                    Class="ai-input"
+                    Style="width: 100%; border-radius: 24px; padding: 8px 20px;"
+                    Name="AiInput" />
 
                     <RadzenLengthValidator Component="AiInput" Min="7" Text="@Localizer["AiInputMinCharError"]" />
                     <RadzenLengthValidator Component="AiInput" Max="80" Text="@Localizer["AiInputMaxCharError"]" />
 
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" JustifyContent="JustifyContent.End">
                         <RadzenButton ButtonStyle="ButtonStyle.Success"
-                                      Size="ButtonSize.Medium"
-                                      Icon="auto_awesome"
-                                      Text="@Localizer["AiButtonText"]"
-                                      Style="border-radius: 24px; padding: 6px 20px; transition: all 0.3s ease;"
-                                      Class="ai-button"
-                                      ButtonType="ButtonType.Submit" />
+                        Size="ButtonSize.Medium"
+                        Icon="auto_awesome"
+                        Text="@Localizer["AiButtonText"]"
+                        Style="border-radius: 24px; padding: 6px 20px; transition: all 0.3s ease;"
+                        Class="ai-button"
+                        ButtonType="ButtonType.Submit" />
                     </RadzenStack>
                 </RadzenStack>
             </RadzenTemplateForm>
-           
+            @if(_aiPromptResponse != string.Empty)
+            {
+                <RadzenText Text="@_aiPromptResponse"
+                            Style="border-radius: 15px;
+                       padding: 12px 16px;
+                       margin: 8px 0;
+                       max-width: 80%;
+                       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                       position: relative;
+                       line-height: 1.5;" />
+            }
+            
 
             <div class="ai-helper-text">
                 <i class="fas fa-info-circle" style="margin-right: 6px; color: #6c757d;"></i>

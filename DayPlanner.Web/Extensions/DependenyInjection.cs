@@ -19,7 +19,6 @@ internal static class DependencyInjection
             .ConfigureHttpClient(client =>
             {
                 client.BaseAddress = new("https+http://dayplanner-api/v1");
-                client.Timeout = TimeSpan.FromSeconds(60); //Increase Timeout for AI response
             });
 
         // Register IDayPlannerApi (With Authorization)
@@ -38,8 +37,11 @@ internal static class DependencyInjection
                 }
             };
         })
-            .ConfigureHttpClient(client => client.BaseAddress = new("https+http://dayplanner-api/v1"));
-
+        .ConfigureHttpClient(client =>
+        {
+            client.BaseAddress = new("https+http://dayplanner-api/v1");
+            client.Timeout = TimeSpan.FromSeconds(75); //Increase Timeout for AI response
+        });
         return services;
     }
 }

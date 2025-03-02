@@ -11,7 +11,7 @@ using System.Globalization;
 namespace DayPlanner.Web.Components.Pages.Account;
 
 [Authorize]
-[Route("/dashboard")]
+[Route("/account/dashboard")]
 public partial class Dashboard : ComponentBase
 {
     #region Injections
@@ -28,6 +28,7 @@ public partial class Dashboard : ComponentBase
     #endregion
 
     private string _userAiInput = string.Empty;
+    private string _aiPromptResponse = string.Empty;
     private List<Appointment> _appointments = [];
     private (DateTime Start, DateTime End)? _loadedRange;
     private (DateTime Start, DateTime End)? _currentRange;
@@ -134,5 +135,11 @@ public partial class Dashboard : ComponentBase
         var utcOffsetFormatted = $"UTC: {(utcOffset >= TimeSpan.Zero ? "+" : "-")}{utcOffset.Hours:D2}:{utcOffset.Minutes:D2}";
 
         var result = await AiService.GetAppointmentSuggestionAsync(_userAiInput, _currentRange!.Value.Start, _currentRange!.Value.End, utcOffsetFormatted, CultureInfo.CurrentUICulture.Name);
+        if(result.Item1 is not null)
+        {
+            _aiPromptResponse = result.Item1.PromptMessage;
+            _appointments = [.. _appointments, new() { UserId = "", Start = result.Item1.Start, End = result.Item1.End, Title = result.Item1.Title, Origin = Abstractions.Enums.CalendarOrigin.AiSuggestion}];
+
+        }
     }
 }
