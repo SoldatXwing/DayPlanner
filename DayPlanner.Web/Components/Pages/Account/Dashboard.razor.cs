@@ -27,6 +27,7 @@ public partial class Dashboard : ComponentBase
     private IAiService AiService { get; set; } = default!;
     #endregion
 
+    private bool _aiWorking = false;
     private string _userAiInput = string.Empty;
     private string _aiPromptResponse = string.Empty;
     private List<Appointment> _appointments = [];
@@ -102,7 +103,7 @@ public partial class Dashboard : ComponentBase
         if (result is bool deleteRequested && deleteRequested == false)
         {
             await AppointmentService.DeleteAppointmentAsync(args.Data.Id);
-            _appointments = _appointments.Where(a => a.Id != args.Data.Id).ToList();
+            _appointments = [.. _appointments.Where(a => a.Id != args.Data.Id)];
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Success,
@@ -113,10 +114,13 @@ public partial class Dashboard : ComponentBase
         if (result is AppointmentRequest data)
         {
             Appointment updatedAppointment = await AppointmentService.UpdateAppointmentAsync(args.Data.Id, data);
-            _appointments = _appointments
-                .Where(a => a.Id != args.Data.Id)
-                .Concat([updatedAppointment])
-                .ToList();
+            _appointments =
+            [
+                .. _appointments
+                                .Where(a => a.Id != args.Data.Id)
+,
+                updatedAppointment,
+            ];
             NotificationService.Notify(new NotificationMessage
             {
                 Severity = NotificationSeverity.Success,
@@ -128,18 +132,44 @@ public partial class Dashboard : ComponentBase
     }
     private async Task Form_OnSubmitAsync()
     {
-        if(string.IsNullOrWhiteSpace(_userAiInput))
+        if (string.IsNullOrWhiteSpace(_userAiInput))
             return;
 
         var utcOffset = TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
         var utcOffsetFormatted = $"UTC: {(utcOffset >= TimeSpan.Zero ? "+" : "-")}{utcOffset.Hours:D2}:{utcOffset.Minutes:D2}";
 
+        _aiWorking = true;
         var result = await AiService.GetAppointmentSuggestionAsync(_userAiInput, _currentRange!.Value.Start, _currentRange!.Value.End, utcOffsetFormatted, CultureInfo.CurrentUICulture.Name);
-        if(result.Item1 is not null)
+        _aiWorking = false;
+        if (result.Item1 is not null)
         {
             _aiPromptResponse = result.Item1.PromptMessage;
-            _appointments = [.. _appointments, new() { UserId = "", Start = result.Item1.Start, End = result.Item1.End, Title = result.Item1.Title, Origin = Abstractions.Enums.CalendarOrigin.AiSuggestion}];
-
+            _appointments = [.. _appointments, new() { UserId = "AiSuggestionAppointment", Start = result.Item1.Start, End = result.Item1.End, Title = result.Item1.Title, Origin = Abstractions.Enums.CalendarOrigin.AiSuggestion }];
         }
+    }
+    private async Task HandleAiSuggestion(bool accepted)
+    {
+        if (!accepted)
+        {
+            _appointments = [.. _appointments.Where(a => a.UserId != "AiSuggestionAppointment")];
+            _aiPromptResponse = string.Empty;
+            StateHasChanged();
+            return;
+        }
+        var aiAppointment = _appointments.Single(a => a.UserId == "AiSuggestionAppointment");
+
+        aiAppointment = await AppointmentService.CreateAppointmentAsync(new(Abstractions.Enums.CalendarOrigin.Ai)
+        {
+            Title = aiAppointment.Title,
+            End = aiAppointment.End,
+            Start = aiAppointment.Start,
+            Summary = aiAppointment.Summary,
+            Location = aiAppointment.Location
+        }
+        );
+        _appointments = [.. _appointments.Where(a => a.UserId != "AiSuggestionAppointment")];
+        _appointments = [.. _appointments, aiAppointment];
+        _aiPromptResponse = string.Empty;
+        StateHasChanged();
     }
 }

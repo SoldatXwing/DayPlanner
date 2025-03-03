@@ -24,8 +24,8 @@ namespace DayPlanner.Api.ApiControllers.V1
         /// Get the AI response for a given input
         /// </summary>
         /// <param name="input">The users input</param>
-        /// <param name="start">Start date as context</param>
-        /// <param name="end">End date as context</param>
+        /// <param name="startContext">Start date as context</param>
+        /// <param name="endContext">End date as context</param>
         /// <param name="appointmentStore">Appointment store</param>
         /// <param name="userTimezone">Time zone of the user</param>
         /// <param name="chatClient">Chat client</param>
@@ -35,8 +35,8 @@ namespace DayPlanner.Api.ApiControllers.V1
         [ProducesResponseType<AppointmentSuggestion>(200)]
         [ProducesResponseType<ApiErrorModel>(400)]
         public async Task<IActionResult> GetAiResponse([FromQuery] string input,
-            [FromQuery] DateTime start,
-            [FromQuery] DateTime end,
+            [FromQuery] DateTime startContext,
+            [FromQuery] DateTime endContext,
             [FromServices] IAppointmentStore appointmentStore,
             [FromServices] IChatClient chatClient,
             [FromQuery] string userTimezone = "UTC",
@@ -49,11 +49,11 @@ namespace DayPlanner.Api.ApiControllers.V1
             }
             var userId = HttpContext.User.GetUserId()!;
 
-            var existingAppointments = await appointmentStore.GetUsersAppointments(userId, start.ToUniversalTime(), end.ToUniversalTime());
+            var existingAppointments = await appointmentStore.GetUsersAppointments(userId, startContext.ToUniversalTime(), endContext.ToUniversalTime());
             string existingAppointmentsJson = JsonSerializer.Serialize(existingAppointments);
 
             var prompt = $@"
-    Current date range: from {start} to {end}
+    Current date range: from {startContext} to {endContext}
 
     User input: {input}
 

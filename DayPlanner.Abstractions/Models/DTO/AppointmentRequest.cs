@@ -11,8 +11,12 @@ namespace DayPlanner.Abstractions.Models.DTO
         public string Location { get; set; } = string.Empty;
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-        public CalendarOrigin Origin { get; private set; } = CalendarOrigin.Unspecified;
+        public CalendarOrigin Origin { get; set; } = CalendarOrigin.Unspecified;
         public AppointmentRequest() { }
+        /// <summary>
+        /// This ctor is needed for properly firebase serialization
+        /// </summary>
+        /// <param name="calendarOrigin">The calendar origin</param>
         public AppointmentRequest(CalendarOrigin calendarOrigin) => Origin = calendarOrigin;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using DayPlanner.Web.Refit;
 using Refit;
+using System.Text.Json.Serialization;
 
 namespace DayPlanner.Web.Extensions;
 
@@ -14,18 +15,23 @@ internal static class DependencyInjection
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        var serializer = SystemTextJsonContentSerializer.GetDefaultJsonSerializerOptions();
+
+        serializer.Converters.Remove(serializer.Converters.Single(x => x.GetType().Equals(typeof(JsonStringEnumConverter))));
+
         // Register IDayPlannerAccountApi (No Authorization)
         services.AddRefitClient<IDayPlannerAccountApi>()
             .ConfigureHttpClient(client =>
             {
                 client.BaseAddress = new("https+http://dayplanner-api/v1");
-            });
+            }); 
 
         // Register IDayPlannerApi (With Authorization)
         services.AddRefitClient<IDayPlannerApi>(settingsAction: sp =>
         {
             return new RefitSettings
             {
+                ContentSerializer = new SystemTextJsonContentSerializer(serializer),
                 AuthorizationHeaderValueGetter = (_, _) =>
                 {
                     HttpContext? context = sp.GetRequiredService<IHttpContextAccessor>().HttpContext;

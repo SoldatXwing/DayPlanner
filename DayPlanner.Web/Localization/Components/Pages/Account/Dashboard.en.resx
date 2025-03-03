@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AcceptAiSuggestion" xml:space="preserve">
+    <value>Accept suggestion</value>
+  </data>
   <data name="AddAppointment" xml:space="preserve">
     <value>Add appointment</value>
   </data>
@@ -137,6 +140,9 @@
   </data>
   <data name="AIScheduleAssistant" xml:space="preserve">
     <value>AI Schedule Assistant</value>
+  </data>
+  <data name="DeclineAiSuggestion" xml:space="preserve">
+    <value>Delete suggestion</value>
   </data>
   <data name="DeleteAppointmentSuccess" xml:space="preserve">
     <value>Appointment was successfully deleted</value>
