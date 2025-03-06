@@ -1,0 +1,48 @@
+﻿.avatar-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--rz-border-default);
+}
+
+.profile-icon {
+    font-size: 6rem !important;
+    color: var(--rz-secondary);
+}
+
+.googleIcon {
+    margin-right: 10px;
+}
+.userAvatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background-color: var(--rz-secondary, #007bff);
+    color: var(--rz-primary-contrast, white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 60px;
+}
+@media (max-width: 768px) {
+    .responsive-row {
+        flex-direction: column;
+    }
+
+    .profile-image, .profile-icon {
+        width: 100px !important;
+        height: 100px !important;
+    }
+
+    .avatar-container {
+        margin-bottom: 1rem;
+    }
+}

@@ -1,0 +1,127 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+@inherits LayoutComponentBase
+
+
+<HeadContent>
+    @if (IsLightTheme)
+    {
+        <link rel="stylesheet" href="_content/Radzen.Blazor/css/material.css">
+    }
+    else
+    {
+        <link rel="stylesheet" href="_content/Radzen.Blazor/css/material-dark.css">
+    }
+</HeadContent>
+<RadzenComponents />
+<div>
+    <RadzenLayout>
+        <RadzenHeader>
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+
+                        <!-- Left group: Menu and DayPlanner -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                            <RadzenSidebarToggle Click="@(() => sidebar1Expanded = !sidebar1Expanded)" />
+                            <RadzenLink Text="DayPlanner" Path="@Routes.Home()" Style="text-decoration: none;" />
+                        </RadzenStack>
+
+                        <!-- Right group: Avatar, username, Logout and Toggler -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="rz-mr-2">
+                            @{
+                                var avatar = GetUserAvatar();
+                                Uri? uri;
+                                bool isUrlValid = Uri.TryCreate(avatar, UriKind.Absolute, out uri) &&
+                                    uri is not null &&
+                                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+                            }
+                            @if (!isUrlValid)
+                            {
+                                <div class="userAvatar">
+                                    @avatar
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="userAvatarImage">
+                                    <img src="@avatar" alt="User Avatar" />
+                                </div>                               
+                            }
+                            <RadzenLabel Text="@_user?.DisplayName" />
+
+                            <RadzenButton Click="@(() => Navigation.NavigateToLogout(forceLoad: true))" Icon="logout" ButtonStyle="ButtonStyle.Light" />
+                            <RadzenToggleButton Style="margin-left: auto; margin-right: 1rem;"
+                                                Icon=@(IsLightTheme ? "dark_mode" : "light_mode")
+                                                Value=@IsLightTheme
+                                                Variant=Variant.Text ButtonStyle=ButtonStyle.Base ToggleButtonStyle=ButtonStyle.Base ToggleShade=Shade.Default
+                                                Change=@OnChange />
+                        </RadzenStack>
+                    </RadzenStack>
+                </Authorized>
+                <NotAuthorized>
+                    <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+
+                        <!-- Left Group: dummy sidebar for spacing -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+                            <RadzenSidebarToggle Style="visibility: hidden;" /> <!-- Invisible but keeps spacing -->
+                            <RadzenLink Text="DayPlanner" Path="@Routes.Home()" Style="text-decoration: none;" />
+                        </RadzenStack>
+
+                        <!-- Right Group: Appearance Toggler -->
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="rz-mr-2">
+                            <RadzenToggleButton Style="margin-left: auto; margin-right: 1rem;"
+                                                Icon=@(IsLightTheme ? "dark_mode" : "light_mode")
+                                                Value=@IsLightTheme
+                                                Variant=Variant.Text ButtonStyle=ButtonStyle.Base ToggleButtonStyle=ButtonStyle.Base ToggleShade=Shade.Default
+                                                Change=@OnChange />
+                        </RadzenStack>
+                    </RadzenStack>
+                </NotAuthorized>
+            </AuthorizeView>
+        </RadzenHeader>
+
+        <AuthorizeView>
+            <RadzenSidebar @bind-Expanded="@sidebar1Expanded">
+                <RadzenPanelMenu>
+                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Home"] Icon="home" Click="@(() => {Navigation.NavigateToHome(); sidebar1Expanded = false;})" />
+                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Dashboard"] Icon="dashboard" Click="@(() => {Navigation.NavigateToDashboard(); sidebar1Expanded = false;})" />
+                    <RadzenPanelMenuItem Text=@Localizer["SideBar_Settings"] Icon="settings" Click="@(() => {Navigation.NavigateToSettings(); sidebar1Expanded = false;})" />
+                </RadzenPanelMenu>
+                <div class="rz-p-4" />
+            </RadzenSidebar>
+        </AuthorizeView>
+
+        <RadzenBody>
+            <ChildContent>
+                <RadzenContentContainer Name="main">
+                    @Body
+                </RadzenContentContainer>
+            </ChildContent>
+        </RadzenBody>
+
+        <RadzenFooter>
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <div class="footer-left">
+                        <span>© @DateTime.Now.Year DayPlanner</span>
+                        <span class="separator">|</span>
+                        <RadzenLink Text="@Localizer["PrivacyAgreement"]" Path="@Routes.PrivacyAgreement()" />
+                        <span class="separator">|</span>
+                        <RadzenLink Text="@Localizer["LegalNotice"]" Path="@Routes.PrivacyAgreement()" />
+                        <span class="separator">|</span>
+                        <RadzenLink Text="@Localizer["TermsAndContidions"]" Path="@Routes.PrivacyAgreement()" />
+                    </div>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <div class="footer-right">
+                        Made in
+                        <img src="https://upload.wikimedia.org/wikipedia/en/b/ba/Flag_of_Germany.svg" alt="German flag" width="20" class="flag-icon" />
+                        with ❤️
+                    </div>
+                </RadzenColumn>
+            </RadzenRow>
+        </RadzenFooter>
+        </RadzenLayout>
+</div>

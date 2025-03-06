@@ -1,0 +1,155 @@
+﻿@using DayPlanner.Abstractions.Models.Backend
+
+@inject TooltipService TooltipService
+
+<div>
+    <RadzenScheduler class="scheduler" TItem="Appointment"
+    Data=@_appointments
+    StartProperty="@nameof(Appointment.Start)"
+    EndProperty="@nameof(Appointment.End)"
+    TextProperty="@nameof(Appointment.Title)" SelectedIndex="2" AppointmentMouseEnter=@OnAppointmentMouseEnter
+    AppointmentMouseLeave=@OnAppointmentMouseLeave TodayText="@Localizer["Today_Button"]"
+    LoadData="@OnLoadDataAsync" SlotSelect="OnSlotSelectAsync" AppointmentSelect="OnAppointmentSelectedAsync" AppointmentRender="OnAppointmentRender">
+
+        <Template Context="data">
+            @if (data.Origin == Abstractions.Enums.CalendarOrigin.GoogleCalendar)
+            {
+                <i class="fab fa-google" style="margin-right:3px;"></i>
+                <span>@data.Title</span>
+            }
+            else if (data.Origin == Abstractions.Enums.CalendarOrigin.AiSuggestion)
+            {
+                <i class="fas fa-lightbulb" style="margin-right:3px;"></i>
+                <span>@data.Title</span>
+            }
+            else if (data.Origin == Abstractions.Enums.CalendarOrigin.Ai)
+            {
+                <i class="fas fa-robot" style="margin-right:3px;"></i>
+                <span>@data.Title</span>
+            }
+            else
+            {
+                <span>@data.Title</span>
+            }
+
+        </Template>
+        <ChildContent>
+            <RadzenDayView />
+            <RadzenWeekView />
+            <RadzenMonthView />
+        </ChildContent>
+
+    </RadzenScheduler>
+    <div class="ai-suggestion-container">
+        <RadzenStack Orientation="Orientation.Vertical" Gap="15px">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px">
+                <div class="ai-icon-container">
+                    <i class="fas fa-robot ai-icon"></i>
+                </div>
+                <RadzenLabel Text="@Localizer["AIScheduleAssistant"]"
+                Style="font-size: 1.25rem; font-weight: 600;" />
+            </RadzenStack>
+            <RadzenTemplateForm TItem="string" Data="@_userAiInput" Submit="@Form_OnSubmitAsync">
+                <RadzenStack Orientation="Orientation.Vertical" Gap="10px">
+                    <RadzenTextBox @bind-Value="@_userAiInput"
+                    Placeholder="@Localizer["AiInputPlaceholder"]"
+                    Class="ai-input"
+                    Style="width: 100%; border-radius: 24px; padding: 8px 20px;"
+                    Name="AiInput" />
+
+                    <RadzenLengthValidator Component="AiInput" Min="7" Text="@Localizer["AiInputMinCharError"]" />
+                    <RadzenLengthValidator Component="AiInput" Max="80" Text="@Localizer["AiInputMaxCharError"]" />
+
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="10px" JustifyContent="JustifyContent.End">
+                        <RadzenButton ButtonStyle="ButtonStyle.Success"
+                        Size="ButtonSize.Medium"
+                        Icon="auto_awesome"
+                        Text="@Localizer["AiButtonText"]"
+                        Style="border-radius: 24px; padding: 6px 20px; transition: all 0.3s ease;"
+                        Class="ai-button"
+                        ButtonType="ButtonType.Submit"
+                        Disabled="@(_aiPromptResponse != string.Empty || _aiWorking)"/>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenTemplateForm>
+            @if (_aiWorking)
+            {
+                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+            }
+            @if (_aiPromptResponse != string.Empty)
+            {
+                <RadzenText Text="@_aiPromptResponse"
+                Style="border-radius: 15px;
+                       padding: 12px 16px;
+                       margin: 8px 0;
+                       max-width: 80%;
+                       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                       position: relative;
+                       line-height: 1.5;" />
+                <RadzenRow Gap="1rem">
+                    <RadzenButton Text="@Localizer["AcceptAiSuggestion"]"
+                    ButtonType="ButtonType.Button"
+                    ButtonStyle="ButtonStyle.Success"
+                    Click="@(() => HandleAiSuggestion(accepted: true))"/>
+                    <RadzenButton Text="@Localizer["DeclineAiSuggestion"]"
+                    ButtonType="ButtonType.Button"
+                    ButtonStyle="ButtonStyle.Danger"
+                    Click="@(() => HandleAiSuggestion(accepted: false))" />
+
+                </RadzenRow>
+            }
+
+
+            <div class="ai-helper-text">
+                <i class="fas fa-info-circle" style="margin-right: 6px; color: #6c757d;"></i>
+                <span>@Localizer["AiHelperText"]</span>
+            </div>
+        </RadzenStack>
+    </div>
+</div>
+
+@code {
+    private void OnAppointmentMouseEnter(SchedulerAppointmentMouseEventArgs<Appointment> args)
+    {
+        TooltipService.Open(args.Element, ts =>
+    @<RadzenStack Orientation="Orientation.Vertical" Gap="0" class="rz-p-6" Style="min-width: 250px; max-width: 500px;">
+        <RadzenText TextStyle="TextStyle.H4" class="rz-mb-4" Style="color: var(--rz-tooltip-color);">
+            @args.Data.Title
+        </RadzenText>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="4px">
+            <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-tooltip-color); width: 44px;">
+                <strong>Start</strong>
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-tooltip-color);">
+                @args.Data.Start.ToString("hh:mm ⋅ dddd, MMMM d")
+            </RadzenText>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="4px">
+            <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-tooltip-color); width: 44px;">
+                <strong>End</strong>
+            </RadzenText>
+            <RadzenText TextStyle="TextStyle.Body2" Style="color: var(--rz-tooltip-color);">
+                @args.Data.End.ToString("hh:mm ⋅ dddd, MMMM d")
+            </RadzenText>
+        </RadzenStack>
+    </RadzenStack>
+    , new TooltipOptions { Position = TooltipPosition.Top, Duration = null });
+    }
+    private void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<Appointment> args)
+    {
+        if (args.Data.Origin is Abstractions.Enums.CalendarOrigin.GoogleCalendar)
+        {
+            args.Attributes["class"] = "rz-event-content rz-background-color-warning-light";
+        }
+        else if (args.Data.Origin is Abstractions.Enums.CalendarOrigin.AiSuggestion)
+        {
+            args.Attributes["class"] = "rz-event-content rz-background-color-danger-light";
+        }
+        else if (args.Data.Origin is Abstractions.Enums.CalendarOrigin.Ai)
+        {
+            args.Attributes["class"] = "rz-event-content rz-background-color-series-3";
+        }
+    }
+
+
+}

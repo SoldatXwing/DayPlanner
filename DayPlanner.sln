@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.AppHost", "DayPl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.ServiceDefaults", "DayPlanner.ServiceDefaults\DayPlanner.ServiceDefaults.csproj", "{879A4CE8-1852-2AE0-0D7C-1F55E2F0BEE7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayPlanner.Web.Wasm", "DayPlanner.Web.Wasm\DayPlanner.Web.Wasm.csproj", "{50BEA6F1-2134-74D0-12FF-104CF1598D43}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{879A4CE8-1852-2AE0-0D7C-1F55E2F0BEE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{879A4CE8-1852-2AE0-0D7C-1F55E2F0BEE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{879A4CE8-1852-2AE0-0D7C-1F55E2F0BEE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50BEA6F1-2134-74D0-12FF-104CF1598D43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50BEA6F1-2134-74D0-12FF-104CF1598D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50BEA6F1-2134-74D0-12FF-104CF1598D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50BEA6F1-2134-74D0-12FF-104CF1598D43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,53 @@
+﻿::deep .scheduler {
+    height: 666px;
+}
+.ai-suggestion-container {
+    margin-top: 25px;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+}
+
+.ai-icon-container {
+    background: linear-gradient(135deg, #007bff, #00a8ff);
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 120, 255, 0.2);
+}
+
+.ai-icon {
+    color: white;
+    font-size: 1.5rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.ai-input input {
+    transition: all 0.3s ease !important;
+    border: 2px solid #e9ecef !important;
+}
+
+    .ai-input input:focus {
+        border-color: #007bff !important;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15) !important;
+    }
+
+.ai-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2) !important;
+}
+
+.ai-helper-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 12px;
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .ai-suggestion-container {
+        padding: 1rem;
+        margin-top: 20px;
+    }
+}

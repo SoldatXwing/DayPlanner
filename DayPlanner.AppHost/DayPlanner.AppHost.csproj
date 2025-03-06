@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DayPlanner.Api\DayPlanner.Api.csproj" />
     <ProjectReference Include="..\DayPlanner.BackgroundServices\DayPlanner.BackgroundServices.csproj" />
+    <ProjectReference Include="..\DayPlanner.Web.Wasm\DayPlanner.Web.Wasm.csproj" />
     <ProjectReference Include="..\DayPlanner.Web\DayPlanner.Web.csproj" />
   </ItemGroup>
 

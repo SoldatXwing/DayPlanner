@@ -1,0 +1,187 @@
+﻿@using DayPlanner.Abstractions.Models.DTO
+
+<div>
+    <RadzenStack Orientation="Orientation.Vertical" Gap="2rem">
+        <!-- Account Settings Section -->
+        <RadzenCard>
+            <RadzenTemplateForm TItem="UpdateUserRequest" Data="@UserRequest" Submit="@SaveUserSettings" @key="formKey">
+                <ChildContent>
+                    <RadzenStack Orientation="Orientation.Vertical" Gap="1.5rem">
+                        <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+                            <RadzenText Text="@Localizer["AccountSettings"]" Style="font-size: 1.5rem; font-weight: 500;" />
+                            @if (!editMode)
+                            {
+                                <RadzenButton Icon="edit" Text="@Localizer["EditProfile"]"
+                                              ButtonStyle="ButtonStyle.Secondary"
+                                              Click="@(() => editMode = true)" />
+                            }
+                        </RadzenRow>
+
+                        <!-- Avatar -->
+                        <RadzenRow JustifyContent="JustifyContent.Center">
+                            <div class="avatar-container">
+                                @{
+                                    var avatar = GetUserAvatar();
+                                    Uri? uri;
+                                    bool isUrlValid = Uri.TryCreate(avatar, UriKind.Absolute, out uri) &&
+                                    uri is not null &&
+                                    (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+                                }
+                                @if (!isUrlValid)
+                                {
+                                    <div class="userAvatar">
+                                        @avatar
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="avatar-container">
+                                        <img src="@avatar" alt="User Avatar" class="profile-image" />
+                                    </div>
+                                }
+                            </div>
+                        </RadzenRow>
+
+                        <RadzenRow Gap="2rem" class="rz-mt-4">
+                            <!-- Display Name Field -->
+                            <RadzenColumn Size="6">
+                                <RadzenFormField Text="@Localizer["DisplayName"]" Variant="Variant.Text" Style="width: 100%;">
+                                    <RadzenTextBox Name="displayName"
+                                                   @bind-Value="@UserRequest!.DisplayName"
+                                                   Disabled="@(!editMode)" />
+                                </RadzenFormField>
+                                <RadzenRequiredValidator Component="displayName"
+                                                         Style="display: block; margin-top: 4px;"
+                                                         Text="@Localizer["RequiredInput"]" Popup="false" />
+                            </RadzenColumn>
+
+                            <!-- Email Field -->
+                            <RadzenColumn Size="6">
+                                <RadzenFormField Text="@Localizer["Email"]" Variant="Variant.Text" Style="width: 100%;">
+                                    <RadzenTextBox Name="email"
+                                                   @bind-Value="@UserRequest!.Email"
+                                                   Disabled="@(!editMode)" style="flex: 1;" />
+                                    @if (UserSession!.EmailVerified is true)
+                                    {
+                                        <RadzenBadge Shade="Shade.Lighter"
+                                                     BadgeStyle="BadgeStyle.Success"
+                                                     Text=@Localizer["EmailVerified"]
+                                                     Style="margin-left: 0.5rem; font-size: 0.8rem; max-width:150px;" />
+                                    }
+                                </RadzenFormField>
+
+                                <RadzenRequiredValidator Component="email"
+                                                         Style="display: block; margin-top: 4px;"
+                                                         Text="@Localizer["RequiredInput"]" Popup="false" />
+
+                                <RadzenEmailValidator Component="email"
+                                                      Style="display: block; margin-top: 4px;"
+                                                      Text="@Localizer["InvalidEmail"]" Popup="false" />
+                            </RadzenColumn>
+                        </RadzenRow>
+
+                        <!-- Save/Cancel Buttons -->
+                        @if (editMode)
+                        {
+                            <RadzenRow Gap="1rem" JustifyContent="JustifyContent.End">
+                                <RadzenButton Text="@Localizer["Cancel"]"
+                                              ButtonStyle="ButtonStyle.Light"
+                                              Click="@CancelEdit"
+                                              Icon="cancel" />
+
+                                <RadzenButton Text="@Localizer["SaveChanges"]"
+                                              ButtonStyle="ButtonStyle.Primary"
+                                              Icon="Save"
+                                              ButtonType="ButtonType.Submit" />
+                            </RadzenRow>
+                        }
+                    </RadzenStack>
+                </ChildContent>
+            </RadzenTemplateForm>
+        </RadzenCard>
+
+        <RadzenCard>
+            <ChildContent>
+                <RadzenStack Orientation="Orientation.Vertical" Gap="1.5rem">
+                    <RadzenRow JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center">
+                        <RadzenText Text="@Localizer["ImportSettings"]"
+                                    Style="font-size: 1.5rem; font-weight: 500;" />
+                    </RadzenRow>
+                    <div style="overflow-x: auto;">
+                        <RadzenTable Style="width: 100%; min-width: 600px;">
+                            <RadzenTableHeader>
+                                <RadzenTableRow class="responsive-row">
+                                    <RadzenTableHeaderCell>@Localizer["Provider"]</RadzenTableHeaderCell>
+                                    <RadzenTableHeaderCell>@Localizer["Status"]</RadzenTableHeaderCell>
+                                    <RadzenTableHeaderCell>@Localizer["SyncRate"]</RadzenTableHeaderCell>
+                                    <RadzenTableHeaderCell>@Localizer["Actions"]</RadzenTableHeaderCell>
+                                </RadzenTableRow>
+                            </RadzenTableHeader>
+                            <RadzenTableBody>
+                                <RadzenTableRow class="responsive-row">
+                                    <RadzenTableCell>
+                                        <i class="fab fa-google googleIcon"></i>
+                                        <span>@Localizer["GoogleCalendar"]</span>
+                                    </RadzenTableCell>
+                                    <RadzenTableCell>
+                                        @if (isGoogleConnected)
+                                        {
+                                            <RadzenBadge Shade="Shade.Lighter"
+                                                         BadgeStyle="BadgeStyle.Success"
+                                                         Text=@Localizer["Connected"] />
+                                        }
+                                        else
+                                        {
+                                            <RadzenBadge Shade="Shade.Lighter"
+                                                         BadgeStyle="BadgeStyle.Danger"
+                                                         Text=@Localizer["NotConnected"] />
+                                        }
+                                    </RadzenTableCell>
+                                    <RadzenTableCell>@Localizer["GoogleSyncRate"]</RadzenTableCell>
+                                    <RadzenTableCell>
+                                        @if (isGoogleConnected)
+                                        {
+                                            <RadzenButton ButtonStyle="ButtonStyle.Danger"
+                                                          Icon="delete"
+                                                          Click="@ConfirmDisconnect"
+                                                          Text=@Localizer["RemoveConnection"] />
+                                        }
+                                        else
+                                        {
+                                            <RadzenButton ButtonStyle="ButtonStyle.Success"
+                                                          Icon="edit"
+                                                          Click="@(async () => await ConnectGoogleCalendar())"
+                                                          Text=@Localizer["AddConnection"] />
+                                        }
+                                    </RadzenTableCell>
+                                </RadzenTableRow>
+                            </RadzenTableBody>
+                        </RadzenTable>
+                    </div>
+                </RadzenStack>
+            </ChildContent>
+        </RadzenCard>
+    </RadzenStack>
+</div>
+@code{
+    async Task ConfirmDisconnect()
+    {
+        bool deleteImportedAppointments = false;
+        var result = await DialogService.OpenAsync(Localizer["ConfirmDisconnect"], ds =>
+        @<RadzenStack Gap="1.5rem">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenCheckBox @bind-Value="deleteImportedAppointments" Name="CheckBox" />
+                <RadzenLabel Text="@Localizer["DeleteImportedAppointments"]" Component="CheckBox" />
+            </RadzenStack>
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenButton Text="Ok" Click="() => DisconnectGoogleCalendar(deleteImportedAppointments)" Style="width: 80px;" />
+                </RadzenStack>
+                <RadzenButton Text="@Localizer["Cancel"]" Click="() => ds.Close(false)" ButtonStyle="ButtonStyle.Light" />
+            </RadzenStack>
+        </RadzenStack>
+        );
+    }
+
+}

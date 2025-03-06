@@ -45,9 +45,21 @@ try
             builder.Services.AddTransient<IConfigureOptions<SwaggerUIOptions>, ConfigureSwaggerUi>();
         }
     }
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowWasmClient", policy =>
+        {
+            policy.AllowAnyOrigin() 
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+    });
+
     builder.AddServiceDefaults();
 
     var app = builder.Build();
+
+    app.UseCors("AllowWasmClient");
 
     app.MapDefaultEndpoints();
     // Use TraceId middleware
