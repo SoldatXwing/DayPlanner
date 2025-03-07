@@ -31,8 +31,9 @@ namespace DayPlanner.Web.Wasm.Services
         /// Tries to sign in a user via google.
         /// </summary>
         /// <param name="token">Token provided from google</param>
+        /// <param name="refreshToken">Refreshtoken provided from google</param>
         /// <returns>The signed in user. If <c>null</c> the credentials were invalid.</returns>
-        public Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token);
+        public Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token, string refreshToken);
 
     }
 }

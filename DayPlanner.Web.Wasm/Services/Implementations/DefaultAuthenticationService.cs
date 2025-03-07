@@ -84,9 +84,9 @@ namespace DayPlanner.Web.Wasm.Services.Implementations
             return (userSession, null);
         }
 
-        public async Task<string> GetGoogleAuthUrlAsync() => await api.GetGoogleAuthUrl("web");
+        public async Task<string> GetGoogleAuthUrlAsync() => await api.GetGoogleAuthUrl("webwasm");
 
-        public async Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token)
+        public async Task<(UserSession? user, ApiErrorModel? error)> LoginViaGoogleAsync(string token, string refreshToken)
         {
             try
             {
@@ -99,7 +99,7 @@ namespace DayPlanner.Web.Wasm.Services.Implementations
                 {
                     Uid = user.Uid,
                     Token = token,
-                    RefreshToken = token,
+                    RefreshToken = refreshToken,
                     DisplayName = user.DisplayName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,

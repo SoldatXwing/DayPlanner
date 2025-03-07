@@ -175,14 +175,17 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
     {
         if (error == "access_denied")
         {
-            logger.LogWarning("User with id: {userId} canceled the google login OAuth flow.", state);
-            if (state == "maui")
-                return Redirect(configuration["FrontEnd:Maui:DefaultCallbackUrl"]!);
+            logger.LogWarning("User with id: {userId} canceled the Google login OAuth flow.", state);
 
-            else if (state == "web")
-                return Redirect(configuration["FrontEnd:Web:DefaultCallbackUrl"]!);
-            return BadRequest(new ApiErrorModel { Message = "Invalid OS", Error = "Invalid OS provided" });
+            return state switch
+            {
+                "maui" => Redirect(configuration["FrontEnd:Maui:DefaultCallbackUrl"]!),
+                "web" => Redirect(configuration["FrontEnd:Web:DefaultCallbackUrl"]!),
+                "webwasm" => Redirect(configuration["FrontEnd:WebWasm:DefaultCallbackUrl"]!),
+                _ => BadRequest(new ApiErrorModel { Message = "Invalid OS", Error = "Invalid OS provided" })
+            };
         }
+
         if (string.IsNullOrEmpty(code))
         {
             logger.LogWarning("Error recieving callback: Code is null or empty");
@@ -201,15 +204,18 @@ public sealed partial class AccountController(ILogger<AccountController> logger)
 
             var idpToken = await googleOAuthService.AuthenticateAccountWithFirebaseViaIdp(dynamicRequestUri, tokenResponse["id_token"]!.ToString());
 
-            string redirectUri;
             string queryParams = $"?token={Uri.EscapeDataString(idpToken!["idToken"]!.ToString())}&refreshToken={Uri.EscapeDataString(idpToken!["refreshToken"]!.ToString())}";
-            if (state == "maui")
-                redirectUri = configuration["FrontEnd:Maui:GoogleCallBackUrl"] + queryParams;
+            string? redirectUri = state switch
+            {
+                "maui" => configuration["FrontEnd:Maui:GoogleCallBackUrl"] + queryParams,
+                "web" => configuration["FrontEnd:Web:GoogleCallBackUrl"] + queryParams,
+                "webwasm" => configuration["FrontEnd:WebWasm:GoogleCallBackUrl"] + queryParams,
+                _ => null
+            };
 
-            else if (state == "web")
-                redirectUri = configuration["FrontEnd:Web:GoogleCallBackUrl"] + queryParams;
-            else
+            if (redirectUri == null)
                 return BadRequest(new ApiErrorModel { Message = "Invalid OS", Error = "Invalid OS provided" });
+
             return Redirect(redirectUri);
         }
         catch (InvalidOperationException ex)

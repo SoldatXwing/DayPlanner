@@ -26,31 +26,21 @@ public sealed class GoogleLogin : ComponentBase
     [SupplyParameterFromQuery(Name = "refreshToken")]
     private string? RefreshToken { get; set; }
 
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
     protected override async Task OnInitializedAsync()
     {
-        if (HttpContext is null)
-        {
-            NavigationManager.Refresh(forceReload: true);
-            return;
-        }
-
         if (string.IsNullOrEmpty(Token) || string.IsNullOrEmpty(RefreshToken))
         {
             NavigationManager.NavigateToLogin();
             return;
         }
 
-        (UserSession? session, ApiErrorModel? _) = await AuthenticationService.LoginViaGoogleAsync(Token);
+        (UserSession? session, ApiErrorModel? _) = await AuthenticationService.LoginViaGoogleAsync(Token, RefreshToken);
         if (session is null)
         {
             NavigationManager.NavigateToLogin();
         }
         else
         {
-            await HttpContext.SignInAsync(session.ToClaimsPrincipial());
             NavigationManager.NavigateToDashboard();
         }
     }
