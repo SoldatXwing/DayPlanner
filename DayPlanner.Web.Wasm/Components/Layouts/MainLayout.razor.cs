@@ -1,6 +1,8 @@
 ﻿using Blazored.LocalStorage;
 using DayPlanner.Abstractions.Models.Backend;
 using DayPlanner.Web.Wasm.Extensions;
+using DayPlanner.Web.Wasm.Services.Implementations;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Localization;
@@ -22,18 +24,13 @@ namespace DayPlanner.Web.Wasm.Components.Layouts
         private NavigationManager Navigation { get; set; } = default!;
         [Inject]
         private ILocalStorageService LocalStorageService { get; set; } = default!;
+        [Inject]
+        private DefaultAuthenticationService AuthenticationService { get; set; } = default!;
         #endregion
         private bool sidebar1Expanded = true;
         private bool IsLightTheme = true;
         User? _user;
 
-        private async void OnUpdateAuthenticationState(Task<AuthenticationState> stateTask)
-        {
-            AuthenticationState state = await stateTask;
-            _user = state.User.Identity?.IsAuthenticated ?? false
-                ? _user = state.User.ToUser()
-                : null;
-        }
         async Task OnChange(bool value)
         {
             await LocalStorageService.SetItemAsync("IsLight", value);
@@ -42,9 +39,17 @@ namespace DayPlanner.Web.Wasm.Components.Layouts
         protected async override Task OnInitializedAsync()
         {
             IsLightTheme = await LocalStorageService.GetItemAsync<bool>("IsLightTheme");
+            await UpdateUserAsync();
 
-            StateProvider.AuthenticationStateChanged += OnUpdateAuthenticationState;
-            OnUpdateAuthenticationState(StateProvider.GetAuthenticationStateAsync());
+            StateProvider.AuthenticationStateChanged += async (task) => await UpdateUserAsync();
+        }
+
+        private async Task UpdateUserAsync()
+        {
+            var authState = await StateProvider.GetAuthenticationStateAsync();
+            _user = authState.User.Identity?.IsAuthenticated == true ? authState.User.ToUser() : null;
+
+            StateHasChanged(); 
         }
 
 
@@ -60,7 +65,12 @@ namespace DayPlanner.Web.Wasm.Components.Layouts
             var initials = string.Concat(parts.Select(part => part[0]).Take(2)); 
             return initials.ToUpper(); 
         }
-
-        private void Logout() => Navigation.NavigateTo("/account/logout",true);
+        private async Task Logout()
+        {
+            if (_user is null)
+                return;
+            await AuthenticationService.SignOutAsync();
+            Navigation.NavigateToHome();
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace DayPlanner.Web.Wasm.Services.Implementations
     internal class DefaultAuthenticationService(IDayPlannerAccountApi api, ILocalStorageService localStorageService) : AuthenticationStateProvider, IAuthenticationService
     {
         private UserSession? _currentUserSession;
-
+        private readonly string _userSessionKey = "userSession";
         public async Task<UserSession?> LoginAsync(UserRequest request)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -122,7 +122,7 @@ namespace DayPlanner.Web.Wasm.Services.Implementations
         {
             try
             {
-                var userSessionResult = await localStorageService.GetItemAsync<UserSession>("userSession");
+                var userSessionResult = await localStorageService.GetItemAsync<UserSession>(_userSessionKey);
                 if (userSessionResult is not null)
                 {
                     _currentUserSession = userSessionResult;
@@ -136,17 +136,24 @@ namespace DayPlanner.Web.Wasm.Services.Implementations
             _currentUserSession = null;
             return new AuthenticationState(new ClaimsPrincipal());
         }
+        public async Task UpdateUserSessionAsync(UserSession userSession)
+        {
+            await localStorageService.RemoveItemAsync(_userSessionKey);
 
+            await SaveUserSession(userSession);
+            NotifyAuthenticationStateChanged();
+        }
         public async Task SignOutAsync()
         {
-            await localStorageService.RemoveItemAsync("userSession");
+            await localStorageService.RemoveItemAsync(_userSessionKey);
+            _currentUserSession = null;
             NotifyAuthenticationStateChanged();
         }
 
         private async Task SaveUserSession(UserSession userSession)
         {
             _currentUserSession = userSession;
-            await localStorageService.SetItemAsync("userSession", userSession);
+            await localStorageService.SetItemAsync(_userSessionKey, userSession);
         }
 
         public void NotifyAuthenticationStateChanged()

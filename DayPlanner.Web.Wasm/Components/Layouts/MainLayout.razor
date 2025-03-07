@@ -51,7 +51,7 @@
                             }
                             <RadzenLabel Text="@_user?.DisplayName" />
 
-                            <RadzenButton Click="@(() => Navigation.NavigateToLogout(forceLoad: true))" Icon="logout" ButtonStyle="ButtonStyle.Light" />
+                            <RadzenButton Click="@Logout" Icon="logout" ButtonStyle="ButtonStyle.Light" />
                             <RadzenToggleButton Style="margin-left: auto; margin-right: 1rem;"
                                                 Icon=@(IsLightTheme ? "dark_mode" : "light_mode")
                                                 Value=@IsLightTheme

@@ -33,19 +33,20 @@ internal static class DependencyInjection
         // Register IDayPlannerApi (With Authorization)
         services.AddRefitClient<IDayPlannerApi>(settingsAction: sp =>
         {
+            var serviceProvider = sp.GetRequiredService<IServiceProvider>();
             return new RefitSettings
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(serializer),
                 AuthorizationHeaderValueGetter = async (_, ct) =>
                 {
-                    var localStorage = sp.GetRequiredService<ILocalStorageService>();
-
+                    using var scope = serviceProvider.CreateScope();
+                    var localStorage = scope.ServiceProvider.GetRequiredService<ILocalStorageService>();
                     var userSession = await localStorage.GetItemAsync<UserSession>("userSession", ct);
-                    return userSession is null ? string.Empty : userSession.Token;
+                    return userSession?.Token ?? string.Empty;
                 }
             };
         })
-        .ConfigureHttpClient(client =>
+         .ConfigureHttpClient(client =>
         {
             var apiConfig = configuration.GetSection("DayPlannerApi:HttpClient");
             client.BaseAddress = new Uri(apiConfig["BaseAddress"] ?? throw new InvalidOperationException("API Base Address not configured"));

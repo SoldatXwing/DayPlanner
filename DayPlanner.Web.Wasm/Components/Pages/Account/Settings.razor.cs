@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
 using Radzen;
 using Microsoft.AspNetCore.Http;
+using DayPlanner.Web.Wasm.Services.Implementations;
 
 namespace DayPlanner.Web.Wasm.Components.Pages.Account
 {
@@ -24,13 +25,13 @@ namespace DayPlanner.Web.Wasm.Components.Pages.Account
         [Inject]
         private NotificationService NotificationService { get; set; } = default!;
         [Inject]
-        private IMemoryCache Cache { get; set; } = default!;
-        [Inject]
         private NavigationManager Navigation { get; set; } = default!;
         [Inject]
         private IGoogleCalendarService GoogleCalendarService { get; set; } = default!;
         [Inject]
         private DialogService DialogService { get; set; } = default!;
+        [Inject]
+        private DefaultAuthenticationService AuthenticationService { get; set; } = default!;
         #endregion
         #region Parameters
         [SupplyParameterFromQuery(Name = "key")]
@@ -53,8 +54,6 @@ namespace DayPlanner.Web.Wasm.Components.Pages.Account
         private UserSession? UserSession;
         private UpdateUserRequest? UserRequest;
 
-        private Guid formKey = Guid.NewGuid(); //This key is needed, for reloading the validations error, if the user cancels the form
-
         private bool editMode = false;
         private void CancelEdit()
         {
@@ -63,31 +62,10 @@ namespace DayPlanner.Web.Wasm.Components.Pages.Account
             UserRequest!.Email = UserSession!.Email!;
             UserRequest!.DisplayName = UserSession!.DisplayName!;
 
-            formKey = Guid.NewGuid();
             StateHasChanged();
         }
         protected override async Task OnInitializedAsync()
         {
-            if (ModelKey is not null)
-            {
-                if (HttpContext is null)
-                {
-                    Navigation.Refresh(true);
-                    return;
-                }
-                if (Cache.TryGetValue(ModelKey, out UserSession? cachedUser))
-                {
-                    Cache.Remove(ModelKey);
-
-                    if (cachedUser is not null)
-                    {
-                        await HttpContext.SignInAsync(cachedUser.ToClaimsPrincipial());
-                    }
-                    Navigation.NavigateToSettings(success: true, forceLoad: true);
-                    return;
-                }
-            }
-
             AuthenticationState authState = await AuthenticationState;
             UserSession = authState.User.Identity?.IsAuthenticated == true
                 ? authState.User.ToUserSession()
@@ -134,24 +112,18 @@ namespace DayPlanner.Web.Wasm.Components.Pages.Account
             {
                 return; //TODO: Search for possible errors 
             }
-            string key = Guid.NewGuid().ToString();
-
-            using ICacheEntry _ = Cache.CreateEntry(key)
-                .SetValue(new UserSession()
-                {
-                    Uid = user!.Uid,
-                    Token = UserSession!.Token!,
-                    RefreshToken = UserSession!.RefreshToken!,
-                    DisplayName = user!.DisplayName,
-                    Email = user!.Email,
-                    PhoneNumber = user!.PhoneNumber,
-                    PhotoUrl = user!.PhotoUrl,
-                    LastSignInTimestamp = user!.LastSignInTimestamp,
-                    EmailVerified = user!.EmailVerified
-                })
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(2));
-
-            Navigation.NavigateToSettings(key: key, forceLoad: true);
+            await AuthenticationService.UpdateUserSessionAsync(new UserSession()
+            {
+                Uid = user!.Uid,
+                Token = UserSession!.Token!,
+                RefreshToken = UserSession!.RefreshToken!,
+                DisplayName = user!.DisplayName,
+                Email = user!.Email,
+                PhoneNumber = user!.PhoneNumber,
+                PhotoUrl = user!.PhotoUrl,
+                LastSignInTimestamp = user!.LastSignInTimestamp,
+                EmailVerified = user!.EmailVerified
+            });
 
         }
         private async Task ConnectGoogleCalendar()
