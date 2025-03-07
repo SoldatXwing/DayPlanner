@@ -28,17 +28,17 @@ namespace DayPlanner.Web.Wasm.Components.Layouts
         private DefaultAuthenticationService AuthenticationService { get; set; } = default!;
         #endregion
         private bool sidebar1Expanded = true;
-        private bool IsLightTheme = true;
+        private bool IsWhiteTheme = true;
         User? _user;
 
         async Task OnChange(bool value)
         {
             await LocalStorageService.SetItemAsync("IsLight", value);
-            IsLightTheme = value;
+            IsWhiteTheme = value;
         }
         protected async override Task OnInitializedAsync()
         {
-            IsLightTheme = await LocalStorageService.GetItemAsync<bool>("IsLightTheme");
+            IsWhiteTheme = await LocalStorageService.GetItemAsync<bool>("IsLightTheme");
             await UpdateUserAsync();
 
             StateProvider.AuthenticationStateChanged += async (task) => await UpdateUserAsync();

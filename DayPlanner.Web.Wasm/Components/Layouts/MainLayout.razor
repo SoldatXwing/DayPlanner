@@ -4,7 +4,7 @@
 
 
 <HeadContent>
-    @if (IsLightTheme)
+    @if (!IsWhiteTheme)
     {
         <link rel="stylesheet" href="_content/Radzen.Blazor/css/material.css">
     }
@@ -19,7 +19,7 @@
         <RadzenHeader>
             <AuthorizeView>
                 <Authorized>
-                    <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenStack class="rz-w-100" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
 
                         <!-- Left group: Menu and DayPlanner -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
@@ -53,8 +53,8 @@
 
                             <RadzenButton Click="@Logout" Icon="logout" ButtonStyle="ButtonStyle.Light" />
                             <RadzenToggleButton Style="margin-left: auto; margin-right: 1rem;"
-                                                Icon=@(IsLightTheme ? "dark_mode" : "light_mode")
-                                                Value=@IsLightTheme
+                                                Icon=@(IsWhiteTheme ? "dark_mode" : "light_mode")
+                                                Value=@IsWhiteTheme
                                                 Variant=Variant.Text ButtonStyle=ButtonStyle.Base ToggleButtonStyle=ButtonStyle.Base ToggleShade=Shade.Default
                                                 Change=@OnChange />
                         </RadzenStack>
@@ -72,8 +72,8 @@
                         <!-- Right Group: Appearance Toggler -->
                         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="10px" class="rz-mr-2">
                             <RadzenToggleButton Style="margin-left: auto; margin-right: 1rem;"
-                                                Icon=@(IsLightTheme ? "dark_mode" : "light_mode")
-                                                Value=@IsLightTheme
+                                                Icon=@(IsWhiteTheme ? "dark_mode" : "light_mode")
+                                                Value=@IsWhiteTheme
                                                 Variant=Variant.Text ButtonStyle=ButtonStyle.Base ToggleButtonStyle=ButtonStyle.Base ToggleShade=Shade.Default
                                                 Change=@OnChange />
                         </RadzenStack>

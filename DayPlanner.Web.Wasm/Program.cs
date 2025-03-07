@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 using Radzen;
 using System.Globalization;
 using Blazored.LocalStorage;
+using Microsoft.JSInterop;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -46,25 +47,36 @@ builder.Services.AddAuthorizationCore();
 
 builder.Services.AddCascadingAuthenticationState();
 
-// Client-seitige Authentifizierung (falls benötigt)
-// In WASM musst du möglicherweise einen AuthenticationStateProvider implementieren
-// Beispiel: builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-
 builder.Services.AddLocalization(options => options.ResourcesPath = "Localization");
-//builder.Services.AddRequestLocalization(options =>
-//{
-//    string[] cultures = ["en", "de"];
-//    options.SetDefaultCulture(cultures[0])
-//        .AddSupportedCultures(cultures)
-//        .AddSupportedUICultures(cultures);
-//    options.ApplyCurrentCultureToResponseHeaders = true;
-//});
 
 var app = builder.Build();
 
-var defaultCulture = new CultureInfo("en");
-CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
-CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
-
+await ConfigureCultureAsync(app);
 
 await app.RunAsync();
+static async Task ConfigureCultureAsync(WebAssemblyHost app)
+{
+    var localStorage = app.Services.GetRequiredService<ILocalStorageService>();
+    var jsRuntime = app.Services.GetRequiredService<IJSRuntime>();
+
+    var supportedCultures = new[] { "en", "de" };
+    var savedCulture = await localStorage.GetItemAsync<string>("culture");
+
+    string selectedCulture;
+    if (!string.IsNullOrEmpty(savedCulture) && supportedCultures.Contains(savedCulture))
+    {
+        selectedCulture = savedCulture;
+    }
+    else
+    {
+        var browserCulture = await jsRuntime.InvokeAsync<string>("eval", "navigator.language");
+        var browserCultureShort = browserCulture.Split('-').FirstOrDefault();
+
+        selectedCulture = supportedCultures.Contains(browserCultureShort) ? browserCultureShort : "en";
+        await localStorage.SetItemAsync("culture", selectedCulture);
+    }
+
+    var culture = new CultureInfo(selectedCulture);
+    CultureInfo.DefaultThreadCurrentCulture = culture;
+    CultureInfo.DefaultThreadCurrentUICulture = culture;
+}
