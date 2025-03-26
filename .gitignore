@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/DayPlanner.Web.Wasm/wwwroot/appsettings.json
+/DayPlanner.Web/appsettings.json
+/DayPlanner.BackgroundServices/appsettings.json
+/DayPlanner.Api/appsettings.json
+/DayPlanner.BackgroundServices/FireBase/serviceAccountKey.json
+/DayPlanner.Api/FireBase/serviceAccountKey.json

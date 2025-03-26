@@ -18,10 +18,10 @@ if (isAiEnabled)
 
 builder.AddProject<Projects.DayPlanner_BackgroundServices>("dayplanner-backgroundservices");
     
-//builder.AddProject<Projects.DayPlanner_Web>("dayplanner-web")
-//    .WithReference(api);
-
-builder.AddProject<Projects.DayPlanner_Web_Wasm>("dayplanner-web-wasm")
+builder.AddProject<Projects.DayPlanner_Web>("dayplanner-web")
     .WithReference(api);
+
+//builder.AddProject<Projects.DayPlanner_Web_Wasm>("dayplanner-web-wasm")
+//    .WithReference(api);
 
 builder.Build().Run();
