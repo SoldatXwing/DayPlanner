@@ -8,7 +8,12 @@ namespace DayPlanner.BackgroundServices
     {
         public static async Task Main(string[] args)
         {
-            var hostBuilder = Host.CreateDefaultBuilder(args);
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")))
+            {
+                Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
+                Console.WriteLine("Environment set to Development");
+            }
+            IHostBuilder hostBuilder = Host.CreateDefaultBuilder(args);
 
             hostBuilder.RegisterStores();
             hostBuilder.AddBackgroundServices();

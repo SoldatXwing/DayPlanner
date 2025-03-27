@@ -116,11 +116,10 @@ namespace DayPlanner.BackgroundServices.Extensions
         {
             if (!context.Configuration.GetSection("GoogleConfig").Exists())            
                 throw new NotImplementedException("Missing GoogleConfig section in appsettings");
-            
 
             string googleCalendarTokenUri = context.Configuration["GoogleConfig:TokenUri"] ?? throw new("Google token URI is required.");
-            string googleClientId = context.Configuration["GoogleConfig:client_Id"] ?? throw new("Google client ID is required.");
-            string googleClientSecret = context.Configuration["GoogleConfig:client_Secret"] ?? throw new("Google client secret is required.");
+            string googleClientId = context.Configuration["googe_client_id"] ?? throw new("Google client ID is required. Configured in user-secrets, key: google_client_id");
+            string googleClientSecret = context.Configuration["google_client_secret"] ?? throw new("Google client secret is required. Configured in user-secrets, key: google_client_secret"); //From User Secrets
 
             services.AddHttpClient();
 
