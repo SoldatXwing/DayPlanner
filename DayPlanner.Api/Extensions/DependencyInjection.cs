@@ -114,7 +114,7 @@ namespace DayPlanner.Api.Extensions
             var configuration = serviceProvider.GetService<IConfiguration>();
 
             string googleCalendarTokenUri = configuration!["GoogleConfig:TokenUri"] ?? throw new("Google token URI is required.");
-            string googleClientId = configuration["googe_client_id"] ?? throw new("Google client ID is required. Configured in user-secrets, key: googe_client_id");
+            string googleClientId = configuration["google_client_id"] ?? throw new("Google client ID is required. Configured in user-secrets, key: googe_client_id");
             string googleClientSecret = configuration["google_client_secret"] ?? throw new("Google client secret is required. Configured in user-secrets, key: googe_client_secret"); //From User Secrets
 
             string authTokenUri = configuration!["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");

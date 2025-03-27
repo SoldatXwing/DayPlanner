@@ -16,7 +16,7 @@ namespace DayPlanner.Authorization.Services
         public string GenerateCalendarAuthUrl(string state)
         {
             string url = $"{Config["GoogleConfig:auth_url"]}" +
-                         $"?client_id={Config["GoogleConfig:client_Id"]}" +
+                         $"?client_id={Config["google_client_id"]}" +
                          $"&redirect_uri={Config["GoogleConfig:Calendar:redirect_uri"]}" +
                          $"&response_type=code" +
                          $"&scope=https://www.googleapis.com/auth/calendar.readonly" +
@@ -27,7 +27,7 @@ namespace DayPlanner.Authorization.Services
         public string GenerateAccountAuthUrl(string os)
         {
             string url = $"{Config["GoogleConfig:auth_url"]}" +
-                         $"?client_id={Config["GoogleConfig:client_Id"]}" +
+                         $"?client_id={Config["google_client_id"]}" +
                          $"&redirect_uri={Config["GoogleConfig:AccountLogin:redirect_uri"]}" +
                          $"&response_type=code" +
                          $"&scope={Uri.EscapeDataString("email profile")}" +
@@ -68,8 +68,8 @@ namespace DayPlanner.Authorization.Services
             var request = new
             {
                 code,
-                client_id = Config["GoogleConfig:client_Id"]!,
-                client_secret = Config["GoogleConfig:client_Secret"]!,
+                client_id = Config["google_client_id"]!,
+                client_secret = Config["google_client_secret"]!,
                 redirect_uri = redirectUri,
                 grant_type = "authorization_code"
             };
