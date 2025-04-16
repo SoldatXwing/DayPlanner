@@ -17,6 +17,50 @@ DayPlanner is a web application that helps users organize their daily tasks and 
 - Third party imports
 - Mobile (Andorid and ios) support
 
+## Run the Application
+
+To successfully run the DayPlanner application locally, follow these steps to ensure the necessary configurations are in place. This involves setting up Firebase credentials and user secrets for the API and background services.
+
+### Prerequisites
+- [.NET SDK](https://dotnet.microsoft.com/download) installed on your machine.
+- A Firebase project with Authentication and Firestore enabled.
+- Access to the Firebase `serviceAccountKey.json` file (downloadable from your Firebase Console).
+
+### Configuration Steps
+
+1. **Add Firebase Service Account Key**
+   - Locate the `serviceAccountKey.json` file from your Firebase project (found in Project Settings > Service Accounts).
+   - Place this file in the following directories:
+     - `DayPlanner.BackgroundServices/FireBase/`
+     - `DayPlanner.Api/FireBase/`
+   - Ensure the file is named exactly as `serviceAccountKey.json`.
+
+2. **Set Up User Secrets**
+   - The application requires Google client secrets for authentication. These must be configured as user secrets in both the `DayPlanner.Api` and `DayPlanner.BackgroundServices` projects.
+   - Open a terminal in each project directory and run the following commands, replacing `"your-client-id"` and `"your-client-secret"` with your actual Google API credentials:
+     ```bash
+     dotnet user-secrets init
+     dotnet user-secrets set "google_client_id" "your-client-id"
+     dotnet user-secrets set "google_client_secret" "your-client-secret"
+     ```
+   - Example:
+     ```bash
+     dotnet user-secrets set "google_client_id" "1234567890-abcde.apps.googleusercontent.com"
+     dotnet user-secrets set "google_client_secret" "GOCSPX-xyz1234567890"
+     ```
+
+3. **Run the Application**
+   - Navigate to the solution directory in your terminal.
+   - The main entry point for the application is the `DayPlanner.AppHost` project. Build and run it using:
+     ```bash
+     dotnet build
+     dotnet run --project DayPlanner.AppHost
+     ```
+   - Alternatively, open the solution in your IDE (e.g., Visual Studio) and set `DayPlanner.AppHost` as the startup project, then run it.
+
+### Notes
+- If you encounter issues, verify that the `serviceAccountKey.json` file path and user secrets are correctly set.
+
 ## Swagger Documentation
 ![Swagger Badge](https://img.shields.io/badge/Swagger-Interactive%20API-blue?style=flat-square)
 
