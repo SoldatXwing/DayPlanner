@@ -28,12 +28,6 @@ namespace DayPlanner.Api.Extensions
         /// <exception cref="FileNotFoundException">Throws if the service-account-key file isnt found</exception>
         public static void AddInfrastructure(this WebApplicationBuilder builder)
         {
-            ValidateConfiguration(builder.Configuration,
-            [
-                "Authentication:TokenUri",
-                "Authentication:Audience",
-                "Authentication:ValidIssuer"
-            ]);
             string authFile = builder.Configuration["FireBase:AuthFile"] ?? throw new InvalidOperationException("An authentication file for firebase is required. Config path: 'FireBase:AuthFile'.");
             string basePath = AppContext.BaseDirectory;
             string filePath = Path.Combine(basePath, authFile);
@@ -80,19 +74,6 @@ namespace DayPlanner.Api.Extensions
 
         }
 
-        private static void ValidateConfiguration(ConfigurationManager configuration, string[] requiredKeys)
-        {
-            ArgumentNullException.ThrowIfNull(configuration);
-
-            foreach (var key in requiredKeys)
-            {
-                if (string.IsNullOrEmpty(configuration[key]))
-                {
-                    throw new ArgumentNullException(key, $"Configuration value for '{key}' is missing.");
-                }
-            }
-        }
-
         private static void AddAuthenticationServices(WebApplicationBuilder builder)
         {
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -117,9 +98,9 @@ namespace DayPlanner.Api.Extensions
             string googleClientId = configuration["google_client_id"] ?? throw new("Google client ID is required. Configured in user-secrets, key: googe_client_id");
             string googleClientSecret = configuration["google_client_secret"] ?? throw new("Google client secret is required. Configured in user-secrets, key: googe_client_secret"); //From User Secrets
 
-            string authTokenUri = configuration!["Authentication:TokenUri"] ?? throw new("Authentication token URI is required.");
-            string refreshTokenUri = configuration["Authentication:RefreshTokenUri"] ?? throw new("Refresh token URI is required.");
-            string idpUri = configuration["Authentication:IdpUri"] ?? throw new("Idp URI is required.");
+            string authTokenUri = configuration!["tokenUri"] ?? throw new("Authentication token URI is required.");
+            string refreshTokenUri = configuration["refreshTokenUri"] ?? throw new("Refresh token URI is required.");
+            string idpUri = configuration["idpUri"] ?? throw new("Idp URI is required.");
 
             // HttpClient for Authentication Token
             services.AddHttpClient("AuthTokenClient", client =>
